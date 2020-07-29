@@ -5,5 +5,9 @@
   "devDependencies": {
     "shadow-cljs": "2.10.18"
   },
-  "dependencies": {}
+  "dependencies": {
+    "bulma": "^0.9.0",
+    "react": "16.13.0",
+    "react-dom": "16.13.0"
+  }
 }

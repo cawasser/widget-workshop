@@ -5,10 +5,22 @@
   "src/test"]
 
  :dependencies
- []
+ [[reagent "1.0.0-alpha2"]
+  [re-frame "1.0.0"]
+  [metosin/muuntaja "0.6.4"]
+  [metosin/reitit "0.3.1"]
+  [cljs-ajax "0.8.0"]]
+
+
+ :dev-http {3333 "public"}
+ :nrepl  {:port 7777}
 
  :builds
- {:ww
+ {:app
    {:target :browser
-    :modules {:main {:init-fn widget-workshop.main/init}}}}}
+    :modules {:main {:init-fn widget-workshop.main/init!}}
+    :devtools {:repl-init-ns widget-workshop.main
+               :repl-pprint true}
+    :source-map   true
+    :pretty-print true}}}
 
