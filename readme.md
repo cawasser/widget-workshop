@@ -17,7 +17,7 @@ Run:
 
 Open your browser to:
 
-    http://localhost:3333
+    [http://localhost:3333](http://localhost:3333)
 
 ## Tooling
 
