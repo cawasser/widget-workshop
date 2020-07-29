@@ -15,9 +15,22 @@ Run:
     npm install
     shadow-cljs watch app
 
+Open your browser to:
+
+    http://localhost:3333
+
+## Tooling
+
+
+### Cursive
+
 Import the project into Cursive using "File | Project | Project form existing sources...".  
 In the popup, navigate into your new folder, and select the "pom.xlm" file. Click OK.
 
+
+### nREPL
+
+An nREPL is automatically started on port 7777.
 
 ## Version History and Goals
 
