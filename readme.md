@@ -8,7 +8,7 @@ approach to creating UI widgets for browser-based "client" software.
 
 Clone the repo:
 
-    git clone xxx
+    git clone https://github.com/cawasser/widget-workshop.git
 
 Run:
 
