@@ -1,0 +1,9 @@
+{
+  "name": "widget-workshop",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "shadow-cljs": "2.10.18"
+  },
+  "dependencies": {}
+}

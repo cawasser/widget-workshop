@@ -1,0 +1,14 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src/dev"
+  "src/main"
+  "src/test"]
+
+ :dependencies
+ []
+
+ :builds
+ {:ww
+   {:target :browser
+    :modules {:main {:init-fn widget-workshop.main/init}}}}}
+
