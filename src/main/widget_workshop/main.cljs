@@ -1,22 +1,26 @@
 (ns widget-workshop.main
-  (:require [reagent.core :as r]
-            [reagent.dom :as rd]
-            [widget-workshop.views.home-page :as home]
-            [widget-workshop.nav-bar :as navbar]
-            [widget-workshop.session :refer [session]]
-            [goog.events :as events]
+  (:require [goog.events :as events]
             [goog.history.EventType :as HistoryEventType]
             [ajax.core :refer [GET POST]]
             [reitit.core :as reitit]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [reagent.core :as r]
+            [reagent.dom :as rd]
+            [re-frame.core :as rf]
+            [widget-workshop.views.home-page :refer [home-page]]
+            [widget-workshop.views.about-page :refer [about-page]]
+            [widget-workshop.nav-bar :as navbar]
+            [widget-workshop.session :refer [session]]
+            [widget-workshop.handlers.initialization])
+
   (:import goog.History))
 
 
 
 
 (def pages
-  {:home  #'home/home-page
-   :about #'home/about-page})
+  {:home  #'home-page
+   :about #'about-page})
 
 (defn page []
   [(pages (:page @session))])
@@ -56,6 +60,7 @@
 
 (defn init! []
   (hook-browser-navigation!)
+  (rf/dispatch-sync [:initialize])
   (mount-components))
 
 
