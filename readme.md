@@ -15,6 +15,9 @@ Run:
     npm install
     shadow-cljs watch app
 
+Import the project into Cursive using "File | Project | Project form existing sources...".  
+In the popup, navigate into your new folder, and select the "pom.xlm" file. Click OK.
+
 
 ## Version History and Goals
 
