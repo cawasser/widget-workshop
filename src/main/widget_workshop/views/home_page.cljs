@@ -26,54 +26,61 @@
 
 
 (defn source [id index]
-  ;[:> Draggable {:key id :draggableId id :index index}
-  ; (fn [provided snapshot]
-  ;   (r/as-element
-  ;     [:div (merge {:ref (.-innerRef provided)}
-  ;             (js->clj (.-draggableProps provided))
-  ;             (js->clj (.-dragHandleProps provided)))
-  ;
-  [:p {:key   id
-       :style {:border           "1px solid lightgray"
-               :border-radius    "5px"
-               :padding          "8px"
-               :margin-bottom    "8px"
-               :color            "white"
-               :background-color "mediumblue"}}
-   (str id)])
+  [:> Draggable {:key id :draggable-id id :index index}
+   (fn [provided snapshot]
+     (r/as-element
+       [:div (merge {:ref (.-innerRef provided)}
+               (js->clj (.-draggableProps provided))
+               (js->clj (.-dragHandleProps provided)))
+
+        [:p {:key   id
+             :index index
+             :style {:border           "1px solid lightgray"
+                     :border-radius    "5px"
+                     :padding          "8px"
+                     :margin-bottom    "8px"
+                     :color            "white"
+                     :background-color "mediumblue"}}
+         (str id)]]))])
 
 
 
 (defn sources []
-  [:div
-   [:h2 "Data Sources"]
-   (for [[index id] (map-indexed vector @(rf/subscribe [:data-sources]))]
-     (source id index))])
+  [:> Droppable {:droppable-id "droppable-2" :type "data-sources"}
+   (fn [provided snapshot]
+     (r/as-element [:div (merge {:ref   (.-innerRef provided)
+                                 :class (when (.-isDraggingOver snapshot) :drag-over)}
+                           (js->clj (.-droppableProps provided)))
+                         [:h2 "Data Sources"]
+                         [:div
+                          (for [[index id] (map-indexed vector @(rf/subscribe [:data-sources]))]
+                            (source id index))]
+                         (.-placeholder provided)]))])
 
 
 
-;(defn data-source-panel []
-;  (let [the-filter (r/atom "")]
-;    (fn []
-;      [:nav.panel {:style {:background-color "dodgerblue"}}
-;       [:p.panel-heading "Data Sources"]
-;       [:div.panel-block
-;        [:p.control.has-icons-left
-;         [:input.input {:type        "text"
-;                        :placeholder "Search"
-;                        :on-change   #(reset! the-filter (-> % .-target .-value))}]
-;         [:span.icon.is-left
-;          [:i.fas.fa-search {:aria-hidden "true"}]]]]
-;       (for [[idx s] (map-indexed vector
-;                       (fuzzy-filter @the-filter
-;                         (map name @(rf/subscribe [:data-sources]))))]
-;
-;         [:> Draggable {:draggable-id (str idx) :index idx}
-;          (fn [provided snapshot]
-;            (r/as-element [:div (merge {:ref (.-innerRef provided)}
-;                                  (js->clj (.-draggableProps provided))
-;                                  (js->clj (.-dragHandleProps provided)))
-;                           [:a.panel-block.is-active s]]))])])))
+(defn data-source-panel []
+  (let [the-filter (r/atom "")]
+    (fn []
+      [:nav.panel {:style {:background-color "dodgerblue"}}
+       [:p.panel-heading "Data Sources"]
+       [:div.panel-block
+        [:p.control.has-icons-left
+         [:input.input {:type        "text"
+                        :placeholder "Search"
+                        :on-change   #(reset! the-filter (-> % .-target .-value))}]
+         [:span.icon.is-left
+          [:i.fas.fa-search {:aria-hidden "true"}]]]]
+       (for [[idx s] (map-indexed vector
+                       (fuzzy-filter @the-filter
+                         (map name @(rf/subscribe [:data-sources]))))]
+
+         ;[:> Draggable {:draggable-id (str idx) :index idx}
+         ; (fn [provided snapshot]
+         ;   (r/as-element [:div (merge {:ref (.-innerRef provided)}
+         ;                         (js->clj (.-draggableProps provided))
+         ;                         (js->clj (.-dragHandleProps provided)))
+         [:a.panel-block.is-active s])])))
 
 
 
@@ -84,7 +91,9 @@
                                  :class (when (.-isDraggingOver snapshot) :drag-over)}
                            (js->clj (.-droppableProps provided)))
                     [:h2 "Widgets"]
-                    [:div {:style {:height "1000px"}}]
+                    [:div {:style {:height "1000px"}}
+                     (for [[index id] (map-indexed vector @(rf/subscribe [:subscriptions]))]
+                       (source id index))]
                     (.-placeholder provided)]))])
 
 
@@ -116,6 +125,11 @@
 
   (rf/dispatch [:add-source :some-other-source])
   (rf/dispatch [:remove-source :some-other-source])
+
+  (js/console.dir DragDropContext)
+  (js/console.dir Draggable)
+  (js/console.dir Droppable)
+
 
 
   (into #{}
@@ -172,6 +186,36 @@
                            (js->clj (.-draggableProps provided))
                            (js->clj (.-dragHandleProps provided)))
                     [:p "Drag me"]]))]
+
+
+  ())
+
+
+(comment
+  (def atm (atom "string"))
+
+  (def the-string @atm)
+  the-string
+
+  (reset! atm "nothing")
+  @atm
+
+  (prn @atm)
+  (reset! atm "different")
+
+  (defn thinigy [new-val]
+    (reset! atm new-val)
+    (let [answer (str "/api/something/" @atm)]
+      (str answer)))
+
+  (thinigy "nothing")
+  (thinigy "something")
+
+
+  answer
+
+
+
 
 
   ())
