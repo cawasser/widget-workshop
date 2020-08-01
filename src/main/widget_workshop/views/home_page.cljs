@@ -41,60 +41,61 @@
                      :margin-bottom    "8px"
                      :color            "white"
                      :background-color "mediumblue"}}
-         (str id)]]))])
+         (str (name id))]]))])
 
 
 
-(defn sources []
-  [:> Droppable {:droppable-id "droppable-2" :type "data-sources"}
-   (fn [provided snapshot]
-     (r/as-element [:div (merge {:ref   (.-innerRef provided)
-                                 :class (when (.-isDraggingOver snapshot) :drag-over)}
-                           (js->clj (.-droppableProps provided)))
-                         [:h2 "Data Sources"]
-                         [:div
-                          (for [[index id] (map-indexed vector @(rf/subscribe [:data-sources]))]
-                            (source id index))]
-                         (.-placeholder provided)]))])
+(defn sources-list [the-filter]
+  [:div
+   (for [[index id] (map-indexed vector
+                      (fuzzy-filter the-filter
+                        (map name @(rf/subscribe [:data-sources]))))]
+     (source id index))])
 
 
 
-(defn data-source-panel []
+(defn sources-panel []
   (let [the-filter (r/atom "")]
     (fn []
-      [:nav.panel {:style {:background-color "dodgerblue"}}
-       [:p.panel-heading "Data Sources"]
-       [:div.panel-block
+      [:div
+       [:h2 "Data Sources"]
+       [:p {:hidden true} @the-filter]                      ; hack to get the droppable to re-render
+       [:div.panel-block {:style {:margin-bottom "5px"}}
         [:p.control.has-icons-left
          [:input.input {:type        "text"
                         :placeholder "Search"
                         :on-change   #(reset! the-filter (-> % .-target .-value))}]
          [:span.icon.is-left
           [:i.fas.fa-search {:aria-hidden "true"}]]]]
-       (for [[idx s] (map-indexed vector
-                       (fuzzy-filter @the-filter
-                         (map name @(rf/subscribe [:data-sources]))))]
 
-         ;[:> Draggable {:draggable-id (str idx) :index idx}
-         ; (fn [provided snapshot]
-         ;   (r/as-element [:div (merge {:ref (.-innerRef provided)}
-         ;                         (js->clj (.-draggableProps provided))
-         ;                         (js->clj (.-dragHandleProps provided)))
-         [:a.panel-block.is-active s])])))
+       [:> Droppable {:droppable-id "sources-panel" :type "sources-panel"}
+        (fn [provided snapshot]
+          (r/as-element
+            [:div (merge {:ref   (.-innerRef provided)
+                          :class (when (.-isDraggingOver snapshot) :drag-over)}
+                    (js->clj (.-droppableProps provided)))
+             [sources-list @the-filter]
+             (.-placeholder provided)]))]])))
 
 
 
 (defn widget-panel []
-  [:> Droppable {:droppable-id "droppable-1" :type "thing"}
-   (fn [provided snapshot]
-     (r/as-element [:div (merge {:ref   (.-innerRef provided)
-                                 :class (when (.-isDraggingOver snapshot) :drag-over)}
-                           (js->clj (.-droppableProps provided)))
-                    [:h2 "Widgets"]
-                    [:div {:style {:height "1000px"}}
-                     (for [[index id] (map-indexed vector @(rf/subscribe [:subscriptions]))]
-                       (source id index))]
-                    (.-placeholder provided)]))])
+  [:div
+   [:h2 "Widgets"]
+   [:> Droppable {:droppable-id "widget-panel" :type "widget-panel"}
+    (fn [provided snapshot]
+      (r/as-element [:div (merge {:ref   (.-innerRef provided)
+                                  :class (when (.-isDraggingOver snapshot) :drag-over)}
+                            (js->clj (.-droppableProps provided)))
+                     [:div {:style {:height "1000px"}}
+                      [:p "drop sources-panel here"]]
+                     (.-placeholder provided)]))]])
+
+
+(defn on-drag-end [{:keys [draggableId source destination]}]
+  (if (= (:droppableId source) (:droppableId destination))
+    (prn "dropped on SELF")
+    (prn "dropped on valid target")))
 
 
 
@@ -102,7 +103,7 @@
   [:> DragDropContext
    {:onDragStart  #()
     :onDragUpdate #()
-    :onDragEnd    #()}
+    :onDragEnd    #(on-drag-end %)}
    [:section.section>div.container>div.content
     [:div.columns
 
@@ -110,7 +111,7 @@
       {:style {:background-color "lightblue"
                :border-radius    "5px"
                :margin-right     "5px"}}
-      [sources]]
+      [sources-panel]]
 
      [:div.column
       {:style {:background-color "lightgray"
