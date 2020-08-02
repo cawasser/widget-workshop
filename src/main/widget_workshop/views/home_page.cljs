@@ -92,10 +92,10 @@
                      (.-placeholder provided)]))]])
 
 
-(defn on-drag-end [{:keys [draggableId source destination]}]
+(defn on-drag-end [{:keys [draggableId source destination] :as event}]
   (if (= (:droppableId source) (:droppableId destination))
-    (prn "dropped on SELF")
-    (prn "dropped on valid target")))
+    (prn "dropped on SELF " event)
+    (prn "dropped on " draggableId " valid target " (:droppableId destination) ", " event)))
 
 
 
