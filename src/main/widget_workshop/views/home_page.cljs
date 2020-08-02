@@ -8,10 +8,8 @@
 ;
 ; https://github.com/atlassian/react-beautiful-dnd/issues/427#issuecomment-420563943
 ;
-; but, unfortunately, is NOT working!
-;
-; seem like the *-dnd JS code is "not" really loaded (Components show as "Anonymous") and then
-; we get and error on <PrivateDraggable> if we try to wrap [:> Draggable ...] around the data-source components
+
+
 
 (defn fuzzy-filter [filter-text alist]
   (if-let [f (some-> filter-text not-empty .toLowerCase)]
