@@ -9,7 +9,7 @@
 
   (fn [db _]
     (assoc db
-      :data-sources #{:basic-data :intermediate-data}
+      :data-sources [:basic-data :intermediate-data :three :four]
       :subscriptions #{}
       :data {}
       :widgets {}
@@ -49,6 +49,25 @@
     (assoc-in db [:data source-name] source-data)))
 
 
+
+
+(defn splice [coll at d & n]
+  (let [[a b] (split-at at coll)
+        c (drop d b)
+        x (if n (concat a n c) (concat a c))]
+    (into [] x)))
+
+
+
+(rf/reg-event-db
+  :arrange-list
+  (fn [db [_ list from-idx to-idx]]
+    (let [data (get db list)
+          item (nth data from-idx)
+          a (splice data from-idx 1)
+          b (splice a to-idx 0 item)]
+      (prn ":arrange-list " data item a b)
+      (assoc db list b))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -106,6 +125,9 @@
   (rf/dispatch [:add-source :really-big-source])
   (rf/dispatch [:remove-source :really-big-source])
 
+  (rf/dispatch [:arrange-list :data-sources 0 2])
+  (rf/dispatch [:arrange-list :data-sources 1 2])
+  (rf/dispatch [:arrange-list :data-sources 2 0])
 
 
   (rf/dispatch [:data-update :basic-data {:name "basic-data"
@@ -113,5 +135,52 @@
   (rf/dispatch [:data-update :intermediate-data {:name "intermediate-data"
                                                  :data  {:item-1 [1 1 1 1]
                                                          :item-2 [2 2 2 2]}}])
+
+  ())
+
+
+; re-arranging the data-sources collection
+(comment
+  (defonce db {:data-sources [:basic-data :intermediate-data :three]})
+  (def ddb (:data-sources db))
+
+  (:data-sources db)
+
+  (def from-idx 1)
+  (def to-idx 0)
+
+
+  (def newColl [1 2 3 4 5 6])
+
+  (defn splice [coll at d & n]
+    (let [[a b] (split-at at coll)
+          c (drop d b)
+          x (if n (concat a n c) (concat a c))]
+      (into [] x)))
+
+  (splice r 3 0 1)
+
+
+
+
+  (let [a (splice newColl 0 1)
+        b (splice a 2 0 1)]
+    b)
+
+
+
+
+
+
+
+
+  (rf/dispatch [:arrange-list :data-sources 0 1])
+  (rf/dispatch [:arrange-list :data-sources 1 2])
+  (rf/dispatch [:arrange-list :data-sources 2 0])
+
+
+  @re-frame.db/app-db
+
+
 
   ())

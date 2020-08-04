@@ -91,9 +91,13 @@
 
 
 (defn on-drag-end [{:keys [draggableId source destination] :as event}]
-  (if (= (:droppableId source) (:droppableId destination))
-    (prn "dropped on SELF " event)
-    (prn "dropped on " draggableId " valid target " (:droppableId destination) ", " event)))
+  (if (not destination)
+    (prn "nothing to do") ; nothing to do
+    (if (and (= (:droppableId source) (:droppableId destination))
+          (= (:index destination) (:index source)))
+      (prn "nothing to do")
+      (rf/dispatch [:arrange-list :data-sources
+                    (:index source) (:index destination)]))))
 
 
 
@@ -101,7 +105,7 @@
   [:> DragDropContext
    {:onDragStart  #()
     :onDragUpdate #()
-    :onDragEnd    #(on-drag-end %)}
+    :onDragEnd    #(on-drag-end (js->clj % :keywordize-keys true))}
    [:section.section>div.container>div.content
     [:div.columns
 
