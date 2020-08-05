@@ -8,8 +8,11 @@
 ;
 ; https://github.com/atlassian/react-beautiful-dnd/issues/427#issuecomment-420563943
 ;
-
-
+;
+; also drawing inspiration from:
+;
+;           https://egghead.io/lessons/react-course-introduction-beautiful-and-accessible-drag-and-drop-with-react-beautiful-dnd
+;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -83,7 +86,7 @@
 (defn draggable-item-list [provided snapshot data]
   (let [isDraggingOver (.-isDraggingOver snapshot)]
     [:div (merge {:ref   (.-innerRef provided)
-                  :style {:background-color (if isDraggingOver "lightgreen" "lightblue")
+                  :style {:background-color (if isDraggingOver "lightgreen" "inherit")
                           :border-width     (if isDraggingOver "1px" "inherit")
                           :border-style     "solid"
                           :border-radius    "5px"
@@ -92,7 +95,6 @@
      (for [[index id] (map-indexed vector data)]
        (drag-item id index))
      (.-placeholder provided)]))
-
 
 
 
@@ -124,15 +126,16 @@
 
 
 
-
 (defn widget-panel [content]
   [:div
    [:h2 "Widgets"]
-   [:> Droppable {:droppable-id "filters" :type "droppable"}
-    (fn [provided snapshot]
-      (r/as-element
-        [draggable-item-list provided snapshot
-         content]))]])
+   [:div {:style {:border "solid"
+                  :border-width "1px"}}
+    [:> Droppable {:droppable-id "filters" :type "droppable"}
+     (fn [provided snapshot]
+       (r/as-element
+         [draggable-item-list provided snapshot
+          content]))]]])
 
 
 
