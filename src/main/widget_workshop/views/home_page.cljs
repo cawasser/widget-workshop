@@ -28,7 +28,11 @@
 
 
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; data filters
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn fuzzy-filter [filter-text alist]
   (if-let [f (some-> filter-text not-empty .toLowerCase)]
@@ -40,6 +44,14 @@
                    (not= -1))
           alist)))
     alist))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; dnd UI components
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defn drag-item [id index]
@@ -55,6 +67,8 @@
              :style {:border           "1px solid lightgray"
                      :border-radius    "5px"
                      :padding          "8px"
+                     :padding-left     "3px"
+                     :padding-right    "3px"
                      :margin-bottom    "8px"
                      :color            "white"
                      :background-color (if (.-isDraggingOver snapshot)
@@ -68,9 +82,10 @@
   (let [isDraggingOver (.-isDraggingOver snapshot)]
     [:div (merge {:ref   (.-innerRef provided)
                   :style {:background-color (if isDraggingOver "lightgreen" "lightblue")
-                          :border-width (if isDraggingOver "2px" "0px")
-                          :border-style "solid"
-                          :border-radius "5px"}}
+                          :border-width     (if isDraggingOver "1px" "inherit")
+                          :border-style     "solid"
+                          :border-radius    "5px"
+                          :margin           "1px"}}
             (js->clj (.-droppableProps provided)))
      (for [[index id] (map-indexed vector data)]
        (drag-item id index))
@@ -79,14 +94,13 @@
 
 
 
-
 (defn sources-panel [content]
-       [:> Droppable {:droppable-id "data-sources" :type "sources-panel"}
-        (fn [provided snapshot]
-          (r/as-element
-            [draggable-item-list provided snapshot
-             ;(fuzzy-filter @the-filter
-               content]))]) ;@(rf/subscribe [:data-sources])]))]])))
+  [:> Droppable {:droppable-id "data-sources" :type "droppable"}
+   (fn [provided snapshot]
+     (r/as-element
+       [draggable-item-list provided snapshot
+        content]))])
+
 
 
 (defn sources-sidebar []
@@ -102,8 +116,9 @@
                         :on-change   #(reset! the-filter (-> % .-target .-value))}]
          [:span.icon.is-left
           [:i.fas.fa-search {:aria-hidden "true"}]]]]
-       [sources-panel (fuzzy-filter @the-filter
-                        (map name @(rf/subscribe [:data-sources])))]])))
+       [sources-panel
+        (fuzzy-filter @the-filter
+          (map name @(rf/subscribe [:data-sources])))]])))
 
 
 
@@ -111,7 +126,7 @@
 (defn widget-panel [content]
   [:div
    [:h2 "Widgets"]
-   [:> Droppable {:droppable-id "filters" :type "widget-panel"}
+   [:> Droppable {:droppable-id "widgets" :type "droppable"}
     (fn [provided snapshot]
       (r/as-element
         [draggable-item-list provided snapshot
@@ -126,13 +141,11 @@
     :onDragEnd    #(on-drag-end (js->clj % :keywordize-keys true))}
    [:section.section>div.container>div.content
     [:div.columns
-
      [:div.column.is-one-fifth
       {:style {:background-color "lightblue"
                :border-radius    "5px"
                :margin-right     "5px"}}
       [sources-sidebar]]
-
      [:div.column
       {:style {:background-color "lightgray"
                :border-radius    "5px"}}
