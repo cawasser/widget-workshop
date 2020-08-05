@@ -21,8 +21,23 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn on-drag-end [{:keys [draggableId type source destination reason] :as event}]
+(defn on-drag-end
+  "handle the 'drag-end' events
+
+  - draggableId: what item is being dragged?
+  - type: UNUSED
+  - source: (map) showing where (source and index within) the draggable 'came from'
+  - destination: (map) showing where (destination and index within) the draggable is 'going to'
+  - reason: UNUSED
+  - event: the entire (raw) event
+
+  (will) use core.match to determine the appropriate event to dispatch
+  "
+
+  [{:keys [draggableId type source destination reason] :as event}]
+
   (prn "on-drag-end " (keyword (:droppableId source)) (keyword (:droppableId destination)))
+
   (if destination
     (if (and (= (:droppableId source) (:droppableId destination))
           (= (:index destination) (:index source)))
@@ -98,6 +113,7 @@
      (.-placeholder provided)]))
 
 
+
 (defn draggable-item-hlist [provided snapshot data]
   (let [isDraggingOver (.-isDraggingOver snapshot)]
     [:div (merge {:ref   (.-innerRef provided)
@@ -114,7 +130,6 @@
      (for [[index id] (map-indexed vector data)]
        (drag-item id index))
      (.-placeholder provided)]))
-
 
 
 
@@ -176,7 +191,10 @@
 
 
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; working with re-frame
+;
 (comment
   @(rf/subscribe [:data-sources])
 
@@ -247,35 +265,6 @@
 
   ())
 
-
-(comment
-  (def atm (atom "string"))
-
-  (def the-string @atm)
-  the-string
-
-  (reset! atm "nothing")
-  @atm
-
-  (prn @atm)
-  (reset! atm "different")
-
-  (defn thinigy [new-val]
-    (reset! atm new-val)
-    (let [answer (str "/api/something/" @atm)]
-      (str answer)))
-
-  (thinigy "nothing")
-  (thinigy "something")
-
-
-  answer
-
-
-
-
-
-  ())
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
