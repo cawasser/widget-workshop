@@ -11,6 +11,25 @@
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; dnd handlers
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn on-drag-end [{:keys [draggableId type source destination reason] :as event}]
+  (if destination
+    (if (and (= (:droppableId source) (:droppableId destination))
+          (= (:index destination) (:index source)))
+      (prn "nothing to do")
+      (rf/dispatch [:arrange-list
+                    (keyword (:droppableId source)) (:index source)
+                    (keyword (:droppableId destination)) (:index destination)]))))
+
+
+
+
+
 (defn fuzzy-filter [filter-text alist]
   (if-let [f (some-> filter-text not-empty .toLowerCase)]
     (into #{}
@@ -23,7 +42,7 @@
     alist))
 
 
-(defn source [id index]
+(defn drag-item [id index]
   [:> Draggable {:key id :draggable-id id :index index}
    (fn [provided snapshot]
      (r/as-element
@@ -38,21 +57,39 @@
                      :padding          "8px"
                      :margin-bottom    "8px"
                      :color            "white"
-                     :background-color "mediumblue"}}
+                     :background-color (if (.-isDraggingOver snapshot)
+                                         "green"
+                                         "mediumblue")}}
          (str (name id))]]))])
 
 
 
-(defn sources-list [the-filter]
-  [:div
-   (for [[index id] (map-indexed vector
-                      (fuzzy-filter the-filter
-                        (map name @(rf/subscribe [:data-sources]))))]
-     (source id index))])
+(defn draggable-item-list [provided snapshot data]
+  (let [isDraggingOver (.-isDraggingOver snapshot)]
+    [:div (merge {:ref   (.-innerRef provided)
+                  :style {:background-color (if isDraggingOver "lightgreen" "lightblue")
+                          :border-width (if isDraggingOver "2px" "0px")
+                          :border-style "solid"
+                          :border-radius "5px"}}
+            (js->clj (.-droppableProps provided)))
+     (for [[index id] (map-indexed vector data)]
+       (drag-item id index))
+     (.-placeholder provided)]))
 
 
 
-(defn sources-panel []
+
+
+(defn sources-panel [content]
+       [:> Droppable {:droppable-id "data-sources" :type "sources-panel"}
+        (fn [provided snapshot]
+          (r/as-element
+            [draggable-item-list provided snapshot
+             ;(fuzzy-filter @the-filter
+               content]))]) ;@(rf/subscribe [:data-sources])]))]])))
+
+
+(defn sources-sidebar []
   (let [the-filter (r/atom "")]
     (fn []
       [:div
@@ -65,39 +102,20 @@
                         :on-change   #(reset! the-filter (-> % .-target .-value))}]
          [:span.icon.is-left
           [:i.fas.fa-search {:aria-hidden "true"}]]]]
-
-       [:> Droppable {:droppable-id "sources-panel" :type "sources-panel"}
-        (fn [provided snapshot]
-          (r/as-element
-            [:div (merge {:ref   (.-innerRef provided)
-                          :class (when (.-isDraggingOver snapshot) :drag-over)}
-                    (js->clj (.-droppableProps provided)))
-             [sources-list @the-filter]
-             (.-placeholder provided)]))]])))
+       [sources-panel (fuzzy-filter @the-filter
+                        (map name @(rf/subscribe [:data-sources])))]])))
 
 
 
-(defn widget-panel []
+
+(defn widget-panel [content]
   [:div
    [:h2 "Widgets"]
-   [:> Droppable {:droppable-id "widget-panel" :type "widget-panel"}
+   [:> Droppable {:droppable-id "filters" :type "widget-panel"}
     (fn [provided snapshot]
-      (r/as-element [:div (merge {:ref   (.-innerRef provided)
-                                  :class (when (.-isDraggingOver snapshot) :drag-over)}
-                            (js->clj (.-droppableProps provided)))
-                     [:div {:style {:height "1000px"}}
-                      [:p "drop sources-panel here"]]
-                     (.-placeholder provided)]))]])
-
-
-(defn on-drag-end [{:keys [draggableId source destination] :as event}]
-  (if (not destination)
-    (prn "nothing to do") ; nothing to do
-    (if (and (= (:droppableId source) (:droppableId destination))
-          (= (:index destination) (:index source)))
-      (prn "nothing to do")
-      (rf/dispatch [:arrange-list :data-sources
-                    (:index source) (:index destination)]))))
+      (r/as-element
+        [draggable-item-list provided snapshot
+         content]))]])
 
 
 
@@ -113,12 +131,12 @@
       {:style {:background-color "lightblue"
                :border-radius    "5px"
                :margin-right     "5px"}}
-      [sources-panel]]
+      [sources-sidebar]]
 
      [:div.column
       {:style {:background-color "lightgray"
                :border-radius    "5px"}}
-      [widget-panel]]]]])
+      [widget-panel @(rf/subscribe [:filters])]]]]])
 
 
 
@@ -220,5 +238,15 @@
 
 
 
+
+  ())
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; fuzzy search
+;
+(comment
+  (def f (atom "b"))
+  (fuzzy-filter @f (map name @(rf/subscribe [:data-sources])))
 
   ())

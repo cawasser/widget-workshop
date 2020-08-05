@@ -11,6 +11,7 @@
     (assoc db
       :data-sources [:basic-data :intermediate-data :three :four]
       :subscriptions #{}
+      :filters [:dummy-1 :dummy-2]
       :data {}
       :widgets {}
       :widget-layout {})))
@@ -61,13 +62,16 @@
 
 (rf/reg-event-db
   :arrange-list
-  (fn [db [_ list from-idx to-idx]]
-    (let [data (get db list)
-          item (nth data from-idx)
-          a (splice data from-idx 1)
-          b (splice a to-idx 0 item)]
-      (prn ":arrange-list " data item a b)
-      (assoc db list b))))
+  (fn [db [_ from-list from-idx to-list to-idx]]
+
+    (if (= from-list to-list)
+      (let [data (get db from-list)
+            item (nth data from-idx)
+            a (splice data from-idx 1)
+            b (splice a to-idx 0 item)]
+        (prn ":arrange-list " data item a b)
+        (assoc db from-list b))
+      db)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -85,6 +89,10 @@
   (fn [db _]
     (:subscriptions db)))
 
+(rf/reg-sub
+  :filters
+  (fn [db _]
+    (:filters db)))
 
 (rf/reg-sub
   :data
@@ -113,6 +121,8 @@
 (comment
 
   (def app-db (atom @re-frame.db/app-db))
+
+  (rf/dispatch-sync [:initialize])
 
   (rf/dispatch [:subscribe :basic-data])
   (rf/dispatch [:unsubscribe :basic-data])
