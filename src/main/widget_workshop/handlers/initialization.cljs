@@ -65,13 +65,22 @@
   (fn [db [_ from-list from-idx to-list to-idx]]
 
     (if (= from-list to-list)
+      ; same list
       (let [data (get db from-list)
             item (nth data from-idx)
             a (splice data from-idx 1)
             b (splice a to-idx 0 item)]
-        (prn ":arrange-list " data item a b)
+        (prn ":arrange-list (same) " data item a b)
         (assoc db from-list b))
-      db)))
+
+      ; different lists
+      (let [from-data (get db from-list)
+            to-data (get db to-list)
+            item (nth from-data from-idx)
+            new-from (splice from-data from-idx 1)
+            new-to (splice to-data to-idx 0 item)]
+        (prn ":arrange-list (diff) " item new-from new-to)
+        (assoc db from-list new-from to-list new-to)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

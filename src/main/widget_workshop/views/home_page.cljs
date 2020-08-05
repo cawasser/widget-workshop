@@ -18,6 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-drag-end [{:keys [draggableId type source destination reason] :as event}]
+  (prn "on-drag-end " (keyword (:droppableId source)) (keyword (:droppableId destination)))
   (if destination
     (if (and (= (:droppableId source) (:droppableId destination))
           (= (:index destination) (:index source)))
@@ -70,6 +71,7 @@
                      :padding-left     "3px"
                      :padding-right    "3px"
                      :margin-bottom    "8px"
+                     :max-width        "220px"
                      :color            "white"
                      :background-color (if (.-isDraggingOver snapshot)
                                          "green"
@@ -126,7 +128,7 @@
 (defn widget-panel [content]
   [:div
    [:h2 "Widgets"]
-   [:> Droppable {:droppable-id "widgets" :type "droppable"}
+   [:> Droppable {:droppable-id "filters" :type "droppable"}
     (fn [provided snapshot]
       (r/as-element
         [draggable-item-list provided snapshot
