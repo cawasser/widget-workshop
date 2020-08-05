@@ -1,6 +1,7 @@
 (ns widget-workshop.views.home-page
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
+            [cljs.core.match :refer-macros [match]]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]))
 
 
@@ -83,7 +84,7 @@
 
 
 
-(defn draggable-item-list [provided snapshot data]
+(defn draggable-item-vlist [provided snapshot data]
   (let [isDraggingOver (.-isDraggingOver snapshot)]
     [:div (merge {:ref   (.-innerRef provided)
                   :style {:background-color (if isDraggingOver "lightgreen" "inherit")
@@ -97,13 +98,31 @@
      (.-placeholder provided)]))
 
 
+(defn draggable-item-hlist [provided snapshot data]
+  (let [isDraggingOver (.-isDraggingOver snapshot)]
+    [:div (merge {:ref   (.-innerRef provided)
+                  :style {:background-color (if isDraggingOver "lightgreen" "inherit")
+                          :border-width     (if isDraggingOver "1px" "inherit")
+                          :border-style     "solid"
+                          :border-radius    "5px"
+                          :margin           "1px"
+                          :display          :flex
+                          :flex-flow        "row wrap"
+                          :justify-contents :middle
+                          :align-items      :center}}
+            (js->clj (.-droppableProps provided)))
+     (for [[index id] (map-indexed vector data)]
+       (drag-item id index))
+     (.-placeholder provided)]))
+
+
+
 
 (defn sources-panel [content]
   [:> Droppable {:droppable-id "data-sources" :type "droppable"}
    (fn [provided snapshot]
      (r/as-element
-       [draggable-item-list provided snapshot
-        content]))])
+       [draggable-item-vlist provided snapshot content]))])
 
 
 
@@ -129,13 +148,12 @@
 (defn widget-panel [content]
   [:div
    [:h2 "Widgets"]
-   [:div {:style {:border "solid"
+   [:div {:style {:border       "solid"
                   :border-width "1px"}}
-    [:> Droppable {:droppable-id "filters" :type "droppable"}
+    [:> Droppable {:droppable-id "filters" :type "droppable" :direction "horizontal"}
      (fn [provided snapshot]
        (r/as-element
-         [draggable-item-list provided snapshot
-          content]))]]])
+         [draggable-item-hlist provided snapshot content]))]]])
 
 
 
