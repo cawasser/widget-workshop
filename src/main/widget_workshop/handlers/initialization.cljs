@@ -1,6 +1,7 @@
 (ns widget-workshop.handlers.initialization
   (:require
-    [re-frame.core :as rf]))
+    [re-frame.core :as rf]
+    [cljs-uuid-utils.core :as uuid]))
 
 
 
@@ -9,24 +10,15 @@
 
   (fn [db _]
     (assoc db
-      :data-sources [:basic-data :intermediate-data :three :four]
+      :data-sources {}
+      :data-sources-list []
       :subscriptions #{}
-      :filters [:dummy-1 :dummy-2]
+      :filters {}
       :data {}
-      :widgets {}
+      :blank-widget (uuid/uuid-string (uuid/make-random-uuid))
+      :widgets []
       :widget-layout {})))
 
-
-
-(rf/reg-event-db
-  :add-source
-  (fn [db [_ source-name]]
-    (assoc db :data-sources (conj (:data-sources db) source-name))))
-
-(rf/reg-event-db
-  :remove-source
-  (fn [db [_ source-name]]
-    (assoc db :data-sources (disj (:data-sources db) source-name))))
 
 
 (rf/reg-event-db
@@ -52,35 +44,6 @@
 
 
 
-(defn splice [coll at d & n]
-  (let [[a b] (split-at at coll)
-        c (drop d b)
-        x (if n (concat a n c) (concat a c))]
-    (into [] x)))
-
-
-
-(rf/reg-event-db
-  :arrange-list
-  (fn [db [_ from-list from-idx to-list to-idx]]
-
-    (if (= from-list to-list)
-      ; same list
-      (let [data (get db from-list)
-            item (nth data from-idx)
-            a (splice data from-idx 1)
-            b (splice a to-idx 0 item)]
-        (prn ":arrange-list (same) " data item a b)
-        (assoc db from-list b))
-
-      ; different lists
-      (let [from-data (get db from-list)
-            to-data (get db to-list)
-            item (nth from-data from-idx)
-            new-from (splice from-data from-idx 1)
-            new-to (splice to-data to-idx 0 item)]
-        (prn ":arrange-list (diff) " item new-from new-to)
-        (assoc db from-list new-from to-list new-to)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -91,7 +54,13 @@
 (rf/reg-sub
   :data-sources
   (fn [db _]
-    (:data-sources db)))
+    (keys (:data-sources db))))
+
+(rf/reg-sub
+  :data-sources-list
+  (fn [db _]
+    (:data-sources-list db)))
+
 
 (rf/reg-sub
   :subscriptions
@@ -100,8 +69,8 @@
 
 (rf/reg-sub
   :filters
-  (fn [db _]
-    (:filters db)))
+  (fn [db [_ id]]
+    (get-in db [:filters id])))
 
 (rf/reg-sub
   :data
@@ -113,6 +82,11 @@
   :widgets
   (fn [db _]
     (:widgets db)))
+
+(rf/reg-sub
+  :blank-widget
+  (fn [db _]
+    (:blank-widget db)))
 
 (rf/reg-sub
   :widget-layout
@@ -140,9 +114,6 @@
   (rf/dispatch [:unsubscribe :bad-data])
 
 
-
-  (rf/dispatch [:add-source :really-big-source])
-  (rf/dispatch [:remove-source :really-big-source])
 
   (rf/dispatch [:arrange-list :data-sources 0 2])
   (rf/dispatch [:arrange-list :data-sources 1 2])

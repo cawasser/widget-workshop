@@ -11,7 +11,8 @@
             [widget-workshop.views.about-page :refer [about-page]]
             [widget-workshop.nav-bar :as navbar]
             [widget-workshop.session :refer [session]]
-            [widget-workshop.handlers.initialization])
+            [widget-workshop.handlers.initialization]
+            [widget-workshop.server.subscription-manager :as sm])
 
   (:import goog.History))
 
@@ -61,8 +62,17 @@
 (defn init! []
   (hook-browser-navigation!)
   (rf/dispatch-sync [:initialize])
+
+  ; register some 'data-sources'
+  (sm/register-data-source
+    :generic-source
+    widget-workshop.server.generic-data-source/get-data)
+
   (mount-components))
 
 
+(comment
+  @re-frame.db/app-db
 
+  ())
 

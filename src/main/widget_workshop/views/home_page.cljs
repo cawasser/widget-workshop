@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [cljs.core.match :refer-macros [match]]
-            ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]))
+            ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
+            [widget-workshop.handlers.dynamic-subscriptions]))
 
 
 ; Drag & Drop code mimics:
@@ -36,15 +37,15 @@
 
   [{:keys [draggableId type source destination reason] :as event}]
 
-  (prn "on-drag-end " (keyword (:droppableId source)) (keyword (:droppableId destination)))
+  (prn "on-drag-end " event (keyword (:droppableId source)) (keyword (:droppableId destination)))
 
   (if destination
     (if (and (= (:droppableId source) (:droppableId destination))
           (= (:index destination) (:index source)))
       (prn "nothing to do")
-      (rf/dispatch [:arrange-list
-                    (keyword (:droppableId source)) (:index source)
-                    (keyword (:droppableId destination)) (:index destination)]))))
+      (rf/dispatch [:handle-drop-event
+                    (:droppableId source) (:index source)
+                    (:droppableId destination) (:index destination)]))))
 
 
 
@@ -134,7 +135,7 @@
 
 
 (defn sources-panel [content]
-  [:> Droppable {:droppable-id "data-sources" :type "droppable"}
+  [:> Droppable {:droppable-id "data-sources-list" :type "droppable"}
    (fn [provided snapshot]
      (r/as-element
        [draggable-item-vlist provided snapshot content]))])
@@ -156,19 +157,31 @@
           [:i.fas.fa-search {:aria-hidden "true"}]]]]
        [sources-panel
         (fuzzy-filter @the-filter
-          (map name @(rf/subscribe [:data-sources])))]])))
+          (map name @(rf/subscribe [:data-sources-list])))]])))
 
 
+(defn widget [id]
+  (prn "widget " id @(rf/subscribe [:filters id]))
+  [:div {:style {:border           "solid"
+                 :border-width     "1px"
+                 :height           "200px"
+                 :background-color (if (= id @(rf/subscribe [:blank-widget]))
+                                     "mediumgray"
+                                     "tomato")}}
+   [:h5 id]
+   [:> Droppable {:droppable-id id :type "droppable" :direction "horizontal"}
+    (fn [provided snapshot]
+      (r/as-element
+        [draggable-item-hlist provided snapshot @(rf/subscribe [:filters id])]))]])
 
-(defn widget-panel [content]
+
+(defn widget-panel []
   [:div
-   [:h2 "Widgets"]
-   [:div {:style {:border       "solid"
-                  :border-width "1px"}}
-    [:> Droppable {:droppable-id "filters" :type "droppable" :direction "horizontal"}
-     (fn [provided snapshot]
-       (r/as-element
-         [draggable-item-hlist provided snapshot content]))]]])
+   [:h2 "Widgets"
+    (for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
+      ^{:key idx} [widget id])
+    [widget @(rf/subscribe [:blank-widget])]]])
+
 
 
 
@@ -187,7 +200,7 @@
      [:div.column
       {:style {:background-color "lightgray"
                :border-radius    "5px"}}
-      [widget-panel @(rf/subscribe [:filters])]]]]])
+      [widget-panel]]]]])
 
 
 
@@ -223,6 +236,9 @@
                (not= -1))
       alist)
     alist)
+
+
+  @(rf/subscribe [:filters "alpha"])
 
   ())
 
