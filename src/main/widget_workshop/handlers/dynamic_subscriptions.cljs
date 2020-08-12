@@ -1,7 +1,7 @@
 (ns widget-workshop.handlers.dynamic-subscriptions
   (:require [re-frame.core :as rf]
             [widget-workshop.util.uuid :refer [aUUID]]
-            [widget-workshop.util.vectors :refer [splice]]))
+            [widget-workshop.util.vectors :refer [splice reorder]]))
 
 
 
@@ -101,12 +101,29 @@
 
 
 
+(defn- reorder-widget-filters
+  "the user wants to reorder the filters in a widget"
+
+  [db from from-idx to-idx]
+
+  (let [{:keys [id name]}   (get-source-filtered-item db from from-idx)]
+    (prn "reorder-widget-filters " from from-idx to-idx name)
+    (assoc db :filters (assoc (:filters db) from (reorder (get-in db [:filters from]) from-idx to-idx)))))
+
+
+
 (defn- handle-drop-event [db from from-idx to to-idx]
   (prn "-handle-drop-event " from to (:blank-widget db))
 
   (cond
     ; can't reorder the sources list
     (= from to "data-sources-list") (do (prn ">>>>> do nothing") db)
+
+    ; reorder the 'filters' on a widget
+    (and
+      (not= from "data-sources-list")
+      (not= to (:blank-widget db))
+      (= from to)) (reorder-widget-filters db from from-idx to-idx)
 
     ; dropping from the sources onto a new widget
     (and
@@ -122,8 +139,6 @@
     (and
       (not= from "data-sources-list")
       (not= to (:blank-widget db))) (connect-widgets db from from-idx to to-idx)
-
-    ; reorder the 'filters' on a widget
 
     ; drop new sources onto a widget (not a new widget)
     (and
@@ -204,7 +219,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; find specifi item in the :data-sources-list
+; find specific item in the :data-sources-list
 ;
 (comment
   (def db @re-frame.db/app-db)
@@ -215,5 +230,18 @@
     (nth (get db :data-sources-list))
     (get (:drag-items db))
     :name)
+
+  ())
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; reorder the filters in a given widget
+;
+(comment
+  (def db @re-frame.db/app-db)
+
+  (reorder (get-in db [:filters from]) from-idx to-idx)
 
   ())
