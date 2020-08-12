@@ -4,6 +4,29 @@
 
 
 
+(defn- get-source-item [db from-idx]
+  (->> from-idx
+    (nth (get db :data-sources-list))
+    (get (:drag-items db))
+    :name))
+
+
+(defn- get-source-filtered-item
+  "returns a vector of the (source) id and name of the item being dropped
+
+  this data will be used to construct a NEW item inside the 'to' widget"
+
+  [db from from-idx]
+
+  (if-let [filters (get-in db [:filters from])]
+    (do
+      (prn "get-source-filtered-item " filters from-idx)
+      (->> (nth filters from-idx)
+        (vector :drag-items)
+        (get-in db)))))
+
+
+
 (defn splice [coll at d & n]
   (let [[a b] (split-at at coll)
         c (drop d b)
@@ -20,12 +43,13 @@
   [db from from-idx to to-idx]
 
   (let [new-blank-widget (aUUID)
-        current-blank (:blank-widget db)
-        name (->> from-idx
-               (nth (get db (keyword from)))
-               (get (:drag-items db))
-               :name)
-        new-uuid (aUUID)]
+        current-blank    (:blank-widget db)
+        name             (get-source-item db from-idx)
+        ;(->> from-idx
+        ;  (nth (get db from))
+        ;  (get (:drag-items db))
+        ;  :name)
+        new-uuid         (aUUID)]
     (prn "new-widget " from from-idx new-uuid name current-blank new-blank-widget)
     (assoc db :widgets (conj (:widgets db) to)
               :filters (assoc (:filters db) to [new-uuid])
@@ -33,26 +57,69 @@
               :blank-widget new-blank-widget)))
 
 
+
 (defn- add-to-widget [db from from-idx to to-idx]
-  db)
+  "the user wants to add more sources to an existing widget"
+
+  [db from from-idx to to-idx]
+
+  (let [name                (get-source-item db from-idx)
+        new-uuid            (aUUID)
+        existing-to-filters (get-in db [:filters to])]
+    (prn "add-to-widget " from from-idx new-uuid name to to-idx)
+    (assoc db :filters (assoc (:filters db)
+                         to (splice existing-to-filters to-idx 0 new-uuid))
+              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
+
 
 
 (defn- connect-widgets [db from from-idx to to-idx]
-  db)
+  "the user wants to connect two widgets together using the item dropped on
+  the 'to widget'"
+
+  [db from from-idx to to-idx]
+
+  (let [{:keys [id name]} (get-source-filtered-item db from from-idx)
+        new-uuid            (aUUID)
+        existing-to-filters (get-in db [:filters to])]
+    (prn "connect-widgets " from from-idx new-uuid name to to-idx)
+    (assoc db :filters (assoc (:filters db)
+                         to (splice existing-to-filters to-idx 0 new-uuid))
+              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
+
 
 
 (defn- handle-drop-event [db from from-idx to to-idx]
   (prn "-handle-drop-event " from to (:blank-widget db))
 
   (cond
-    (= from to "data-sources-list") (do (prn ">>>>> do nothing")
-                                      db)
+    ; can't reorder the sources list
+    (= from to "data-sources-list") (do (prn ">>>>> do nothing") db)
 
+    ; dropping from the sources onto a new widget
     (and
       (= from "data-sources-list")
-      (= to (:blank-widget db))) (new-widget db from from-idx to to-idx)
+      (= to (:blank-widget db))) (new-widget db (keyword from) from-idx to to-idx)
 
-    :default db))
+    ; can't drop from an existing widget onto the 'new' widget
+    (and
+      (not= from "data-sources-list")
+      (= to (:blank-widget db))) (do (prn ">>>>> do nothing") db)
+
+    ; drop from one widget to another
+    (and
+      (not= from "data-sources-list")
+      (not= to (:blank-widget db))) (connect-widgets db from from-idx to to-idx)
+
+    ; reorder the 'filters' on a widget
+
+    ; drop new sources onto a widget (not a new widget)
+    (and
+      (= from "data-sources-list")
+      (not= to (:blank-widget db))) (add-to-widget db (keyword from) from-idx to to-idx)
+
+    ; can't do anything else
+    :default (do (prn ">>>>>>> default") db)))
 
 
 
@@ -72,7 +139,7 @@
 (comment
   (def from "data-sources-list")
   (def to "202c00c7-7b12-4292-aa98-264e45d3c46d")
-  (def new-blank-widget ( aUUID))
+  (def new-blank-widget (aUUID))
   (def item "generic-source")
 
   (= from to "data-sources-list")
@@ -95,6 +162,45 @@
 
   (->> 0
     (nth (get db from))
+    (get (:drag-items db))
+    :name)
+
+  ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; find the specific item from :filters nthat the user has dropped
+;
+(comment
+
+  (def db @re-frame.db/app-db)
+  (def from "228f87c6-3411-49bc-95be-f2904aa2e2ec")
+  (def from-idx 0)
+
+  (if-let [filters (get-in db [:filters from])]
+    (do
+      (prn "get-source-filtered-item " filters)
+      (->> (nth filters from-idx)
+        (vector :drag-items)
+        (get-in db))))
+
+  (get-source-filtered-item db from from-idx)
+
+  ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; find specifi item in the :data-sources-list
+;
+(comment
+  (def db @re-frame.db/app-db)
+  (def from-idx 2)
+
+
+  (->> from-idx
+    (nth (get db :data-sources-list))
     (get (:drag-items db))
     :name)
 

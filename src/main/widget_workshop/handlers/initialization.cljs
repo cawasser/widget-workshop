@@ -125,7 +125,6 @@
         (prn "found filters " filters)
         (->> filters
           (map #(get-in db [:drag-items %])))))))
-          ;(map (juxt :id :name)))))))
 
 
 (rf/reg-sub

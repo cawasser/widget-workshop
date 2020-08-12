@@ -67,6 +67,10 @@
   (sm/register-data-source
     "generic-source"
     widget-workshop.server.generic-data-source/get-data)
+  (sm/register-data-source "source-2" #())
+  (sm/register-data-source "source-3" #())
+  (sm/register-data-source "source-4" #())
+
 
   (mount-components))
 
