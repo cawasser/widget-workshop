@@ -89,6 +89,24 @@
 
 
 
+(defn- connect-to-new-widget [db from from-idx to to-idx]
+  "the user wants to connect and eixtsing widgets to a 'new' widget using the item
+  dropped on the 'blank widget'"
+
+  [db from from-idx to to-idx]
+
+  (let [new-blank-widget    (aUUID)
+        current-blank       (:blank-widget db)
+        {:keys [id name]}   (get-source-filtered-item db from from-idx)
+        new-uuid            (aUUID)]
+    (prn "connect-to-new-widget " from from-idx new-uuid name current-blank new-blank-widget)
+    (assoc db :widgets (conj (:widgets db) to)
+              :filters (assoc (:filters db) to [new-uuid])
+              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name})
+              :blank-widget new-blank-widget)))
+
+
+
 (defn- handle-drop-event [db from from-idx to to-idx]
   (prn "-handle-drop-event " from to (:blank-widget db))
 
@@ -101,10 +119,10 @@
       (= from "data-sources-list")
       (= to (:blank-widget db))) (new-widget db (keyword from) from-idx to to-idx)
 
-    ; can't drop from an existing widget onto the 'new' widget
+    ; drop from an existing widget onto the 'new' widget
     (and
       (not= from "data-sources-list")
-      (= to (:blank-widget db))) (do (prn ">>>>> do nothing") db)
+      (= to (:blank-widget db))) (connect-to-new-widget db from from-idx to to-idx)
 
     ; drop from one widget to another
     (and
