@@ -65,7 +65,7 @@
 
   ; register some 'data-sources'
   (sm/register-data-source
-    :generic-source
+    "generic-source"
     widget-workshop.server.generic-data-source/get-data)
 
   (mount-components))

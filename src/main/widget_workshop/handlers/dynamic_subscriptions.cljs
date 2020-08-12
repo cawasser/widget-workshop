@@ -1,6 +1,6 @@
 (ns widget-workshop.handlers.dynamic-subscriptions
   (:require [re-frame.core :as rf]
-            [cljs-uuid-utils.core :as uuid]))
+            [widget-workshop.util.uuid :refer [aUUID]]))
 
 
 
@@ -19,12 +19,17 @@
   2) create a new guid for a new 'blank' and place into the :blank-widget key"
   [db from from-idx to to-idx]
 
-  (let [new-blank-widget (uuid/uuid-string (uuid/make-random-uuid))
+  (let [new-blank-widget (aUUID)
         current-blank (:blank-widget db)
-        item (nth (get db (keyword from)) from-idx)]
-    (prn "new-widget " from from-idx item current-blank new-blank-widget)
+        name (->> from-idx
+               (nth (get db (keyword from)))
+               (get (:drag-items db))
+               :name)
+        new-uuid (aUUID)]
+    (prn "new-widget " from from-idx new-uuid name current-blank new-blank-widget)
     (assoc db :widgets (conj (:widgets db) to)
-              :filters (assoc (:filters db) to [item])
+              :filters (assoc (:filters db) to [new-uuid])
+              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name})
               :blank-widget new-blank-widget)))
 
 
@@ -67,7 +72,7 @@
 (comment
   (def from "data-sources-list")
   (def to "202c00c7-7b12-4292-aa98-264e45d3c46d")
-  (def new-blank-widget (uuid/uuid-string (uuid/make-random-uuid)))
+  (def new-blank-widget ( aUUID))
   (def item "generic-source")
 
   (= from to "data-sources-list")
@@ -85,5 +90,12 @@
   (assoc db :widgets (conj (:widgets db) to)
             :filters (assoc (:filters db) to [item])
             :blank-widget new-blank-widget)
+
+
+
+  (->> 0
+    (nth (get db from))
+    (get (:drag-items db))
+    :name)
 
   ())

@@ -58,12 +58,12 @@
 (defn fuzzy-filter [filter-text alist]
   (if-let [f (some-> filter-text not-empty .toLowerCase)]
     (into #{}
-      (map keyword
+      ;(map keyword
         (filter #(-> %
                    .toLowerCase
                    (.indexOf f)
                    (not= -1))
-          alist)))
+          alist))
     alist))
 
 
@@ -75,7 +75,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defn drag-item [id index]
+(defn drag-item [id name index]
   [:> Draggable {:key id :draggable-id id :index index}
    (fn [provided snapshot]
      (r/as-element
@@ -96,7 +96,7 @@
                      :background-color (if (.-isDraggingOver snapshot)
                                          "green"
                                          "mediumblue")}}
-         (str (name id))]]))])
+         name]]))])
 
 
 
@@ -109,8 +109,9 @@
                           :border-radius    "5px"
                           :margin           "1px"}}
             (js->clj (.-droppableProps provided)))
-     (for [[index id] (map-indexed vector data)]
-       (drag-item id index))
+     (prn "draggable-item-vlist " data)
+     (for [[index {:keys [id name]}] (map-indexed vector data)]
+       (drag-item id name index))
      (.-placeholder provided)]))
 
 
@@ -128,8 +129,9 @@
                           :justify-contents :middle
                           :align-items      :center}}
             (js->clj (.-droppableProps provided)))
-     (for [[index id] (map-indexed vector data)]
-       (drag-item id index))
+     (prn "draggable-item-hlist " data)
+     (for [[index {:keys [id name]}] (map-indexed vector data)]
+       (drag-item id name index))
      (.-placeholder provided)]))
 
 
@@ -156,12 +158,13 @@
          [:span.icon.is-left
           [:i.fas.fa-search {:aria-hidden "true"}]]]]
        [sources-panel
-        (fuzzy-filter @the-filter
-          (map name @(rf/subscribe [:data-sources-list])))]])))
+        ;(fuzzy-filter @the-filter
+        ;  (map (comp name :id)
+            @(rf/subscribe [:drag-items :data-sources-list])]])))
 
 
 (defn widget [id]
-  (prn "widget " id @(rf/subscribe [:filters id]))
+  (prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
   [:div {:style {:border           "solid"
                  :border-width     "1px"
                  :height           "200px"
@@ -172,7 +175,7 @@
    [:> Droppable {:droppable-id id :type "droppable" :direction "horizontal"}
     (fn [provided snapshot]
       (r/as-element
-        [draggable-item-hlist provided snapshot @(rf/subscribe [:filters id])]))]])
+        [draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))]])
 
 
 (defn widget-panel []
@@ -221,13 +224,13 @@
 
 
   (into #{}
-    (map keyword
-      (fuzzy-filter "" (map name @(rf/subscribe [:data-sources])))))
+    ;(map keyword
+      (fuzzy-filter "" (map name @(rf/subscribe [:data-sources]))))
 
   (into #{}
-    (map keyword
+    ;(map keyword
       (fuzzy-filter "me"
-        (map name @(rf/subscribe [:data-sources])))))
+        (map name @(rf/subscribe [:data-sources]))))
 
   (if-let [filter-text (some-> filter-text not-empty .toLowerCase)]
     (filter #(-> %
@@ -289,5 +292,29 @@
 (comment
   (def f (atom "b"))
   (fuzzy-filter @f (map name @(rf/subscribe [:data-sources])))
+
+  ())
+
+
+
+(comment
+  @re-frame.db/app-db
+
+
+  @(rf/subscribe [:filter-drag-items id])
+
+  (map (comp name :id) @(rf/subscribe [:drag-items :data-sources-list]))
+
+
+  (for [[idx {:keys [id name] :as orig}]
+        (map-indexed vector
+          @(rf/subscribe [:drag-items :data-sources-list]))]
+    [id name])
+
+  (for [[idx {:keys [id name] :as orig}]]
+      (map-indexed vector
+        @(rf/subscribe [:filter-drag-items
+                        "e4703951-39e9-4064-ab3c-4e83d1c3787b"]))
+    [id name])
 
   ())

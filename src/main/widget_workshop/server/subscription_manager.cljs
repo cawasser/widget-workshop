@@ -1,8 +1,21 @@
 (ns widget-workshop.server.subscription-manager
   (:require [re-frame.core :as rf]
-            [widget-workshop.server.generic-data-source]))
+            [widget-workshop.server.generic-data-source]
+            [widget-workshop.util.uuid :refer [aUUID]]))
 
 
+
+
+
+(defn- remove-drag-item [db id]
+  "removes a drag item of the given id form the :drag-items key
+
+  we need this function because the :drag-items content is actualy keys by a UUID
+  which is then associated wiht the id as it's value"
+
+  [id]
+
+  (dissoc (:drag-items db)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -18,16 +31,19 @@
 (rf/reg-event-db
   :add-source
   (fn [db [_ id source-fn]]
-    (assoc db
-      :data-sources (assoc (:data-sources db) id source-fn)
-      :data-sources-list (conj (:data-sources-list db) id))))
+    (let [drag-id (aUUID)]
+      (assoc db
+        :data-sources (assoc (:data-sources db) id source-fn)
+        :data-sources-list (conj (:data-sources-list db) drag-id)
+        :drag-items (assoc (:drag-items db) drag-id {:id (aUUID) :name id})))))
 
 (rf/reg-event-db
   :remove-source
   (fn [db [_ id]]
     (assoc db
       :data-sources (dissoc (:data-sources db) id)
-      :data-sources-list (disj (:data-sources-list db) id))))
+      :data-sources-list (disj (:data-sources-list db) id)
+      :drag-items (remove-drag-item db id))))
 
 
 
@@ -110,8 +126,11 @@
   @re-frame.db/app-db
 
   (register-data-source
-    :generic-source
+    "generic-source"
     widget-workshop.server.generic-data-source/get-data)
+
+
+
   (register-data-source :really-big-source #())
   (unregister-data-source :generic-source)
   (unregister-data-source :really-big-source)

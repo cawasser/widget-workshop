@@ -1,7 +1,7 @@
 (ns widget-workshop.handlers.initialization
   (:require
     [re-frame.core :as rf]
-    [cljs-uuid-utils.core :as uuid]))
+    [widget-workshop.util.uuid :refer [aUUID]]))
 
 
 
@@ -10,14 +10,54 @@
 
   (fn [db _]
     (assoc db
+
       :data-sources {}
+      ; map of the data-sources, with id mapped to the function
+      ;
+      ; used to generate the most up-to-date data
+
       :data-sources-list []
+      ; list of :data-sources id's. should always contain the same uuids as
+      ; :data-sources
+      ;
+      ; used to create the UI for dragging,
+
       :subscriptions #{}
+      ;
+      ;
+
       :filters {}
+      ; map of UUIDs to uniquely identify a draggable item, each mapped to {:id} which
+      ; provides human-readable naming for the item
+      ;
+      ; used to create each draggable in the UI (sidebar or widgets)
+
       :data {}
-      :blank-widget (uuid/uuid-string (uuid/make-random-uuid))
+      ;
+      ;
+
+      :blank-widget (aUUID)
+      ; UUID for a 'blank' widget, show at the bottom of the widgets panel UI
+      ;
+      ; used to denote the 'special' widget for 'widget creation', this uuid will
+      ; be migrated into :data-sources and :data-sources-list when promted to a
+      ; 'real' widget upon first drop event
+
       :widgets []
-      :widget-layout {})))
+      ; uuids for 'real' widgets
+      ;
+      ; used to generate the widgets in the widget panel UI
+
+      :widget-layout {}
+      ;
+      ;
+
+      :drag-items {})))
+      ; map of uuids to {:id <uuid> :name <name>} for each draggble, so they are uniquely identified
+      ; throughout the entire app
+      ;
+      ; use to identify draggable items for use in the UI, as well as any data needed for
+      ; UI presentation (id, color, etc.)
 
 
 
@@ -61,6 +101,11 @@
   (fn [db _]
     (:data-sources-list db)))
 
+(rf/reg-sub
+  :drag-items
+  (fn [db [_ source]]
+    (map #(get-in db [:drag-items %]) (get db source))))
+
 
 (rf/reg-sub
   :subscriptions
@@ -71,6 +116,17 @@
   :filters
   (fn [db [_ id]]
     (get-in db [:filters id])))
+
+(rf/reg-sub
+  :filter-drag-items
+  (fn [db [_ id]]
+    (if-let [filters (get-in db [:filters id])]
+      (do
+        (prn "found filters " filters)
+        (->> filters
+          (map #(get-in db [:drag-items %])))))))
+          ;(map (juxt :id :name)))))))
+
 
 (rf/reg-sub
   :data
@@ -130,6 +186,7 @@
 
 
 ; re-arranging the data-sources collection
+;
 (comment
   (defonce db {:data-sources [:basic-data :intermediate-data :three]})
   (def ddb (:data-sources db))
@@ -169,7 +226,36 @@
   (rf/dispatch [:arrange-list :data-sources 2 0])
 
 
-  @re-frame.db/app-db
+  (def db @re-frame.db/app-db)
+
+
+
+  (rf/dispatch [:add-source :generic-source #()])
+  @(rf/subscribe [:drag-items :data-sources-list])
+
+  (def id)
+
+  (map #(get-in db [:drag-items %]) (get-in db [:filters id]))
+  @(rf/subscribe [:filter-drag-items id])
+
+  ())
+
+
+; getting the id from the filter uuid
+;
+(comment
+  (def id "55a1f781-3ae8-422d-b930-b083438b7644")
+  (def db @re-frame.db/app-db)
+  (def blank (:blank-widget db))
+
+
+  (if-let [filters (get-in db [:filters id])]
+    (do
+      (prn "found filters " filters)
+      (->> filters
+        (map #(get-in db [:drag-items %])))))
+        ;(map (juxt :id :name)))))
+
 
 
 
