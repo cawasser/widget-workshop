@@ -59,11 +59,11 @@
   (if-let [f (some-> filter-text not-empty .toLowerCase)]
     (into #{}
       ;(map keyword
-        (filter #(-> %
-                   .toLowerCase
-                   (.indexOf f)
-                   (not= -1))
-          alist))
+      (filter #(-> %
+                 .toLowerCase
+                 (.indexOf f)
+                 (not= -1))
+        alist))
     alist))
 
 
@@ -83,19 +83,19 @@
                (js->clj (.-draggableProps provided))
                (js->clj (.-dragHandleProps provided)))
 
-        [:p {:key   id
-             :index index
-             :style {:border           "1px solid lightgray"
-                     :border-radius    "5px"
-                     :padding          "8px"
-                     :padding-left     "3px"
-                     :padding-right    "3px"
-                     :margin-bottom    "8px"
-                     :max-width        "220px"
-                     :color            "white"
-                     :background-color (if (.-isDraggingOver snapshot)
-                                         "green"
-                                         "mediumblue")}}
+        [:p.is-6 {:key   id
+                  :index index
+                  :style {:border           "1px solid lightgray"
+                          :border-radius    "5px"
+                          :padding          "8px"
+                          :padding-left     "3px"
+                          :padding-right    "3px"
+                          :margin-bottom    "8px"
+                          :max-width        "220px"
+                          :color            "white"
+                          :background-color (if (.-isDraggingOver snapshot)
+                                              "green"
+                                              "mediumblue")}}
          name]]))])
 
 
@@ -160,18 +160,20 @@
        [sources-panel
         ;(fuzzy-filter @the-filter
         ;  (map (comp name :id)
-            @(rf/subscribe [:drag-items :data-sources-list])]])))
+        @(rf/subscribe [:drag-items :data-sources-list])]])))
 
 
 (defn widget [id]
   (prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
-  [:div {:style {:border           "solid"
-                 :border-width     "1px"
-                 :height           "200px"
+  [:div {:style {:border       "solid"
+                 :border-width "1px"
+                 :height       "200px"}}
+
+   [:h3 {:style {:height "34px"
                  :background-color (if (= id @(rf/subscribe [:blank-widget]))
-                                     "mediumgray"
+                                     "darkgray"
                                      "tomato")}}
-   [:h5 id]
+    id]
    [:> Droppable {:droppable-id id :type "droppable" :direction "horizontal"}
     (fn [provided snapshot]
       (r/as-element
@@ -180,10 +182,10 @@
 
 (defn widget-panel []
   [:div
-   [:h2 "Widgets"
-    (for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
-      ^{:key idx} [widget id])
-    [widget @(rf/subscribe [:blank-widget])]]])
+   [:h2 "Widgets"]
+   (for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
+     ^{:key idx} [widget id])
+   [widget @(rf/subscribe [:blank-widget])]])
 
 
 
@@ -225,12 +227,12 @@
 
   (into #{}
     ;(map keyword
-      (fuzzy-filter "" (map name @(rf/subscribe [:data-sources]))))
+    (fuzzy-filter "" (map name @(rf/subscribe [:data-sources]))))
 
   (into #{}
     ;(map keyword
-      (fuzzy-filter "me"
-        (map name @(rf/subscribe [:data-sources]))))
+    (fuzzy-filter "me"
+      (map name @(rf/subscribe [:data-sources]))))
 
   (if-let [filter-text (some-> filter-text not-empty .toLowerCase)]
     (filter #(-> %
@@ -312,9 +314,9 @@
     [id name])
 
   (for [[idx {:keys [id name] :as orig}]]
-      (map-indexed vector
-        @(rf/subscribe [:filter-drag-items
-                        "e4703951-39e9-4064-ab3c-4e83d1c3787b"]))
+    (map-indexed vector
+      @(rf/subscribe [:filter-drag-items
+                      "e4703951-39e9-4064-ab3c-4e83d1c3787b"]))
     [id name])
 
   ())
