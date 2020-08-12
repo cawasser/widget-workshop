@@ -1,7 +1,8 @@
 (ns widget-workshop.handlers.initialization
   (:require
     [re-frame.core :as rf]
-    [widget-workshop.util.uuid :refer [aUUID]]))
+    [widget-workshop.util.uuid :refer [aUUID]]
+    [widget-workshop.util.vectors :refer [disjoin]]))
 
 
 
@@ -82,6 +83,11 @@
     (assoc-in db [:data source-name] source-data)))
 
 
+(rf/reg-event-db
+  :remove-widget
+  (fn [db [_ id]]
+    (prn "removing widget " id)
+    (assoc db :widgets (disjoin (:widgets db) id))))
 
 
 
@@ -259,3 +265,5 @@
 
 
   ())
+
+

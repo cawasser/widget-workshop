@@ -1,6 +1,7 @@
 (ns widget-workshop.handlers.dynamic-subscriptions
   (:require [re-frame.core :as rf]
-            [widget-workshop.util.uuid :refer [aUUID]]))
+            [widget-workshop.util.uuid :refer [aUUID]]
+            [widget-workshop.util.vectors :refer [splice]]))
 
 
 
@@ -25,13 +26,6 @@
         (vector :drag-items)
         (get-in db)))))
 
-
-
-(defn splice [coll at d & n]
-  (let [[a b] (split-at at coll)
-        c (drop d b)
-        x (if n (concat a n c) (concat a c))]
-    (into [] x)))
 
 
 (defn- new-widget

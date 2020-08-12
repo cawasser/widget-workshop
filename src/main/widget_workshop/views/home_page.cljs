@@ -40,21 +40,33 @@
   (prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
   [:div {:style {:border       "solid"
                  :border-width "1px"
-                 :height       "200px"}}
+                 :height       "auto"
+                 :width        "500px"}}
+   [:div.container.level
+    [:div.level-left.has-text-left
+     [:h3 {:style {:height           "30px"
+                   :background-color (if (= id @(rf/subscribe [:blank-widget]))
+                                       "darkgray"
+                                       "tomato")}}
+      id]
 
-   [:h3 {:style {:height "34px"
-                 :background-color (if (= id @(rf/subscribe [:blank-widget]))
-                                     "darkgray"
-                                     "tomato")}}
-    id]
-   [:> Droppable {:droppable-id id :type "droppable" :direction "horizontal"}
-    (fn [provided snapshot]
-      (r/as-element
-        [d/draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))]])
+     [:div.level-right.has-text-centered
+      [:button.delete.is-large {:style {:margin-right  "10px"}
+                                :on-click      #(do
+                                                  (prn "delete button " id)
+                                                  (rf/dispatch [:remove-widget id])
+                                                  (.stopPropagation %))}]]]]
+   [:div {:style {:border       "solid"
+                   :border-width "1px"
+                   :height       "200px"}}
+     [:> Droppable {:droppable-id id :type "droppable" :direction "horizontal"}
+      (fn [provided snapshot]
+        (r/as-element
+          [d/draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))]]])
 
 
 (defn widget-panel []
-  [:div
+  [:div {:style {:height "auto"}}
    [:h2 "Widgets"]
    (for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
      ^{:key idx} [widget id])
