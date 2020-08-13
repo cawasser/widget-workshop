@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
-            [widget-workshop.handlers.dynamic-subscriptions]))
+            [widget-workshop.handlers.dynamic-subscriptions]
+            [widget-workshop.handlers.scenarios :as s]))
 
 
 ; Drag & Drop code mimics:
@@ -29,10 +30,7 @@
   - source: (map) showing where (source and index within) the draggable 'came from'
   - destination: (map) showing where (destination and index within) the draggable is 'going to'
   - reason: UNUSED
-  - event: the entire (raw) event
-
-  (will) use core.match to determine the appropriate event to dispatch
-  "
+  - event: the entire (raw) event"
 
   [{:keys [draggableId type source destination reason] :as event}]
 
@@ -45,6 +43,28 @@
       (rf/dispatch-sync [:handle-drop-event
                          (:droppableId source) (:index source)
                          (:droppableId destination) (:index destination)]))))
+
+
+
+(defn on-drag-update
+  "handle the 'drag-update' events
+
+  - draggableId: what item is being dragged?
+  - type: UNUSED
+  - source: (map) showing where (source and index within) the draggable 'came from'
+  - destination: (map) showing where (destination and index within) the draggable is 'going to'
+  - reason: UNUSED
+  - event: the entire (raw) event"
+
+  [{:keys [draggableId type source destination reason] :as event}]
+
+  (if destination
+    (condp = (s/scenario? (:droppableId source) (:droppableId destination))
+      :default ())))
+
+
+
+
 
 
 

@@ -2,6 +2,7 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [widget-workshop.views.dnd.components :as d]
+            [widget-workshop.views.dnd.new-widget :refer [new-widget-id]]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.handlers.dynamic-subscriptions]))
 
@@ -69,7 +70,7 @@
    [:h2 "Widgets"]
    (for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
      ^{:key idx} [widget id true])
-   [widget @(rf/subscribe [:blank-widget]) false]])
+   [widget new-widget-id false]])
 
 
 
@@ -77,7 +78,7 @@
 (defn home-page []
   [:> DragDropContext
    {:onDragStart  #()
-    :onDragUpdate #()
+    :onDragUpdate #();d/on-drag-update (js->clj % :keywordize-keys true)
     :onDragEnd    #(d/on-drag-end (js->clj % :keywordize-keys true))}
    [:section.section>div.container>div.content
     [:div.columns

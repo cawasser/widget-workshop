@@ -70,15 +70,13 @@
   2) create a new guid for a new 'blank' and place into the :blank-widget key"
   [db from from-idx to to-idx]
 
-  (let [new-blank-widget (aUUID)
-        current-blank    (:blank-widget db)
-        name             (get-source-item-name db from-idx)
-        new-uuid         (aUUID)]
+  (let [new-widget (aUUID)
+        name       (get-source-item-name db from-idx)
+        new-uuid   (aUUID)]
     ;(prn "new-widget " from from-idx new-uuid name current-blank new-blank-widget)
-    (assoc db :widgets (conj (:widgets db) to)
-              :filters (assoc (:filters db) to [new-uuid])
-              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name})
-              :blank-widget new-blank-widget)))
+    (assoc db :widgets (conj (:widgets db) new-widget)
+              :filters (assoc (:filters db) new-widget [new-uuid])
+              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
 
 
 
@@ -119,15 +117,13 @@
 
   [db from from-idx to to-idx]
 
-  (let [new-blank-widget (aUUID)
-        current-blank    (:blank-widget db)
+  (let [new-widget (aUUID)
         {:keys [id name]} (get-source-filtered-item db from from-idx)
-        new-uuid         (aUUID)]
+        new-uuid   (aUUID)]
     ;(prn "connect-to-new-widget " from from-idx new-uuid name current-blank new-blank-widget)
-    (assoc db :widgets (conj (:widgets db) to)
-              :filters (assoc (:filters db) to [new-uuid])
-              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name})
-              :blank-widget new-blank-widget)))
+    (assoc db :widgets (conj (:widgets db) new-widget)
+              :filters (assoc (:filters db) new-widget [new-uuid])
+              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
 
 
 
@@ -160,9 +156,9 @@
 
   [db from from-idx to to-idx]
 
-  ;(prn "-handle-drop-event " from to (:blank-widget db))
+  ;(prn "-handle-drop-event " from to widget-workshop.views.dnd.components/new-widget db))
 
-  (condp = (s/scenario? db from to)
+  (condp = (s/scenario? from to)
     ; can't reorder the sources list
     :do-nothing db
 
@@ -216,13 +212,12 @@
 
   (and
     (= from "data-sources-list")
-    (= to (:blank-widget @re-frame.db/app-db)))
+    (= to widget-workshop.views.dnd.components/new-widget))
 
 
   (def db @re-frame.db/app-db)
   (assoc db :widgets (conj (:widgets db) to)
-            :filters (assoc (:filters db) to [item])
-            :blank-widget new-blank-widget)
+            :filters (assoc (:filters db) to [item]))
 
 
 

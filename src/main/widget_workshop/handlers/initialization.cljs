@@ -37,13 +37,6 @@
       ;
       ;
 
-      :blank-widget (aUUID)
-      ; UUID for a 'blank' widget, show at the bottom of the widgets panel UI
-      ;
-      ; used to denote the 'special' widget for 'widget creation', this uuid will
-      ; be migrated into :data-sources and :data-sources-list when promted to a
-      ; 'real' widget upon first drop event
-
       :widgets []
       ; uuids for 'real' widgets
       ;
@@ -158,11 +151,6 @@
     (:widgets db)))
 
 (rf/reg-sub
-  :blank-widget
-  (fn [db _]
-    (:blank-widget db)))
-
-(rf/reg-sub
   :widget-layout
   (fn [db _]
     (:widget-layout db)))
@@ -269,7 +257,7 @@
 (comment
   (def id "55a1f781-3ae8-422d-b930-b083438b7644")
   (def db @re-frame.db/app-db)
-  (def blank (:blank-widget db))
+  (def blank widget-workshop.views.dnd.components/new-widget)
 
 
   (if-let [filters (get-in db [:filters id])]
