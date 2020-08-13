@@ -36,28 +36,25 @@
         @(rf/subscribe [:drag-items :data-sources-list])]])))
 
 
-(defn- title-bar [id]
+(defn- title-bar [id can-delete]
   [:div.container.level
    [:div.level-left.has-text-left
     [:h3 {:style {:height           "30px"
-                  :background-color (if (= id @(rf/subscribe [:blank-widget]))
-                                      "darkgray"
-                                      "tomato")}}
-     id]
-
-    [:div.level-right.has-text-centered
-     [:button.delete.is-large {:style {:margin-right  "10px"}
-                               :on-click      #(do
-                                                 ;(prn "delete button " id)
-                                                 (rf/dispatch [:remove-widget id])
-                                                 (.stopPropagation %))}]]]])
-(defn widget [id]
+                  :background-color (if can-delete "tomato" "darkgray")}} id]
+    (if can-delete
+      [:div.level-right.has-text-centered
+       [:button.delete.is-large {:style {:margin-right  "10px"}
+                                 :on-click      #(do
+                                                   ;(prn "delete button " id)
+                                                   (rf/dispatch [:remove-widget id])
+                                                   (.stopPropagation %))}]])]])
+(defn widget [id can-delete]
   ;(prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
   [:div {:style {:border       "solid"
                  :border-width "1px"
                  :height       "auto"
                  :width        "500px"}}
-   [title-bar id]
+   [title-bar id can-delete]
    [:div {:style {:border       "solid"
                    :border-width "1px"
                    :height       "200px"}}
@@ -71,8 +68,8 @@
   [:div {:style {:height "auto"}}
    [:h2 "Widgets"]
    (for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
-     ^{:key idx} [widget id])
-   [widget @(rf/subscribe [:blank-widget])]])
+     ^{:key idx} [widget id true])
+   [widget @(rf/subscribe [:blank-widget]) false]])
 
 
 

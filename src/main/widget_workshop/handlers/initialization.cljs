@@ -108,8 +108,15 @@
     (:data-sources-list db)))
 
 (rf/reg-sub
+  :all-drag-items
+  (fn [db _]
+    ;(prn "all-drag-items " (:drag-items db))
+    (:drag-items db)))
+
+(rf/reg-sub
   :drag-items
   (fn [db [_ source]]
+    ;(prn "drag-items " source)
     (map #(get-in db [:drag-items %]) (get db source))))
 
 
@@ -121,16 +128,22 @@
 (rf/reg-sub
   :filters
   (fn [db [_ id]]
+    ;(prn "filters " id "//" (get-in db [:filters id]))
     (get-in db [:filters id])))
 
 (rf/reg-sub
   :filter-drag-items
-  (fn [db [_ id]]
-    (if-let [filters (get-in db [:filters id])]
-      (do
-        ;(prn "found filters " filters)
-        (->> filters
-          (map #(get-in db [:drag-items %])))))))
+
+  (fn [[_ id]]
+    [(rf/subscribe [:filters id]) (rf/subscribe [:all-drag-items])])
+
+  (fn [[filters drag-items]]
+    (if filters
+      (let [ret (map #(get drag-items %) filters)]
+        ;(prn "found filters " filters "//" drag-items "//" ret)
+        ret)
+
+      [])))
 
 
 (rf/reg-sub
@@ -168,6 +181,7 @@
 
   (rf/dispatch-sync [:initialize])
 
+
   (rf/dispatch [:subscribe :basic-data])
   (rf/dispatch [:unsubscribe :basic-data])
 
@@ -190,6 +204,8 @@
   ())
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
 ; re-arranging the data-sources collection
 ;
 (comment
@@ -246,6 +262,8 @@
   ())
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
 ; getting the id from the filter uuid
 ;
 (comment
@@ -267,3 +285,19 @@
   ())
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; getting the drag-items for a given widget's filter
+;
+(comment
+
+  @re-frame.db/app-db
+
+  (def filters
+    @(rf/subscribe [:filters
+                    "b89aaa52-e4db-43f6-aedb-8324233d6a5a"]))
+  (def drag-items @(rf/subscribe [:all-drag-items]))
+
+
+  (map #(get drag-items %) filters)
+  ())

@@ -42,9 +42,9 @@
     (if (and (= (:droppableId source) (:droppableId destination))
           (= (:index destination) (:index source)))
       ();prn "nothing to do"
-      (rf/dispatch [:handle-drop-event
-                    (:droppableId source) (:index source)
-                    (:droppableId destination) (:index destination)]))))
+      (rf/dispatch-sync [:handle-drop-event
+                         (:droppableId source) (:index source)
+                         (:droppableId destination) (:index destination)]))))
 
 
 
