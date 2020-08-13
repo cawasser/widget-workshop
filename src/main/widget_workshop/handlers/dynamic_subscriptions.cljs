@@ -1,7 +1,8 @@
 (ns widget-workshop.handlers.dynamic-subscriptions
   (:require [re-frame.core :as rf]
             [widget-workshop.util.uuid :refer [aUUID]]
-            [widget-workshop.util.vectors :refer [splice reorder]]))
+            [widget-workshop.util.vectors :refer [splice reorder]]
+            [widget-workshop.handlers.scenarios :as s]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -73,7 +74,7 @@
         current-blank    (:blank-widget db)
         name             (get-source-item-name db from-idx)
         new-uuid         (aUUID)]
-    ;(prn "new-widget " from from-idx new-uuid name current-blank new-blank-widget)
+    (prn "new-widget " from from-idx new-uuid name current-blank new-blank-widget)
     (assoc db :widgets (conj (:widgets db) to)
               :filters (assoc (:filters db) to [new-uuid])
               :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name})
@@ -161,40 +162,28 @@
 
   ;(prn "-handle-drop-event " from to (:blank-widget db))
 
-  (cond
+  (prn "scenario? " (s/scenario? db from to))
+  (condp = (s/scenario? db from to)
     ; can't reorder the sources list
-    (= from to "data-sources-list") (do                     ;(prn ">>>>> do nothing")
-                                      db)
+    :do-nothing db
 
     ; reorder the 'filters' on a widget
-    (and
-      (not= from "data-sources-list")
-      (not= to (:blank-widget db))
-      (= from to)) (reorder-widget-filters db from from-idx to-idx)
+    :reorder-filters (reorder-widget-filters db from from-idx to-idx)
 
     ; dropping from the sources onto a new widget
-    (and
-      (= from "data-sources-list")
-      (= to (:blank-widget db))) (new-widget db (keyword from) from-idx to to-idx)
+    :new-widget-from-source (new-widget db (keyword from) from-idx to to-idx)
 
     ; drop from an existing widget onto the 'new' widget
-    (and
-      (not= from "data-sources-list")
-      (= to (:blank-widget db))) (connect-to-new-widget db from from-idx to to-idx)
+    :new-widget-from-widget (connect-to-new-widget db from from-idx to to-idx)
 
     ; drop from one widget to another
-    (and
-      (not= from "data-sources-list")
-      (not= to (:blank-widget db))) (connect-widgets db from from-idx to to-idx)
+    :connect-widgets (connect-widgets db from from-idx to to-idx)
 
     ; drop new sources onto a widget (not a new widget)
-    (and
-      (= from "data-sources-list")
-      (not= to (:blank-widget db))) (add-to-widget db (keyword from) from-idx to to-idx)
+    :add-source-to-widget (add-to-widget db (keyword from) from-idx to to-idx)
 
     ; can't do anything else
-    :default (do                                            ;(prn ">>>>>>> default")
-               db)))
+    :default db))
 
 
 
