@@ -74,7 +74,7 @@
         current-blank    (:blank-widget db)
         name             (get-source-item-name db from-idx)
         new-uuid         (aUUID)]
-    (prn "new-widget " from from-idx new-uuid name current-blank new-blank-widget)
+    ;(prn "new-widget " from from-idx new-uuid name current-blank new-blank-widget)
     (assoc db :widgets (conj (:widgets db) to)
               :filters (assoc (:filters db) to [new-uuid])
               :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name})
@@ -162,7 +162,6 @@
 
   ;(prn "-handle-drop-event " from to (:blank-widget db))
 
-  (prn "scenario? " (s/scenario? db from to))
   (condp = (s/scenario? db from to)
     ; can't reorder the sources list
     :do-nothing db
