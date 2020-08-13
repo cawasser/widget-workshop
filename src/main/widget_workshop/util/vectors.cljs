@@ -2,7 +2,20 @@
 
 
 
-(defn splice [coll at d & n]
+(defn splice
+  "mimics the JS 'splice' function
+
+  can be used to remove 'd' items and add 'n' items for the given coll(ection) 'at'
+  that given location
+
+  eg.
+
+  (def v [1 2 3 4]) => 'v'
+  (splice v 2 1 :a) => [1 2 :a 4]
+
+  "
+
+  [coll at d & n]
   (let [[a b] (split-at at coll)
         c (drop d b)
         x (if n (concat a n c) (concat a c))]
@@ -10,7 +23,7 @@
 
 
 (defn reorder [coll from to]
-  (prn "reorder " coll from to)
+  ;(prn "reorder " coll from to)
   (let [item (nth coll from)
         a (splice coll from 1)
         b (splice a to 0 item)]
@@ -33,6 +46,9 @@
 
   (disjoin v "2")
 
+
+  (def v [1 2 3 4])
+  (splice v 2 1 :a)
 
   ())
 

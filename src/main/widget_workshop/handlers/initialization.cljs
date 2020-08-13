@@ -65,7 +65,7 @@
 (rf/reg-event-db
   :subscribe
   (fn [db [_ source-name]]
-    (prn source-name)
+    ;(prn source-name)
     (if (contains? (:data-sources db) source-name)
       (assoc db :subscriptions (conj (:subscriptions db) source-name))
       db)))
@@ -86,7 +86,7 @@
 (rf/reg-event-db
   :remove-widget
   (fn [db [_ id]]
-    (prn "removing widget " id)
+    ;(prn "removing widget " id)
     (assoc db :widgets (disjoin (:widgets db) id))))
 
 
@@ -128,7 +128,7 @@
   (fn [db [_ id]]
     (if-let [filters (get-in db [:filters id])]
       (do
-        (prn "found filters " filters)
+        ;(prn "found filters " filters)
         (->> filters
           (map #(get-in db [:drag-items %])))))))
 
@@ -256,7 +256,7 @@
 
   (if-let [filters (get-in db [:filters id])]
     (do
-      (prn "found filters " filters)
+      ;(prn "found filters " filters)
       (->> filters
         (map #(get-in db [:drag-items %])))))
         ;(map (juxt :id :name)))))

@@ -36,26 +36,28 @@
         @(rf/subscribe [:drag-items :data-sources-list])]])))
 
 
+(defn- title-bar [id]
+  [:div.container.level
+   [:div.level-left.has-text-left
+    [:h3 {:style {:height           "30px"
+                  :background-color (if (= id @(rf/subscribe [:blank-widget]))
+                                      "darkgray"
+                                      "tomato")}}
+     id]
+
+    [:div.level-right.has-text-centered
+     [:button.delete.is-large {:style {:margin-right  "10px"}
+                               :on-click      #(do
+                                                 ;(prn "delete button " id)
+                                                 (rf/dispatch [:remove-widget id])
+                                                 (.stopPropagation %))}]]]])
 (defn widget [id]
-  (prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
+  ;(prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
   [:div {:style {:border       "solid"
                  :border-width "1px"
                  :height       "auto"
                  :width        "500px"}}
-   [:div.container.level
-    [:div.level-left.has-text-left
-     [:h3 {:style {:height           "30px"
-                   :background-color (if (= id @(rf/subscribe [:blank-widget]))
-                                       "darkgray"
-                                       "tomato")}}
-      id]
-
-     [:div.level-right.has-text-centered
-      [:button.delete.is-large {:style {:margin-right  "10px"}
-                                :on-click      #(do
-                                                  (prn "delete button " id)
-                                                  (rf/dispatch [:remove-widget id])
-                                                  (.stopPropagation %))}]]]]
+   [title-bar id]
    [:div {:style {:border       "solid"
                    :border-width "1px"
                    :height       "200px"}}

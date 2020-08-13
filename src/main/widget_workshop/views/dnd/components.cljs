@@ -36,12 +36,12 @@
 
   [{:keys [draggableId type source destination reason] :as event}]
 
-  (prn "on-drag-end " event (keyword (:droppableId source)) (keyword (:droppableId destination)))
+  ;(prn "on-drag-end " event (keyword (:droppableId source)) (keyword (:droppableId destination)))
 
   (if destination
     (if (and (= (:droppableId source) (:droppableId destination))
           (= (:index destination) (:index source)))
-      (prn "nothing to do")
+      ();prn "nothing to do"
       (rf/dispatch [:handle-drop-event
                     (:droppableId source) (:index source)
                     (:droppableId destination) (:index destination)]))))
@@ -77,6 +77,7 @@
 (defn drag-item
   ([id name index]
    (drag-item id name index "black" "white"))
+
   ([id name index bg-color txt-color]
    [:> Draggable {:key id :draggable-id id :index index}
     (fn [provided snapshot]
@@ -111,7 +112,7 @@
                           :min-height       "30px"
                           :margin           "1px"}}
             (js->clj (.-droppableProps provided)))
-     (prn "draggable-item-vlist " data)
+     ;(prn "draggable-item-vlist " data)
      (for [[index {:keys [id name]}] (map-indexed vector data)]
        (drag-item id name index "mediumblue" "white"))
      (.-placeholder provided)]))
@@ -132,7 +133,7 @@
                           :justify-contents :middle
                           :align-items      :center}}
             (js->clj (.-droppableProps provided)))
-     (prn "draggable-item-hlist " data)
+     ;(prn "draggable-item-hlist " data)
      (for [[index {:keys [id name]}] (map-indexed vector data)]
        (drag-item id name index))
      (.-placeholder provided)]))
