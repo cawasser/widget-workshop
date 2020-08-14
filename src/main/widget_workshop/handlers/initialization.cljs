@@ -127,6 +127,11 @@
 (rf/reg-sub
   :filter-drag-items
 
+
+  ; this subscription depends on 2 other subscriptopns:
+  ;  1) filters for the given widget, if this changes we need to re-fire
+  ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
+  ;         we may need ot re-fire
   (fn [[_ id]]
     [(rf/subscribe [:filters id]) (rf/subscribe [:all-drag-items])])
 

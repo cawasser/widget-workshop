@@ -2,8 +2,14 @@
   (:require [widget-workshop.views.dnd.new-widget :refer [new-widget-id]]))
 
 
+(def drop-scenario-values [:do-nothing                      ; default
+                           :add-source-to-widget
+                           :connect-widgets
+                           :new-widget-from-source
+                           :new-widget-from-widget
+                           :reorder-filters])
 
-(defn scenario?
+(defn drop-scenario?
   "examines the drag and drop scenario and returns a keyword
   that describes the user's intent"
 

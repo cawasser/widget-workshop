@@ -39,29 +39,10 @@
   (if destination
     (if (and (= (:droppableId source) (:droppableId destination))
           (= (:index destination) (:index source)))
-      ();prn "nothing to do"
+      ()                                                    ;prn "nothing to do"
       (rf/dispatch-sync [:handle-drop-event
                          (:droppableId source) (:index source)
                          (:droppableId destination) (:index destination)]))))
-
-
-
-(defn on-drag-update
-  "handle the 'drag-update' events
-
-  - draggableId: what item is being dragged?
-  - type: UNUSED
-  - source: (map) showing where (source and index within) the draggable 'came from'
-  - destination: (map) showing where (destination and index within) the draggable is 'going to'
-  - reason: UNUSED
-  - event: the entire (raw) event"
-
-  [{:keys [draggableId type source destination reason] :as event}]
-
-  (if destination
-    (condp = (s/scenario? (:droppableId source) (:droppableId destination))
-      :default ())))
-
 
 
 

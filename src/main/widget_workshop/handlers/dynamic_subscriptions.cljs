@@ -158,7 +158,7 @@
 
   ;(prn "-handle-drop-event " from to widget-workshop.views.dnd.components/new-widget db))
 
-  (condp = (s/scenario? from to)
+  (condp = (s/drop-scenario? from to)
     ; can't reorder the sources list
     :do-nothing db
 

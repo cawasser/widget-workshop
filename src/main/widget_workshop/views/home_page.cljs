@@ -11,7 +11,9 @@
 
 
 (defn sources-panel [content]
-  [:> Droppable {:droppable-id "data-sources-list" :type "droppable"}
+  [:> Droppable {:droppable-id   "data-sources-list"
+                 :isDropDisabled true                       ; can't drop anything onto the source list
+                 :type           "droppable"}
    (fn [provided snapshot]
      (r/as-element
        [d/draggable-item-vlist provided snapshot content]))])
@@ -44,11 +46,11 @@
                   :background-color (if can-delete "tomato" "darkgray")}} id]
     (if can-delete
       [:div.level-right.has-text-centered
-       [:button.delete.is-large {:style {:margin-right  "10px"}
-                                 :on-click      #(do
-                                                   ;(prn "delete button " id)
-                                                   (rf/dispatch [:remove-widget id])
-                                                   (.stopPropagation %))}]])]])
+       [:button.delete.is-large {:style    {:margin-right "10px"}
+                                 :on-click #(do
+                                              ;(prn "delete button " id)
+                                              (rf/dispatch [:remove-widget id])
+                                              (.stopPropagation %))}]])]])
 (defn widget [id can-delete]
   ;(prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
   [:div {:style {:border       "solid"
@@ -57,12 +59,13 @@
                  :width        "500px"}}
    [title-bar id can-delete]
    [:div {:style {:border       "solid"
-                   :border-width "1px"
-                   :height       "200px"}}
-     [:> Droppable {:droppable-id id :type "droppable" :direction "horizontal"}
-      (fn [provided snapshot]
-        (r/as-element
-          [d/draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))]]])
+                  :border-width "1px"
+                  :height       "200px"}}
+    [:> Droppable {:droppable-id id :type "droppable"
+                   :direction    "horizontal"}
+     (fn [provided snapshot]
+       (r/as-element
+         [d/draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))]]])
 
 
 (defn widget-panel []
@@ -78,7 +81,7 @@
 (defn home-page []
   [:> DragDropContext
    {:onDragStart  #()
-    :onDragUpdate #();d/on-drag-update (js->clj % :keywordize-keys true)
+    :onDragUpdate #()                                       ;d/on-drag-update (js->clj % :keywordize-keys true)
     :onDragEnd    #(d/on-drag-end (js->clj % :keywordize-keys true))}
    [:section.section>div.container>div.content
     [:div.columns
