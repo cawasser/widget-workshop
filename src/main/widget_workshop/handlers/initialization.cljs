@@ -127,14 +127,17 @@
 (rf/reg-sub
   :filter-drag-items
 
-
-  ; this subscription depends on 2 other subscriptopns:
-  ;  1) filters for the given widget, if this changes we need to re-fire
+  ; this subscription depends on 2 other subscriptions:
+  ;
+  ;  1) :filters for the given widget, if this changes (add/remove/reorder) we
+  ;         need to re-fire
   ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
   ;         we may need ot re-fire
   (fn [[_ id]]
     [(rf/subscribe [:filters id]) (rf/subscribe [:all-drag-items])])
 
+  ; now, instead of looking in the db, we look in the results of the 2 prereq
+  ; subscriptions
   (fn [[filters drag-items]]
     (if filters
       (let [ret (map #(get drag-items %) filters)]

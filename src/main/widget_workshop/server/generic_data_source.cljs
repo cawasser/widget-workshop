@@ -1,5 +1,4 @@
-(ns widget-workshop.server.generic-data-source
-  (:require [re-frame.core :as rf]))
+(ns widget-workshop.server.generic-data-source)
 
 
 (defn get-data
