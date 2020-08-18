@@ -83,7 +83,6 @@
 ;
 ; play with transformations
 ;
-
 (comment
   ; by entity
   (group-by :id (get-data))
@@ -130,10 +129,12 @@
   ())
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; some thoughts on an 'information model' for user-defined-data-selection
+;
 (comment
 
-  ; some thoughts on an 'information model' for user-defined-data-selection
-  ;
   ;     [:select (nee query/filter) [<fn> OR? <keywords>]
   ;          - how sophisticated do we make this?
   ;
@@ -175,6 +176,10 @@
     (map #(zipmap [:datetime :id :param-2] %))
     (group-by :id))
 
+
+
+
+
   (def pipeline2 [[:extract [:datetime :id :param-2]]
                   [:group-by [:id]]])
   (->> (get-data)
@@ -192,25 +197,30 @@
   ;
   ; FYI, looks like multi-methods are a good approach for some of this
 
+
+
+
   ; so, how can we compose our thread-last? remember, ->> is a MACRO!
   ;
   ; loop/recur?
   ;
-  (defn- process [dsl-step data]
-    (prn dsl-step)
+
+  (defn- process [[cmd params] data]
+    (prn {:cmd cmd :params params :data data})
     data)
 
-  (first pipeline2)
-  (rest pipeline2)
-  (rest (rest pipeline2))
-  (if (not (rest (rest pipeline2))) true false)
+  (process (first pipeline2) (:data (get-data)))
 
-  (loop [dsl pipeline2
-         result (:data (get-data))]
-    (prn dsl)
-    (if-not pipeline2
-      result
+
+
+  (defn apply-filters [dsl data]
+    (if (empty? dsl)
+      data
       (recur (rest dsl) (process (first dsl) data))))
+
+  (apply-filters pipeline2 (:data (get-data)))
 
 
   ())
+
+
