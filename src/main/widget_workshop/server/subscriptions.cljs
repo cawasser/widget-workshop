@@ -1,6 +1,7 @@
-(ns widget-workshop.server.subscription-manager
+(ns widget-workshop.server.subscriptions
   (:require [re-frame.core :as rf]
-            [widget-workshop.server.generic-data-source]
+            [widget-workshop.server.source.generic-data]
+            [widget-workshop.server.source.config-data]
             [widget-workshop.util.uuid :refer [aUUID]]))
 
 
@@ -11,7 +12,7 @@
   "removes a drag item of the given id form the :drag-items key
 
   we need this function because the :drag-items content is actualy keys by a UUID
-  which is then associated wiht the id as it's value"
+  which is then associated with the id as it's value"
 
   [id]
 

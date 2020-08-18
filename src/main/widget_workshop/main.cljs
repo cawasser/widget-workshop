@@ -12,7 +12,7 @@
             [widget-workshop.nav-bar :as navbar]
             [widget-workshop.session :refer [session]]
             [widget-workshop.handlers.initialization]
-            [widget-workshop.server.subscription-manager :as sm])
+            [widget-workshop.server.subscriptions :as sm])
 
   (:import goog.History))
 
@@ -66,7 +66,7 @@
   ; register some 'data-sources'
   (sm/register-data-source
     "generic-source"
-    widget-workshop.server.generic-data-source/get-data)
+    widget-workshop.server.source.generic-data/get-data)
   (sm/register-data-source "source-2" #())
   (sm/register-data-source "source-3" #())
   (sm/register-data-source "source-4" #())
