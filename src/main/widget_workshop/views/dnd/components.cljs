@@ -97,7 +97,8 @@
                            :margin-bottom    "8px"
                            :max-width        "220px"
                            :color            txt-color
-                           :background-color bg-color}}
+                           :background-color bg-color}
+                   :on-click #(prn "clicked " name)}
           name]]))]))
 
 
