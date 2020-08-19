@@ -1,4 +1,4 @@
-(ns widget-workshop.server.source.data-soup
+(ns widget-workshop.server.data-soup.data-soup
   (:require [widget-workshop.server.source.util :refer [keyset]]
             [datascript.core :as d]))
 

@@ -1,22 +1,24 @@
-(ns widget-workshop.server.filtering.apply-filters)
+(ns widget-workshop.server.data-soup.apply-filters)
 
 
 (defmulti filter-step
   (fn [[step params] data] step))
 
 
-;     [:select (nee query/filter) [<fn> OR? <keywords>]
+; 'ds'stands for 'data soup'
+
+;     [:ds/select (nee query/filter) [<fn> OR? <keywords>]
 ;          - how sophisticated do we make this?
 ;
-;     [:map <fn>]
-;     [:take <int>]
-;     [:reduce <fn>]
-;     [:first]
-;     [:last]
-;     [:nth n]
-;     [:extract (nee 'map juxt') [<keyword>]]
-;     [:chain (nee 'map comp') [<fn>]]
-;     [:group-by [<keyword>]]
+;     [:ds/map <fn>]
+;     [:ds/take <int>]
+;     [:ds/reduce <fn>]
+;     [:ds/first]
+;     [:ds/last]
+;     [:ds/nth n]
+;     [:ds/extract (nee 'map juxt') [<keyword>]]
+;     [:ds/chain (nee 'map comp') [<fn>]]
+;     [:ds/group-by [<keyword>]]
 
 
 

@@ -1,6 +1,6 @@
 (ns widget-workshop.server.subscriptions
   (:require [re-frame.core :as rf]
-            [widget-workshop.server.source.data-soup]
+            [widget-workshop.server.data-soup.data-soup]
             [widget-workshop.server.source.generic-data]
             [widget-workshop.server.source.config-data]
             [widget-workshop.util.uuid :refer [aUUID]]))
