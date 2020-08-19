@@ -1,5 +1,6 @@
 (ns widget-workshop.server.subscriptions
   (:require [re-frame.core :as rf]
+            [widget-workshop.server.source.data-soup]
             [widget-workshop.server.source.generic-data]
             [widget-workshop.server.source.config-data]
             [widget-workshop.util.uuid :refer [aUUID]]))
@@ -35,6 +36,8 @@
     (let [drag-id (aUUID)]
       (assoc db
         :data-sources (assoc (:data-sources db) id source-fn)
+
+        ; HACK: these next two are only relevant on the UI side
         :data-sources-list (conj (:data-sources-list db) drag-id)
         :drag-items (assoc (:drag-items db) drag-id {:id (aUUID) :name id})))))
 
@@ -43,6 +46,8 @@
   (fn [db [_ id]]
     (assoc db
       :data-sources (dissoc (:data-sources db) id)
+
+      ; HACK: these next two are only relevant on the UI side
       :data-sources-list (disj (:data-sources-list db) id)
       :drag-items (remove-drag-item db id))))
 
@@ -146,5 +151,7 @@
 ;
 ; can we create re-frame subscriptions on the fly?
 ;
-(comment)
+(comment
+
+  ())
 
