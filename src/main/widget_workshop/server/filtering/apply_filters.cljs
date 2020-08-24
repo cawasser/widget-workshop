@@ -1,6 +1,8 @@
 (ns widget-workshop.server.filtering.apply-filters)
 
 
+; TODO: how do we handle the :keys meta-data on the source value?
+
 (defmulti filter-step
   (fn [[step params] data] step))
 
@@ -69,8 +71,9 @@
 (comment
 
   (def pipeline2 [[:extract [:datetime :id :param-2]]
-                  [:group-by [:id]]
-                  [:take 2]])
+                  [:take 2]
+                  [:group-by [:id]]])
+
 
   (filter-step (first pipeline2)
     (:data (widget-workshop.server.source.config-data/get-data)))
@@ -91,5 +94,9 @@
   (apply-filters [[:extract [:datetime :id :param-2]]
                   [:group-by [:id]]]
     (:data (widget-workshop.server.source.config-data/get-data)))
+
+  (apply-filters []
+    (:data (widget-workshop.server.source.config-data/get-data)))
+
 
   ())

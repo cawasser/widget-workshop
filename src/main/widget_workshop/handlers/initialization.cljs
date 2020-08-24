@@ -21,7 +21,16 @@
       ; list of :data-sources id's. should always contain the same uuids as
       ; :data-sources
       ;
-      ; used to create the UI for dragging,
+      ; used to create the UI for dragging
+
+      :filter-source {}
+      ; a map of filters to the dsl used to actually perform the operation
+      ; on a data set
+
+      :filter-list []
+      ; a vector of :filter ids
+      ;
+      ; used to create the UI for dragging filters
 
       :subscriptions #{}
       ;
@@ -109,6 +118,16 @@
   :data-sources-list
   (fn [db _]
     (:data-sources-list db)))
+
+(rf/reg-sub
+  :filter-source
+  (fn [db _]
+    (keys (:filter-source db))))
+
+(rf/reg-sub
+  :filter-list
+  (fn [db _]
+    (:filter-list db)))
 
 (rf/reg-sub
   :all-drag-items
