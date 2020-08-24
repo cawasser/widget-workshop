@@ -17,13 +17,13 @@
   "returns the name (string) to be displayed for a given item in :data-sources
   inside the app-db
 
-  - db   - the app-db for convenience
-  - from-idx - the numeric position of the given item in the :data-sources vector
+  - db  - the app-db for convenience
+  - idx - the numeric position of the given item in the :data-sources vector
 
   returns the name (string) of the item to be displayed in the UI"
 
-  [db from-idx]
-  (->> from-idx
+  [db idx]
+  (->> idx
     (nth (get db :data-sources-list))
     (get (:drag-items db))
     :name))
@@ -40,12 +40,12 @@
 
   returns the map of details about the given dragged item found, keyed by the item's uuid"
 
-  [db from from-idx]
+  [db from idx]
 
   (if-let [filters (get-in db [:filters from])]
     (do
       ;(prn "get-source-filtered-item " filters from-idx)
-      (->> (nth filters from-idx)
+      (->> (nth filters idx)
         (vector :drag-items)
         (get-in db)))))
 
@@ -61,9 +61,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- allow-drop? [db name filters]
-  (prn "allow-drop?" name (map #(-> (get-in db [:drag-items %]) :name)
-                            filters))
+(defn- allow-drop?
+  "disallow dropping the same item into the filters twice
+
+  db - the current db for performance / simplicity
+  name (string) - the name of the item being dropped
+  filters (vector) - vector of filter IDs (uuids) already in the TO widget
+
+  returns
+
+  true - if the 'name' does NOT already exist in the filters list (indirectly)
+  false - if 'name' already exists"
+  [db name filters]
+
   (if (some #{name}
         (map #(-> (get-in db [:drag-items %]) :name)
           filters))
@@ -163,7 +173,7 @@
   - from-idx  - numeric index of the item which was taken from the FROM vector
   - to     - the dnd source the item being dropped ONM, used to look into app-db to find the data structure
              that needs to be modified
-  - to-idx - numeric index of when the user wants the item in the TO vector
+  - to-idx - numeric index of where the user wants the item in the TO vector
 
   returns - an updated app-db via 'modification' to the db parameter"
 
@@ -172,7 +182,7 @@
   ;(prn "-handle-drop-event " from to widget-workshop.views.dnd.components/new-widget db))
 
   (condp = (s/drop-scenario? from to)
-    ; can't reorder the sources list
+    ; nothing to do (eg, can't reorder the sources list)
     :do-nothing db
 
     ; reorder the 'filters' on a widget
@@ -192,8 +202,6 @@
 
     ; can't do anything else
     :default db))
-
-
 
 
 

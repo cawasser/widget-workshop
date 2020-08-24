@@ -76,11 +76,21 @@
     (assoc-in db [:data source-name] source-data)))
 
 
+
+
+(defn- remove-filters [db id]
+  (dissoc (:filters db) id))
+
+(defn- remove-drag-items [db id]
+  (apply dissoc (:drag-items db) (get-in db [:filters id])))
+
 (rf/reg-event-db
   :remove-widget
   (fn [db [_ id]]
     ;(prn "removing widget " id)
-    (assoc db :widgets (disjoin (:widgets db) id))))
+    (assoc db :widgets (disjoin (:widgets db) id)
+              :filters (remove-filters db id)
+              :drag-items (remove-drag-items db id))))
 
 
 
@@ -275,9 +285,6 @@
         (map #(get-in db [:drag-items %])))))
         ;(map (juxt :id :name)))))
 
-
-
-
   ())
 
 
@@ -297,3 +304,27 @@
 
   (map #(get drag-items %) filters)
   ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; remove widget and all associated data (:filters and :drag-items)
+;
+(comment
+
+  (def db @re-frame.db/app-db)
+  (def source "cffbbbc9-6228-4ed4-8eca-4e1b35c5fefe")
+  (:filters db)
+  (get-in db [:filters source])
+
+
+  ; remove filters
+  (dissoc (:filters db) source)
+
+  ; remove drag-items)
+  (apply dissoc (:drag-items db) (get-in db [:filters source]))
+
+
+
+  ())
+
