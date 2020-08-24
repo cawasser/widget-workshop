@@ -61,6 +61,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn- allow-drop? [db name filters]
+  (prn "allow-drop?" name (map #(-> (get-in db [:drag-items %]) :name)
+                            filters))
+  (if (some #{name}
+        (map #(-> (get-in db [:drag-items %]) :name)
+          filters))
+    false
+    true))
+
 
 (defn- new-widget
   "the user wants to create a new widget based upon the soruce item dropped on
@@ -89,9 +98,11 @@
         new-uuid            (aUUID)
         existing-to-filters (get-in db [:filters to])]
     ;(prn "add-to-widget " from from-idx new-uuid name to to-idx)
-    (assoc db :filters (assoc (:filters db)
-                         to (splice existing-to-filters to-idx 0 new-uuid))
-              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
+    (if (allow-drop? db name existing-to-filters)
+      (assoc db :filters (assoc (:filters db)
+                           to (splice existing-to-filters to-idx 0 new-uuid))
+                :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))
+      db)))
 
 
 
@@ -105,9 +116,11 @@
         new-uuid            (aUUID)
         existing-to-filters (get-in db [:filters to])]
     ;(prn "connect-widgets " from from-idx new-uuid name to to-idx)
-    (assoc db :filters (assoc (:filters db)
-                         to (splice existing-to-filters to-idx 0 new-uuid))
-              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
+    (if (allow-drop? db name existing-to-filters)
+      (assoc db :filters (assoc (:filters db)
+                           to (splice existing-to-filters to-idx 0 new-uuid))
+                :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))
+      db)))
 
 
 
@@ -277,5 +290,27 @@
   (def db @re-frame.db/app-db)
 
   (reorder (get-in db [:filters from]) from-idx to-idx)
+
+  ())
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; refuse duplicate filters
+;
+(comment
+  (def db @re-frame.db/app-db)
+  (def to "74e5cf47-a037-4031-ad7a-5fa264ac8c03")
+  (get-in db [:filters to])
+
+  (def existing-to-filters (map #(-> (get-in db [:drag-items %]) :name)
+                             (get-in db [:filters to])))
+
+  (if (some #{"generic-source"}
+        (map #(-> (get-in db [:drag-items %]) :name)
+          (get-in db [:filters to])))
+    true
+    false)
 
   ())
