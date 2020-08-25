@@ -1,56 +1,56 @@
-(ns widget-workshop.server.filtering.apply-filters)
+(ns widget-workshop.server.data-soup.apply-filters)
 
-
-; TODO: how do we handle the :keys meta-data on the source value?
 
 (defmulti filter-step
   (fn [[step params] data] step))
 
 
-;     [:select (nee query/filter) [<fn> OR? <keywords>]
+; 'ds'stands for 'data soup'
+
+;     [:ds/select (nee query/filter) [<fn> OR? <keywords>]
 ;          - how sophisticated do we make this?
 ;
-;     [:map <fn>]
-;     [:take <int>]
-;     [:reduce <fn>]
-;     [:first]
-;     [:last]
-;     [:nth n]
-;     [:extract (nee 'map juxt') [<keyword>]]
-;     [:chain (nee 'map comp') [<fn>]]
-;     [:group-by [<keyword>]]
+;     [:ds/map <fn>]
+;     [:ds/take <int>]
+;     [:ds/reduce <fn>]
+;     [:ds/first]
+;     [:ds/last]
+;     [:ds/nth n]
+;     [:ds/extract (nee 'map juxt') [<keyword>]]
+;     [:ds/pipe (nee 'map comp') [<fn>]]
+;     [:ds/group-by [<keyword>]]
 
 
 
 
-(defmethod filter-step :map [[step params] data]
+(defmethod filter-step :ds/map [[step params] data]
   (map (apply juxt params) data))
 
 
-(defmethod filter-step :take [[step params] data]
+(defmethod filter-step :ds/take [[step params] data]
   (take params data))
 
 
-(defmethod filter-step :first [[step params] data]
+(defmethod filter-step :ds/first [[step params] data]
   (first data))
 
 
-(defmethod filter-step :last [[step params] data]
+(defmethod filter-step :ds/last [[step params] data]
   (last data))
 
 
-(defmethod filter-step :extract [[step params] data]
+(defmethod filter-step :ds/extract [[step params] data]
   (->> data
     (map (apply juxt params))
     (map #(zipmap params %))))
 
 
-(defmethod filter-step :chain [[step params] data]
+(defmethod filter-step :ds/pipe [[step params] data]
   (->> data
     (map (apply comp params))))
 
 
-(defmethod filter-step :group-by [[step params] data]
+(defmethod filter-step :ds/group-by [[step params] data]
   (->> data
     (group-by (apply juxt params))))
 
@@ -70,10 +70,9 @@
 ;
 (comment
 
-  (def pipeline2 [[:extract [:datetime :id :param-2]]
-                  [:take 2]
-                  [:group-by [:id]]])
-
+  (def pipeline2 [[:ds/extract [:datetime :id :param-2]]
+                  [:ds/group-by [:id]]
+                  [:ds/take 2]])
 
   (filter-step (first pipeline2)
     (:data (widget-workshop.server.source.config-data/get-data)))
@@ -88,15 +87,14 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; so now we can develop our multi-methods for all 9 cases (currently)
+; so now we can develop our multi-methods for all 9 (10?) cases (currently)
 ;
 (comment
-  (apply-filters [[:extract [:datetime :id :param-2]]
-                  [:group-by [:id]]]
+  (apply-filters [[:ds/extract [:datetime :id :param-2]]
+                  [:ds/group-by [:id]]]
     (:data (widget-workshop.server.source.config-data/get-data)))
 
   (apply-filters []
     (:data (widget-workshop.server.source.config-data/get-data)))
-
 
   ())

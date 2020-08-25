@@ -1,9 +1,9 @@
 (ns widget-workshop.server.subscriptions
   (:require [re-frame.core :as rf]
-            [widget-workshop.server.source.data-soup]
+            [widget-workshop.server.data-soup.data-soup]
             [widget-workshop.server.source.generic-data]
             [widget-workshop.server.source.config-data]
-            [widget-workshop.server.filtering.apply-filters :as f]
+            [widget-workshop.server.data-soup.apply-filters :as f]
             [widget-workshop.util.uuid :refer [aUUID]]))
 
 
@@ -259,6 +259,14 @@
 ;
 ; can we create re-frame subscriptions on the fly?
 ;
+;   OR
+;
+; should we just do the subscriptions only on the server? see BIFF:
+;
+;   https://youtu.be/oYwhrq8hDFo?t=1879
+;
+;  (update to the model data triggers a function that creates an updated subscription...)
+;F
 (comment
 
   ())

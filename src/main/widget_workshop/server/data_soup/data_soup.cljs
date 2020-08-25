@@ -1,4 +1,4 @@
-(ns widget-workshop.server.source.data-soup
+(ns widget-workshop.server.data-soup.data-soup
   (:require [widget-workshop.server.source.util :refer [keyset]]
             [datascript.core :as d]))
 
@@ -30,12 +30,14 @@
 ;
 ;  3) how do we implement the 'filtering sync' mechanism between UI components?
 ;
-;  4) security?
+;  4) security? (see BIFF: https://youtu.be/oYwhrq8hDFo?t=2001)
 ;
 
 
 (def schema {})
 (def conn (d/create-conn schema))
+(def ?e (symbol "?e"))
+(def $ (symbol "$"))
 
 
 (defn- symbolize [k] (symbol (str "?" (name k))))
@@ -45,7 +47,7 @@
 
   Assumes the entity will be boudn to '?e'"
   [k]
-  [(symbol "?e") k (symbolize k)])
+  [?e k (symbolize k)])
 
 
 (defn make-binding
@@ -54,7 +56,7 @@
   Assumes the entite will be boudn to '?e'"
   [binding k val]
 
-  [:in (symbol "$") (symbolize k)])
+  [:in $ (symbolize k)])
 
 
 
