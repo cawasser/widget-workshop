@@ -40,21 +40,22 @@
 
         ; HACK: these next two are only relevant on the UI side
         :data-sources-list (conj (:data-sources-list db) drag-id)
-        :drag-items (assoc (:drag-items db) drag-id {:id (aUUID) :name id})))))
+        :drag-items (assoc (:drag-items db)
+                      drag-id {:id (aUUID) :type :source :name id})))))
 
 
 (rf/reg-event-db
   :add-filter
   (fn [db [_ id dsl]]
     (let [drag-id (aUUID)]
-      (prn ":add-filter" id dsl drag-id)
+      ;(prn ":add-filter" id dsl drag-id)
       (assoc db
         :filter-source (assoc (:filter-source db) id dsl)
 
         ; HACK: these next two are only relevant on the UI side
         :filter-list (conj (:filter-list db) drag-id)
         :drag-items (assoc (:drag-items db)
-                      drag-id {:id (aUUID) :name id :filter dsl})))))
+                      drag-id {:id (aUUID) :type :filter :name id :filter dsl})))))
 
 
 (rf/reg-event-db

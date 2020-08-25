@@ -47,6 +47,15 @@
 
 
 
+(defn- get-colors [type]
+  (if type
+    (condp = type
+      :source ["cornflowerblue" "black"]
+      :filter ["cadetblue" "white"]
+      :default ["black" "white"])
+    ["black" "white"]))
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -87,41 +96,39 @@
                 (js->clj (.-draggableProps provided))
                 (js->clj (.-dragHandleProps provided)))
 
-         [:p.is-6 {:key   id
-                   :index index
-                   :style {:border           "1px solid lightgray"
-                           :border-radius    "5px"
-                           :padding          "8px"
-                           :padding-left     "3px"
-                           :padding-right    "3px"
-                           :margin-bottom    "8px"
-                           :max-width        "220px"
-                           :color            txt-color
-                           :background-color bg-color}
+         [:p.is-6 {:key      id
+                   :index    index
+                   :style    {:border           "1px solid lightgray"
+                              :border-radius    "5px"
+                              :padding          "8px"
+                              :padding-left     "3px"
+                              :padding-right    "3px"
+                              :margin-bottom    "8px"
+                              :max-width        "220px"
+                              :color            txt-color
+                              :background-color bg-color}
                    :on-click #(prn "clicked " name)}
           name]]))]))
 
 
 
-
-(defn draggable-item-vlist
-  ([provided snapshot data]
-   (draggable-item-vlist provided snapshot data "mediumblue"))
-
-  ([provided snapshot data color]
-   (let [isDraggingOver (.-isDraggingOver snapshot)]
-     [:div (merge {:ref   (.-innerRef provided)
-                   :style {:background-color (if isDraggingOver "lightgreen" "inherit")
-                           :border-width     (if isDraggingOver "1px" "inherit")
-                           :border-style     "solid"
-                           :border-radius    "5px"
-                           :min-height       "30px"
-                           :margin           "1px"}}
-             (js->clj (.-droppableProps provided)))
-      ;(prn "draggable-item-vlist " data)
-      (for [[index {:keys [id name]}] (map-indexed vector data)]
-        (drag-item id name index color "white"))
-      (.-placeholder provided)])))
+(defn draggable-item-vlist [provided snapshot data]
+  (let [isDraggingOver (.-isDraggingOver snapshot)]
+    [:div (merge {:ref   (.-innerRef provided)
+                  :style {:background-color (if isDraggingOver "lightgreen" "inherit")
+                          :border-width     (if isDraggingOver "1px" "inherit")
+                          :border-style     "solid"
+                          :border-radius    "5px"
+                          :min-height       "30px"
+                          :margin           "1px"}}
+            (js->clj (.-droppableProps provided)))
+     ;(prn "draggable-item-vlist " data)
+     (for [[index {:keys [id name type]}] (map-indexed vector data)
+           [bk-color txt-color] (get-colors type)]
+       (do
+         (prn "vlist" id name type bk-color txt-color)
+         (drag-item id name index bk-color txt-color)))
+     (.-placeholder provided)]))
 
 
 
@@ -140,6 +147,9 @@
                           :align-items      :center}}
             (js->clj (.-droppableProps provided)))
      ;(prn "draggable-item-hlist " data)
-     (for [[index {:keys [id name]}] (map-indexed vector data)]
-       (drag-item id name index))
+     (for [[index {:keys [id name type]}] (map-indexed vector data)
+           [bk-color txt-color] (get-colors type)]
+       (do
+         (prn "vlist" id name type bk-color txt-color)
+         (drag-item id name index bk-color txt-color)))
      (.-placeholder provided)]))
