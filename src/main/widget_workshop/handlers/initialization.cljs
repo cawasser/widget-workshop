@@ -21,7 +21,16 @@
       ; list of :data-sources id's. should always contain the same uuids as
       ; :data-sources
       ;
-      ; used to create the UI for dragging,
+      ; used to create the UI for dragging
+
+      :filter-source {}
+      ; a map of filters to the dsl used to actually perform the operation
+      ; on a data set
+
+      :filter-list []
+      ; a vector of :filter ids
+      ;
+      ; used to create the UI for dragging filters
 
       :subscriptions #{}
       ;
@@ -76,11 +85,21 @@
     (assoc-in db [:data source-name] source-data)))
 
 
+
+
+(defn- remove-filters [db id]
+  (dissoc (:filters db) id))
+
+(defn- remove-drag-items [db id]
+  (apply dissoc (:drag-items db) (get-in db [:filters id])))
+
 (rf/reg-event-db
   :remove-widget
   (fn [db [_ id]]
     ;(prn "removing widget " id)
-    (assoc db :widgets (disjoin (:widgets db) id))))
+    (assoc db :widgets (disjoin (:widgets db) id)
+              :filters (remove-filters db id)
+              :drag-items (remove-drag-items db id))))
 
 
 
@@ -99,6 +118,16 @@
   :data-sources-list
   (fn [db _]
     (:data-sources-list db)))
+
+(rf/reg-sub
+  :filter-source
+  (fn [db _]
+    (keys (:filter-source db))))
+
+(rf/reg-sub
+  :filter-list
+  (fn [db _]
+    (:filter-list db)))
 
 (rf/reg-sub
   :all-drag-items
@@ -275,9 +304,6 @@
         (map #(get-in db [:drag-items %])))))
         ;(map (juxt :id :name)))))
 
-
-
-
   ())
 
 
@@ -297,3 +323,27 @@
 
   (map #(get drag-items %) filters)
   ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; remove widget and all associated data (:filters and :drag-items)
+;
+(comment
+
+  (def db @re-frame.db/app-db)
+  (def source "cffbbbc9-6228-4ed4-8eca-4e1b35c5fefe")
+  (:filters db)
+  (get-in db [:filters source])
+
+
+  ; remove filters
+  (dissoc (:filters db) source)
+
+  ; remove drag-items)
+  (apply dissoc (:drag-items db) (get-in db [:filters source]))
+
+
+
+  ())
+

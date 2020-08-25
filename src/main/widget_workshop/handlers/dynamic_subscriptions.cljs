@@ -13,20 +13,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- get-source-item-name
-  "returns the name (string) to be displayed for a given item in :data-sources
+(defn- get-item
+  "returns the name (string) to be displayed for a given item in one of the vectors
   inside the app-db
 
-  - db   - the app-db for convenience
-  - from-idx - the numeric position of the given item in the :data-sources vector
+  - db  - the app-db for convenience
+  - idx - the numeric position of the given item in the given source vector
 
-  returns the name (string) of the item to be displayed in the UI"
+  returns the item to be displayed in the UI"
 
-  [db from-idx]
-  (->> from-idx
-    (nth (get db :data-sources-list))
-    (get (:drag-items db))
-    :name))
+  [db source idx]
+  (->> idx
+    (nth (get db source))
+    (get (:drag-items db))))
 
 
 (defn- get-source-filtered-item
@@ -40,12 +39,12 @@
 
   returns the map of details about the given dragged item found, keyed by the item's uuid"
 
-  [db from from-idx]
+  [db from idx]
 
   (if-let [filters (get-in db [:filters from])]
     (do
-      ;(prn "get-source-filtered-item " filters from-idx)
-      (->> (nth filters from-idx)
+      (prn "get-source-filtered-item " filters from idx)
+      (->> (nth filters idx)
         (vector :drag-items)
         (get-in db)))))
 
@@ -61,6 +60,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn- allow-drop?
+  "disallow dropping the same item into the filters twice
+
+  db - the current db for performance / simplicity
+  name (string) - the name of the item being dropped
+  filters (vector) - vector of filter IDs (uuids) already in the TO widget
+
+  returns
+
+  true - if the 'name' does NOT already exist in the filters list (indirectly)
+  false - if 'name' already exists"
+  [db name filters]
+
+  (if (some #{name}
+        (map #(-> (get-in db [:drag-items %]) :name)
+          filters))
+    false
+    true))
+
 
 (defn- new-widget
   "the user wants to create a new widget based upon the soruce item dropped on
@@ -71,12 +89,12 @@
   [db from from-idx to to-idx]
 
   (let [new-widget (aUUID)
-        name       (get-source-item-name db from-idx)
+        item       (get-item db from from-idx)
         new-uuid   (aUUID)]
     ;(prn "new-widget " from from-idx new-uuid name current-blank new-blank-widget)
     (assoc db :widgets (conj (:widgets db) new-widget)
               :filters (assoc (:filters db) new-widget [new-uuid])
-              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
+              :drag-items (assoc (:drag-items db) new-uuid (assoc item :id new-uuid)))))
 
 
 
@@ -85,13 +103,15 @@
 
   [db from from-idx to to-idx]
 
-  (let [name                (get-source-item-name db from-idx)
+  (let [item                (get-item db from from-idx)
         new-uuid            (aUUID)
         existing-to-filters (get-in db [:filters to])]
-    ;(prn "add-to-widget " from from-idx new-uuid name to to-idx)
-    (assoc db :filters (assoc (:filters db)
-                         to (splice existing-to-filters to-idx 0 new-uuid))
-              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
+    (prn "add-to-widget " from from-idx new-uuid item to to-idx)
+    (if (allow-drop? db name existing-to-filters)
+      (assoc db :filters (assoc (:filters db)
+                           to (splice existing-to-filters to-idx 0 new-uuid))
+                :drag-items (assoc (:drag-items db) new-uuid (assoc item :id new-uuid)))
+      db)))
 
 
 
@@ -105,9 +125,11 @@
         new-uuid            (aUUID)
         existing-to-filters (get-in db [:filters to])]
     ;(prn "connect-widgets " from from-idx new-uuid name to to-idx)
-    (assoc db :filters (assoc (:filters db)
-                         to (splice existing-to-filters to-idx 0 new-uuid))
-              :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))))
+    (if (allow-drop? db name existing-to-filters)
+      (assoc db :filters (assoc (:filters db)
+                           to (splice existing-to-filters to-idx 0 new-uuid))
+                :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))
+      db)))
 
 
 
@@ -150,16 +172,16 @@
   - from-idx  - numeric index of the item which was taken from the FROM vector
   - to     - the dnd source the item being dropped ONM, used to look into app-db to find the data structure
              that needs to be modified
-  - to-idx - numeric index of when the user wants the item in the TO vector
+  - to-idx - numeric index of where the user wants the item in the TO vector
 
   returns - an updated app-db via 'modification' to the db parameter"
 
   [db from from-idx to to-idx]
 
-  ;(prn "-handle-drop-event " from to widget-workshop.views.dnd.components/new-widget db))
+  (prn "-handle-drop-event " from to (s/drop-scenario? from to))
 
   (condp = (s/drop-scenario? from to)
-    ; can't reorder the sources list
+    ; nothing to do (eg, can't reorder the sources list)
     :do-nothing db
 
     ; reorder the 'filters' on a widget
@@ -177,10 +199,11 @@
     ; drop new sources onto a widget (not a new widget)
     :add-source-to-widget (add-to-widget db (keyword from) from-idx to to-idx)
 
+    ; drop new filter onto a widget (not a new widget)
+    :add-filter-to-widget (add-to-widget db (keyword from) from-idx to to-idx)
+
     ; can't do anything else
     :default db))
-
-
 
 
 
@@ -277,5 +300,38 @@
   (def db @re-frame.db/app-db)
 
   (reorder (get-in db [:filters from]) from-idx to-idx)
+
+  ())
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; refuse duplicate filters
+;
+(comment
+  (def db @re-frame.db/app-db)
+  (def to "74e5cf47-a037-4031-ad7a-5fa264ac8c03")
+  (get-in db [:filters to])
+
+  (def existing-to-filters (map #(-> (get-in db [:drag-items %]) :name)
+                             (get-in db [:filters to])))
+
+  (if (some #{"generic-source"}
+        (map #(-> (get-in db [:drag-items %]) :name)
+          (get-in db [:filters to])))
+    true
+    false)
+
+  ())
+
+
+
+(comment
+  (def db @re-frame.db/app-db)
+  (def from :filter-list)
+  (def from-idx 0)
+
+  (get-item db from from-idx)
 
   ())

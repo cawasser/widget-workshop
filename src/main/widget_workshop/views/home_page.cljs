@@ -4,7 +4,9 @@
             [widget-workshop.views.dnd.components :as d]
             [widget-workshop.views.dnd.new-widget :refer [new-widget-id]]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
+            [widget-workshop.views.widget :as w]
             [widget-workshop.handlers.dynamic-subscriptions]))
+
 
 
 
@@ -23,7 +25,9 @@
 (defn sources-sidebar []
   (let [the-filter (r/atom "")]
     (fn []
-      [:div
+      [:div {:style {:border-radius    "5px"
+                     :margin-right     "5px"
+                     :background-color "lightblue"}}
        [:h2 "Data Sources"]
        [:p {:hidden true} @the-filter]                      ; hack to get the droppable to re-render
        [:div.panel-block {:style {:margin-bottom "5px"}}
@@ -39,41 +43,33 @@
         @(rf/subscribe [:drag-items :data-sources-list])]])))
 
 
-(defn- title-bar [id can-delete]
-  [:div.container.level
-   [:div.level-left.has-text-left
-    [:h3 {:style {:height           "30px"
-                  :background-color (if can-delete "tomato" "darkgray")}} id]
-    (if can-delete
-      [:div.level-right.has-text-centered
-       [:button.delete.is-large {:style    {:margin-right "10px"}
-                                 :on-click #(do
-                                              ;(prn "delete button " id)
-                                              (rf/dispatch [:remove-widget id])
-                                              (.stopPropagation %))}]])]])
-(defn widget [id can-delete]
-  ;(prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
-  [:div {:style {:border       "solid"
-                 :border-width "1px"
-                 :height       "auto"
-                 :width        "500px"}}
-   [title-bar id can-delete]
-   [:div {:style {:border       "solid"
-                  :border-width "1px"
-                  :height       "200px"}}
-    [:> Droppable {:droppable-id id :type "droppable"
-                   :direction    "horizontal"}
-     (fn [provided snapshot]
-       (r/as-element
-         [d/draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))]]])
+
+(defn filters-panel [content]
+  [:> Droppable {:droppable-id   "filter-list"
+                 :isDropDisabled true                       ; can't drop anything onto the source list
+                 :type           "droppable"}
+   (fn [provided snapshot]
+     (r/as-element
+       [d/draggable-item-vlist provided snapshot content "cadetblue"]))])
+
+
+
+(defn filters-sidebar []
+  [:div {:style {:border-radius    "5px"
+                 :margin-right     "5px"
+                 :background-color "lightgray"}}
+   [:h2 "Filters"]
+   [filters-panel @(rf/subscribe [:drag-items :filter-list])]])
+
+
 
 
 (defn widget-panel []
   [:div {:style {:height "auto"}}
    [:h2 "Widgets"]
    (for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
-     ^{:key idx} [widget id true])
-   [widget new-widget-id false]])
+     ^{:key idx} [w/widget id true])
+   [w/widget new-widget-id false]])
 
 
 
@@ -86,10 +82,10 @@
    [:section.section>div.container>div.content
     [:div.columns
      [:div.column.is-one-fifth
-      {:style {:background-color "lightblue"
-               :border-radius    "5px"
-               :margin-right     "5px"}}
-      [sources-sidebar]]
+      {:style {}}
+      [sources-sidebar]
+      [:div
+       [filters-sidebar]]]
      [:div.column
       {:style {:background-color "lightgray"
                :border-radius    "5px"}}
@@ -172,5 +168,17 @@
       @(rf/subscribe [:filter-drag-items
                       "e4703951-39e9-4064-ab3c-4e83d1c3787b"]))
     [id name])
+
+  ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; messing with filters on the sidebar
+;
+(comment
+  @re-frame.db/app-db
+
+  @(rf/subscribe [:drag-items :filter-list])
 
   ())

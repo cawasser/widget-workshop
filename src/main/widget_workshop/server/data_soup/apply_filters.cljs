@@ -94,4 +94,7 @@
                   [:ds/group-by [:id]]]
     (:data (widget-workshop.server.source.config-data/get-data)))
 
+  (apply-filters []
+    (:data (widget-workshop.server.source.config-data/get-data)))
+
   ())
