@@ -45,6 +45,7 @@
 
 
 (defn filters-panel [content]
+  (prn "filters-panel " content)
   [:> Droppable {:droppable-id   "filter-list"
                  :isDropDisabled true                       ; can't drop anything onto the source list
                  :type           "droppable"}
@@ -82,10 +83,8 @@
    [:section.section>div.container>div.content
     [:div.columns
      [:div.column.is-one-fifth
-      {:style {}}
       [sources-sidebar]
-      [:div
-       [filters-sidebar]]]
+      [filters-sidebar]]
      [:div.column
       {:style {:background-color "lightgray"
                :border-radius    "5px"}}

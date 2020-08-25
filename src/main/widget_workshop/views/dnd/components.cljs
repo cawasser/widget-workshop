@@ -122,10 +122,9 @@
                           :min-height       "30px"
                           :margin           "1px"}}
             (js->clj (.-droppableProps provided)))
-     ;(prn "draggable-item-vlist " data)
-     (for [[index {:keys [id name type]}] (map-indexed vector data)
-           [bk-color txt-color] (get-colors type)]
-       (do
+     (prn "draggable-item-vlist " data)
+     (for [[index {:keys [id name type]}] (map-indexed vector data)]
+       (let [[bk-color txt-color] (get-colors type)]
          (prn "vlist" id name type bk-color txt-color)
          (drag-item id name index bk-color txt-color)))
      (.-placeholder provided)]))
@@ -147,9 +146,8 @@
                           :align-items      :center}}
             (js->clj (.-droppableProps provided)))
      ;(prn "draggable-item-hlist " data)
-     (for [[index {:keys [id name type]}] (map-indexed vector data)
-           [bk-color txt-color] (get-colors type)]
-       (do
-         (prn "vlist" id name type bk-color txt-color)
+     (for [[index {:keys [id name type]}] (map-indexed vector data)]
+       (let [[bk-color txt-color] (get-colors type)]
+         ;(prn "hlist" id name type bk-color txt-color)
          (drag-item id name index bk-color txt-color)))
      (.-placeholder provided)]))
