@@ -18,7 +18,7 @@
 
   [id]
 
-  (dissoc (:drag-items db)))
+  (dissoc (:builder/drag-items db)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -36,12 +36,10 @@
   (fn [db [_ id source-fn]]
     (let [drag-id (aUUID)]
       (assoc db
-        :data-sources (assoc (:data-sources db) id source-fn)
-
-        ; HACK: these next two are only relevant on the UI side
-        :data-sources-list (conj (:data-sources-list db) drag-id)
-        :drag-items (assoc (:drag-items db)
-                      drag-id {:id (aUUID) :type :source :name id})))))
+        :server/data-sources (assoc (:server/data-sources db) id source-fn)
+        :builder/data-sources-list (conj (:builder/data-sources-list db) drag-id)
+        :builder/drag-items (assoc (:builder/drag-items db)
+                              drag-id {:id (aUUID) :type :source :name id})))))
 
 
 (rf/reg-event-db
@@ -50,34 +48,30 @@
     (let [drag-id (aUUID)]
       ;(prn ":add-filter" id dsl drag-id)
       (assoc db
-        :filter-source (assoc (:filter-source db) id dsl)
-
-        ; HACK: these next two are only relevant on the UI side
-        :filter-list (conj (:filter-list db) drag-id)
-        :drag-items (assoc (:drag-items db)
-                      drag-id {:id (aUUID) :type :filter :name id :filter dsl})))))
+        :builder/filter-source (assoc (:builder/filter-source db) id dsl)
+        :builder/filter-list (conj (:builder/filter-list db) drag-id)
+        :builder/drag-items (assoc (:builder/drag-items db)
+                              drag-id {:id (aUUID) :type :filter :name id :filter dsl})))))
 
 
 (rf/reg-event-db
   :remove-source
   (fn [db [_ id]]
     (assoc db
-      :data-sources (dissoc (:data-sources db) id)
-
-      ; HACK: these next two are only relevant on the UI side
-      :data-sources-list (disj (:data-sources-list db) id)
-      :drag-items (remove-drag-item db id))))
+      :server/data-sources (dissoc (:builder/data-sources db) id)
+      :builder/data-sources-list (disj (:builder/data-sources-list db) id)
+      :builder/drag-items (remove-drag-item db id))))
 
 
 
 
-(defn- pub-to-subscriber [db id results]
-  (let [filters  (get-in db [:filters id])
-        filtered (f/apply-filters filters (:data results))]
-    (assoc-in db
-      [:data id]
-      (assoc results :data filtered
-                     :keys (into [] (keys (first filtered)))))))
+(defn- pub-to-subscriber [db id results])
+  ;(let [filters  (get-in db [:builder/filters id])
+  ;      filtered (f/apply-filters filters (:live/data results))]
+  ;  (assoc-in db
+  ;    [:data id]
+  ;    (assoc results :data filtered
+  ;                   :keys (into [] (keys (first filtered)))))))
 
 
 ; HACK ALERT!
@@ -175,11 +169,36 @@
 ;
 (comment
 
-  @re-frame.db/app-db
+  (def db @re-frame.db/app-db)
+  (def id "testing")
+  (def dsl [:testing])
+  (def source-sn #())
+
+  (let [drag-id (aUUID)]
+    (assoc db
+      :server/data-sources (assoc (:server/data-sources db) id source-fn)
+      :builder/data-sources (conj (:builder/data-sources db) id)
+      :builder/data-sources-list (conj (:builder/data-sources-list db) drag-id)
+      :builder/drag-items (assoc (:builder/drag-items db)
+                            drag-id {:id (aUUID) :type :source :name id})))
+
+  (let [drag-id (aUUID)]
+    ;(prn ":add-filter" id dsl drag-id)
+    (assoc db
+      :builder/filter-source (assoc (:builder/filter-source db) id dsl)
+      :builder/filter-list (conj (:builder/filter-list db) drag-id)
+      :builder/drag-items (assoc (:builder/drag-items db)
+                            drag-id {:id (aUUID) :type :filter
+                                     :name id :filter dsl})))
+
 
   (register-data-source
     "generic-source"
-    widget-workshop.server.generic-data-source/get-data)
+    widget-workshop.server.source.generic-data/get-data)
+
+  (register-data-source
+    "config-source"
+    widget-workshop.server.source.config-data/get-data)
 
 
 
@@ -199,22 +218,24 @@
 ;
 (comment
   (def db @re-frame.db/app-db)
+  (def result ((get-in db [:builder/data-sources "generic-source"])))
 
-  (let [source-fn (get-in db [:data-sources "generic-source"])
-        result    (source-fn)]
-    (assoc result :data (f/apply-filters [[:extract [:id :datetime :x]]
-                                          [:take 2]]
+  (let [result    ((get-in db [:builder/data-sources "generic-source"]))]
+    (assoc result :data (f/apply-filters [[:ds/extract [:id :datetime :x]]
+                                          [:ds/group-by [:x]]]
+                                          ;[:ds/take 2]]
                           (:data result))))
 
+  ; TODO: :group-by breaks the code to recreate the :keys meta-data!
 
-  (def filters [[:extract [:id :x :y]]
-                [:take 2]])
+  (def filters [[:ds/extract [:id :x :y]]
+                [:ds/group-by [:x]]])
+                ;[:ds/take 2]])
   (def id "generic-source")
 
-  (let [source-fn (get-in db [:data-sources id])
-        result    (source-fn)
+  (let [result    ((get-in db [:builder/data-sources id]))
         ;filters (get-in db [:filters source])
-        filtered  (f/apply-filters filters (:data result))]
+        filtered  (f/apply-filters filters (:live/data result))]
     (assoc result :data filtered
                   :keys (into [] (keys (first filtered)))))
 
@@ -232,7 +253,7 @@
   (def source "generic-source")
   (def id "b5ebdc17-b040-47de-92f1-e01ffe06baeb")
 
-  (def results ((get-in db [:data-sources source])))
+  (def results ((get-in db [:builder/data-sources source])))
 
 
   (defn apply-filters [dsl data]
@@ -240,18 +261,18 @@
       data
       (recur (rest dsl) (filter-step (first dsl) data))))
 
-  (map #(get-in db [:filter %]) (get-in db [:filters id]))
+  (map #(get-in db [:builder/filter %]) (get-in db [:builder/filters id]))
 
-  (let [filters  (get-in db [:filters id])
-        filtered (f/apply-filters filters (:data results))]
+  (let [filters  (get-in db [:builder/filters id])
+        filtered (f/apply-filters filters (:live/data results))]
     (assoc-in db
-      [:data id]
+      [:live/data id]
       (assoc results :data filtered
                      :keys (into [] (keys (first filtered))))))
 
-  (let [source-fn (get-in db [:data-sources id])
+  (let [source-fn (get-in db [:server/data-sources id])
         result    (source-fn)]
-    (map #(pub-to-subscriber db % result) (get db :subscriptions)))
+    (map #(pub-to-subscriber db % result) (get-in db [:server/subscriptions id])))
 
   ())
 
@@ -266,7 +287,7 @@
 ;   https://youtu.be/oYwhrq8hDFo?t=1879
 ;
 ;  (update to the model data triggers a function that creates an updated subscription...)
-;F
+;
 (comment
 
   ())

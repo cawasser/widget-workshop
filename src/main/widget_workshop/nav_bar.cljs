@@ -23,5 +23,6 @@
       {:class (when @expanded? :is-active)}
       [:div.navbar-end
        [nav-link "#/" "Home" :home]
+       [nav-link "#/builder" "Builder" :builder]
        [nav-link "#/about" "About" :about]]]]))
 

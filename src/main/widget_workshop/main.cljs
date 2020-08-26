@@ -8,6 +8,7 @@
             [reagent.dom :as rd]
             [re-frame.core :as rf]
             [widget-workshop.views.home-page :refer [home-page]]
+            [widget-workshop.views.builder :refer [builder-page]]
             [widget-workshop.views.about-page :refer [about-page]]
             [widget-workshop.nav-bar :as navbar]
             [widget-workshop.session :refer [session]]
@@ -21,6 +22,7 @@
 
 (def pages
   {:home  #'home-page
+   :builder #'builder-page
    :about #'about-page})
 
 (defn page []
@@ -34,6 +36,7 @@
 (def router
   (reitit/router
     [["/" :home]
+     ["/builder" :builder]
      ["/about" :about]]))
 
 (defn match-route [uri]
@@ -41,6 +44,7 @@
     (reitit/match-by-path router)
     :data
     :name))
+
 ;; -------------------------
 ;; History
 ;; must be called after routes have been defined

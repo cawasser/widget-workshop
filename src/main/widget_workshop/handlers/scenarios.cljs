@@ -17,55 +17,55 @@
 
   (cond
     ; can't do anything within the data sources or filters lists
-    (= from to "data-sources-list") :do-nothing
-    (= from to "filter-list") :do-nothing
+    (= from to "builder/data-sources-list") :do-nothing
+    (= from to "builder/filter-list") :do-nothing
 
     ; can't drop into the data sources or filters lists
-    (= to "data-sources-list") :do-nothing
-    (= to "filter-list") :do-nothing
+    (= to "builder/data-sources-list") :do-nothing
+    (= to "builder/filter-list") :do-nothing
 
     ; reorder the 'filters' on a widget
     (and
-      (not= from "data-sources-list")
+      (not= from "builder/data-sources-list")
       (not= to new-widget-id)
       (= from to)) :reorder-filters
 
     ; dropping from the sources onto a new widget
     (and
-      (= from "data-sources-list")
+      (= from "builder/data-sources-list")
       (= to new-widget-id)) :new-widget-from-source
 
     ; dropping from the filters onto a new widget
-    (and
-      (= from "filter-list")
-      (= to new-widget-id)) :new-widget-from-filters
+    ;(and
+    ;  (= from "filter-list")
+    ;  (= to new-widget-id)) :new-widget-from-filters
 
     ; drop from an existing widget onto the 'new' widget
-    (and
-      (not= from "data-sources-list")
-      (not= from "filter-list")
-      (= to new-widget-id)) :new-widget-from-widget
+    ;(and
+    ;  (not= from "data-sources-list")
+    ;  (not= from "filter-list")
+    ;  (= to new-widget-id)) :new-widget-from-widget
 
     ; drop from an existing widget onto the 'new' widget
-    (and
-      (not= from "data-sources-list")
-      (not= from "filter-list")
-      (= to new-widget-id)) :new-widget-from-widget
+    ;(and
+    ;  (not= from "data-sources-list")
+    ;  (not= from "filter-list")
+    ;  (= to new-widget-id)) :new-widget-from-widget
 
     ; drop from one widget to another
-    (and
-      (not= from "data-sources-list")
-      (not= from "filter-list")
-      (not= to new-widget-id)) :connect-widgets
+    ;(and
+    ;  (not= from "data-sources-list")
+    ;  (not= from "filter-list")
+    ;  (not= to new-widget-id)) :connect-widgets
 
-    ; drop new sources onto a widget (not a new widget)
+    ; drop new sources onto an exsiting widget (not a new widget)
     (and
-      (= from "data-sources-list")
+      (= from "builder/data-sources-list")
       (not= to new-widget-id)) :add-source-to-widget
 
-    ; drop new filter onto a widget (not a new widget)
+    ; drop new filter onto an existing widget (not a new widget)
     (and
-      (= from "filter-list")
+      (= from "builder/filter-list")
       (not= to new-widget-id)) :add-filter-to-widget
 
     ; can't do anything else

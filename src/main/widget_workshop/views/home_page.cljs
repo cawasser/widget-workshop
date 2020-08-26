@@ -10,25 +10,18 @@
 
 
 
-
-
-(defn sources-panel [content]
-  [:> Droppable {:droppable-id   "data-sources-list"
-                 :isDropDisabled true                       ; can't drop anything onto the source list
-                 :type           "droppable"}
-   (fn [provided snapshot]
-     (r/as-element
-       [d/draggable-item-vlist provided snapshot content]))])
+(defn widgets-panel [content]
+  [:p (:name content)])
 
 
 
-(defn sources-sidebar []
+(defn widgets-sidebar []
   (let [the-filter (r/atom "")]
     (fn []
       [:div {:style {:border-radius    "5px"
                      :margin-right     "5px"
                      :background-color "lightblue"}}
-       [:h2 "Data Sources"]
+       [:h2 "Toolbox"]
        [:p {:hidden true} @the-filter]                      ; hack to get the droppable to re-render
        [:div.panel-block {:style {:margin-bottom "5px"}}
         [:p.control.has-icons-left
@@ -37,58 +30,27 @@
                         :on-change   #(reset! the-filter (-> % .-target .-value))}]
          [:span.icon.is-left
           [:i.fas.fa-search {:aria-hidden "true"}]]]]
-       [sources-panel
+       [widgets-panel
         ;(fuzzy-filter @the-filter
         ;  (map (comp name :id)
-        @(rf/subscribe [:drag-items :data-sources-list])]])))
-
-
-
-(defn filters-panel [content]
-  (prn "filters-panel " content)
-  [:> Droppable {:droppable-id   "filter-list"
-                 :isDropDisabled true                       ; can't drop anything onto the source list
-                 :type           "droppable"}
-   (fn [provided snapshot]
-     (r/as-element
-       [d/draggable-item-vlist provided snapshot content "cadetblue"]))])
-
-
-
-(defn filters-sidebar []
-  [:div {:style {:border-radius    "5px"
-                 :margin-right     "5px"
-                 :background-color "lightgray"}}
-   [:h2 "Filters"]
-   [filters-panel @(rf/subscribe [:drag-items :filter-list])]])
-
-
+        @(rf/subscribe [:live/widgets])]])))
 
 
 (defn widget-panel []
   [:div {:style {:height "auto"}}
-   [:h2 "Widgets"]
-   (for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
-     ^{:key idx} [w/widget id true])
-   [w/widget new-widget-id false]])
-
+   [:h2 "Widgets"]])
 
 
 
 (defn home-page []
-  [:> DragDropContext
-   {:onDragStart  #()
-    :onDragUpdate #()                                       ;d/on-drag-update (js->clj % :keywordize-keys true)
-    :onDragEnd    #(d/on-drag-end (js->clj % :keywordize-keys true))}
-   [:section.section>div.container>div.content
-    [:div.columns
-     [:div.column.is-one-fifth
-      [sources-sidebar]
-      [filters-sidebar]]
-     [:div.column
-      {:style {:background-color "lightgray"
-               :border-radius    "5px"}}
-      [widget-panel]]]]])
+  [:section.section>div.container>div.content
+   [:div.columns
+    [:div.column.is-one-fifth
+     [widgets-sidebar]]
+    [:div.column
+     {:style {:background-color "lightgray"
+              :border-radius    "5px"}}
+     [widget-panel]]]])
 
 
 
