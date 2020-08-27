@@ -2,7 +2,8 @@
   (:require
     [re-frame.core :as rf]
     [widget-workshop.util.uuid :refer [aUUID]]
-    [widget-workshop.util.vectors :refer [disjoin]]))
+    [widget-workshop.util.vectors :refer [disjoin]]
+    [widget-workshop.views.dnd.new-widget :refer [new-widget-id new-widget-context]]))
 
 
 (def init-db
@@ -47,7 +48,7 @@
    ; 'content' for :widgets 'under construction' on the builder page
    ;
    ; provides data like :name, :bar-color, :text-color, etc
-   :builder/widgets           {}
+   :builder/widgets           {new-widget-id new-widget-context}
 
    ; map of uuids to {:id <uuid> :name <name>} for each draggble, so they are uniquely identified
    ; throughout the entire app
@@ -169,6 +170,12 @@
   :buildable-widgets
   (fn [db _]
     (:builder/widget-list db)))
+
+
+(rf/reg-sub
+  :buildable-widget
+  (fn [db [_ id]]
+    (get-in db [:builder/widgets id])))
 
 
 

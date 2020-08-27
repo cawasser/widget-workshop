@@ -2,7 +2,8 @@
   (:require [re-frame.core :as rf]
             [widget-workshop.util.uuid :refer [aUUID]]
             [widget-workshop.util.vectors :refer [splice reorder]]
-            [widget-workshop.handlers.scenarios :as s]))
+            [widget-workshop.handlers.scenarios :as s]
+            [widget-workshop.views.util :refer [make-new-widget]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -118,6 +119,7 @@
     true))
 
 
+
 (defn- new-widget
   "the user wants to create a new widget based upon the source item dropped on
   the 'blank widget'
@@ -131,6 +133,8 @@
         new-uuid   (aUUID)]
     ;(prn "new-widget " from from-idx new-uuid name)
     (assoc db :builder/widget-list (conj (:builder/widget-list db) new-widget)
+              :builder/widgets (assoc (:builder/widgets db) new-widget
+                                                           (make-new-widget new-widget))
               :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
               :builder/drag-items (assoc (:builder/drag-items db)
                                     new-uuid (assoc item :id new-uuid)))))
