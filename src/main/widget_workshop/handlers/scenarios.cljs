@@ -24,8 +24,7 @@
 
   [from to]
 
-  (prn "drop-scenario?" from to)
-
+  ;(prn "drop-scenario?" from to)
   (cond
     ; can't do anything within the data sources or filters lists
     (= from to "builder/data-sources-list") :do-nothing

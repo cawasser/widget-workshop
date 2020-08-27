@@ -60,7 +60,7 @@
 
   (if-let [filters (get-in db [:builder/filter-list])]
     (do
-      (prn "get-filter-item " filters from idx)
+      ;(prn "get-filter-item " filters from idx)
       (->> (nth filters idx)
         (vector :builder/drag-items)
         (get-in db)))))
@@ -81,7 +81,7 @@
 
   (if-let [filters (get-in db [:builder/filters from])]
     (do
-      (prn "get-source-filter-item " filters from idx)
+      ;(prn "get-source-filter-item " filters from idx)
       (->> (nth filters idx)
         (vector :builder/drag-items)
         (get-in db)))))
@@ -110,6 +110,7 @@
   false - if 'name' already exists"
   [db name filters]
 
+  ;(prn "drop-allowed?" name (map #(-> (get-in db [:builder/drag-items %]) :name) filters))
   (if (some #{name}
         (map #(-> (get-in db [:builder/drag-items %]) :name)
           filters))
@@ -128,7 +129,7 @@
   (let [new-widget (aUUID)
         item       (get-item db from from-idx)
         new-uuid   (aUUID)]
-    (prn "new-widget " from from-idx new-uuid name)
+    ;(prn "new-widget " from from-idx new-uuid name)
     (assoc db :builder/widget-list (conj (:builder/widget-list db) new-widget)
               :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
               :builder/drag-items (assoc (:builder/drag-items db)
@@ -144,7 +145,7 @@
   (let [item               (get-item db from from-idx)
         new-uuid           (aUUID)
         existing-to-source (get-in db [:builder/source to])]
-    (prn "add-source-to-widget " from from-idx new-uuid item to to-idx existing-to-source)
+    ;(prn "add-source-to-widget " from from-idx new-uuid item to to-idx existing-to-source)
     (if (some #{(:id item)} existing-to-source)
       db
       (assoc db :builder/source (assoc (:builder/source db) to #{new-uuid})
@@ -158,14 +159,14 @@
 
   [db from from-idx to to-idx]
 
-  (prn "add-filter-to-widget BEFORE" from from-idx to to-idx)
+  ;(prn "add-filter-to-widget BEFORE" from from-idx to to-idx)
 
   (let [item                (get-filter-item db from from-idx)
         new-uuid            (aUUID)
         existing-to-filters (get-in db [:builder/filters to])]
 
-    (prn "add-filter-to-widget AFTER" from from-idx new-uuid item to to-idx)
-    (if (allow-drop? db name existing-to-filters)
+    ;(prn "add-filter-to-widget AFTER" from from-idx new-uuid item to to-idx)
+    (if (allow-drop? db (:name item) existing-to-filters)
       (assoc db :builder/filters (assoc (:builder/filters db)
                                    to (splice existing-to-filters to-idx 0 new-uuid))
                 :builder/drag-items (assoc (:builder/drag-items db)
@@ -216,7 +217,7 @@
   [db from from-idx to-idx]
 
   (let [item (get-source-filter-item db from from-idx)]
-    (prn "reorder-widget-filters " from from-idx to-idx item)
+    ;(prn "reorder-widget-filters " from from-idx to-idx item)
     (assoc db :builder/filters (assoc (:builder/filters db)
                                  from (reorder (get-in db [:builder/filters from])
                                         from-idx to-idx)))))
@@ -248,7 +249,7 @@
 
   [db from from-idx to to-idx]
 
-  (prn "-handle-drop-event " from to (s/drop-scenario? from to))
+  ;(prn "-handle-drop-event " from to (s/drop-scenario? from to))
 
   (condp = (s/drop-scenario? from to)
     ; nothing to do (eg, can't reorder the sources list)
@@ -330,7 +331,7 @@
   (fn [[source drag-items]]
     (if source
       (let [ret (map #(get drag-items %) source)]
-        (prn "found source " source "//" drag-items "//" ret)
+        ;(prn "found source " source "//" drag-items "//" ret)
         ret)
       [])))
 
@@ -382,7 +383,7 @@
   (fn [[filters drag-items]]
     (if filters
       (let [ret (map #(get drag-items %) filters)]
-        (prn "found filters " filters "//" drag-items "//" ret)
+        ;(prn "found filters " filters "//" drag-items "//" ret)
         ret)
 
       [])))
@@ -485,7 +486,7 @@
 ;
 (comment
   (def db @re-frame.db/app-db)
-  (def to "74e5cf47-a037-4031-ad7a-5fa264ac8c03")
+  (def to "68adf0a3-e8a4-4ad5-8ac3-04b260006ead")
   (get-in db [:builder/filters to])
 
   (def existing-to-filters (map #(-> (get-in db [:builder/drag-items %]) :name)
@@ -496,6 +497,18 @@
           (get-in db [:builder/filters to])))
     true
     false)
+
+  (def name "take 5")
+  (def filters (get-in db [:builder/filters to]))
+
+  (map #(-> (get-in db [:builder/drag-items %]) :name)
+    filters)
+
+  (if (some #{name}
+        (map #(-> (get-in db [:builder/drag-items %]) :name)
+          filters))
+    false
+    true)
 
   ())
 
@@ -572,7 +585,7 @@
 
   (if-let [filters (get-in db [:builder/filter-list])]
     (do
-      (prn "get-source-filtered-item " filters from idx)
+      ;(prn "get-source-filtered-item " filters from idx)
       (->> (nth filters idx)
         (vector :builder/drag-items)
         (get-in db))))
@@ -593,7 +606,7 @@
   (def to-idx 0)
 
   (let [item (get-source-filter-item db from from-idx)]
-    (prn "reorder-widget-filters " from from-idx to-idx item)
+    ;(prn "reorder-widget-filters " from from-idx to-idx item)
     (assoc db :builder/filters (assoc (:builder/filters db)
                                  from (reorder (get-in db [:builder/filters from])
                                         from-idx to-idx))))

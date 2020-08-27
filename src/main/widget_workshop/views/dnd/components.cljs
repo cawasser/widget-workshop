@@ -34,8 +34,8 @@
 
   [{:keys [draggableId type source destination reason] :as event}]
 
-  (prn "on-drag-end " event (:droppableId source) (:droppableId destination)
-    (.substr (:droppableId destination) 0 (.indexOf (:droppableId destination) "-")))
+  ;(prn "on-drag-end " event (:droppableId source) (:droppableId destination)
+  ;  (.substr (:droppableId destination) 0 (.indexOf (:droppableId destination) "-")))
 
   (if destination
     (let [clean-dest (s/strip-suffix (:droppableId destination))]
@@ -124,10 +124,10 @@
                           :min-height       "30px"
                           :margin           "1px"}}
             (js->clj (.-droppableProps provided)))
-     (prn "draggable-item-vlist " data)
+     ;(prn "draggable-item-vlist " data)
      (for [[index {:keys [id name type]}] (map-indexed vector data)]
        (let [[bk-color txt-color] (get-colors type)]
-         (prn "vlist" id name type bk-color txt-color)
+         ;(prn "vlist" id name type bk-color txt-color)
          ^{:key index} (drag-item id name index bk-color txt-color)))
      (.-placeholder provided)]))
 

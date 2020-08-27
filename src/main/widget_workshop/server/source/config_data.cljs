@@ -206,7 +206,7 @@
   ;
 
   (defn- process [[cmd params] data]
-    (prn {:cmd cmd :params params :data data})
+    ;(prn {:cmd cmd :params params :data data})
     data)
 
   (process (first pipeline2) (:data (get-data)))

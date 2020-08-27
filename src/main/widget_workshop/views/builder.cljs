@@ -41,7 +41,7 @@
 
 
 (defn filters-panel [content]
-  (prn "filters-panel " content)
+  ;(prn "filters-panel " content)
   [:> Droppable {:droppable-id   "builder/filter-list"
                  :isDropDisabled true                       ; can't drop anything onto the source list
                  :type           "filter"}

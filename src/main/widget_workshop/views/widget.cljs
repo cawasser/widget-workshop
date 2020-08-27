@@ -43,12 +43,12 @@
   (let [source-id (prep-id id "@source")
         filter-id (prep-id id "@filter")]
 
-    (prn "widget " id
-      source-id filter-id
-      @(rf/subscribe [:source id])
-      @(rf/subscribe [:source-drag-items id])
-      @(rf/subscribe [:filters id])
-      @(rf/subscribe [:filter-drag-items id]))
+    ;(prn "widget " id
+    ;  source-id filter-id
+    ;  @(rf/subscribe [:source id])
+    ;  @(rf/subscribe [:source-drag-items id])
+    ;  @(rf/subscribe [:filters id])
+    ;  @(rf/subscribe [:filter-drag-items id]))
 
     [:div {:style {:border       "solid"
                    :border-width "1px"
