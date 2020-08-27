@@ -20,6 +20,10 @@
    ; used to create the UI for dragging
    :builder/data-sources-list []
 
+   ; a map to a set with a single data-source for this widget, this is where the data
+   ; will come from (singleton per widget)
+   :builder/source {}
+
    ; a map of filters to the dsl used to actually perform the operation
    ; on a data set
    :builder/filter-source {}
@@ -143,71 +147,11 @@
 ; subscription to main data elements
 ;
 
-(rf/reg-sub
-  :data-sources
-  (fn [db _]
-    (keys (:builder/data-sources db))))
-
-(rf/reg-sub
-  :data-sources-list
-  (fn [db _]
-    (:builder/data-sources-list db)))
-
-(rf/reg-sub
-  :filter-source
-  (fn [db _]
-    (keys (:builder/filter-source db))))
-
-(rf/reg-sub
-  :filter-list
-  (fn [db _]
-    (:builder/filter-list db)))
-
-(rf/reg-sub
-  :all-drag-items
-  (fn [db _]
-    ;(prn "all-drag-items " (:drag-items db))
-    (:builder/drag-items db)))
-
-(rf/reg-sub
-  :drag-items
-  (fn [db [_ source]]
-    ;(prn "drag-items " source)
-    (map #(get-in db [:builder/drag-items %]) (get db source))))
-
 
 (rf/reg-sub
   :subscriptions
   (fn [db _]
-    (:builder/subscriptions db)))
-
-(rf/reg-sub
-  :filters
-  (fn [db [_ id]]
-    ;(prn "filters " id "//" (get-in db [:filters id]))
-    (get-in db [:builder/filters id])))
-
-(rf/reg-sub
-  :filter-drag-items
-
-  ; this subscription depends on 2 other subscriptions:
-  ;
-  ;  1) :filters for the given widget, if this changes (add/remove/reorder) we
-  ;         need to re-fire
-  ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
-  ;         we may need ot re-fire
-  (fn [[_ id]]
-    [(rf/subscribe [:filters id]) (rf/subscribe [:all-drag-items])])
-
-  ; now, instead of looking in the db, we look in the results of the 2 prereq
-  ; subscriptions
-  (fn [[filters drag-items]]
-    (if filters
-      (let [ret (map #(get drag-items %) filters)]
-        ;(prn "found filters " filters "//" drag-items "//" ret)
-        ret)
-
-      [])))
+    (:server/subscriptions db)))
 
 
 (rf/reg-sub

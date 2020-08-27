@@ -81,7 +81,7 @@
 
 
 (defn- new-widget
-  "the user wants to create a new widget based upon the soruce item dropped on
+  "the user wants to create a new widget based upon the source item dropped on
   the 'blank widget'
 
   1) move the 'blank' widget id (a guid) into the :widgets key
@@ -93,21 +93,39 @@
         new-uuid   (aUUID)]
     (prn "new-widget " from from-idx new-uuid name)
     (assoc db :builder/widgets (conj (:builder/widgets db) new-widget)
-              :builder/filters (assoc (:builder/filters db) new-widget [new-uuid])
+              :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
               :builder/drag-items (assoc (:builder/drag-items db)
                                     new-uuid (assoc item :id new-uuid)))))
 
 
 
-(defn- add-to-widget [db from from-idx to to-idx]
-  "the user wants to add more sources to an existing widget"
+; TODO: split between -source and -filter
+(defn- add-source-to-widget [db from from-idx to to-idx]
+  "the user wants to replace the source on an existing widget"
+
+  [db from from-idx to to-idx]
+
+  (let [item               (get-item db from from-idx)
+        new-uuid           (aUUID)
+        existing-to-source (get-in db [:builder/source to])]
+    (prn "add-source-to-widget " from from-idx new-uuid item to to-idx existing-to-source)
+    (if (some #{(:id item)} existing-to-source)
+      db
+      (assoc db :builder/source (assoc (:builder/source db) to #{new-uuid})
+                :builder/drag-items (assoc (:builder/drag-items db)
+                                      new-uuid (assoc item :id new-uuid))))))
+
+
+
+(defn- add-filter-to-widget [db from from-idx to to-idx]
+  "the user wants to add more filters to an existing widget"
 
   [db from from-idx to to-idx]
 
   (let [item                (get-item db from from-idx)
         new-uuid            (aUUID)
         existing-to-filters (get-in db [:builder/filters to])]
-    (prn "add-to-widget " from from-idx new-uuid item to to-idx)
+    (prn "add-filter-to-widget " from from-idx new-uuid item to to-idx)
     (if (allow-drop? db name existing-to-filters)
       (assoc db :builder/filters (assoc (:builder/filters db)
                                    to (splice existing-to-filters to-idx 0 new-uuid))
@@ -165,6 +183,13 @@
                                         from-idx to-idx)))))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; hanalde the drop events, in all their flavors
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- handle-drop-event
   "this function is called by the UI when the user drops something onto something else
@@ -203,10 +228,10 @@
     ;:connect-widgets (connect-widgets db from from-idx to to-idx)
 
     ; drop new sources onto a widget (not a new widget)
-    :add-source-to-widget (add-to-widget db (keyword from) from-idx to to-idx)
+    :add-source-to-widget (add-source-to-widget db (keyword from) from-idx to to-idx)
 
     ; drop new filter onto a widget (not a new widget)
-    :add-filter-to-widget (add-to-widget db (keyword from) from-idx to to-idx)
+    :add-filter-to-widget (add-filter-to-widget db (keyword from) from-idx to to-idx)
 
     ; can't do anything else
     :default db))
@@ -218,6 +243,107 @@
   (fn [db [_ from from-idx to to-idx]]
     ;(prn ":handle-drop-event " from to)
     (handle-drop-event db from from-idx to to-idx)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; subscriptions to all the data items for
+; drag and drop in the builder
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(rf/reg-sub
+  :data-sources
+  (fn [db _]
+    (keys (:builder/data-sources db))))
+
+(rf/reg-sub
+  :data-sources-list
+  (fn [db _]
+    (:builder/data-sources-list db)))
+
+(rf/reg-sub
+  :source
+
+  (fn [db [_ id]]
+    (get-in db [:builder/source id])))
+
+(rf/reg-sub
+  :source-drag-items
+
+  ; this subscription depends on 2 other subscriptions:
+  ;
+  ;  1) :source for the given widget, if this changes (add/remove) we
+  ;         need to re-fire
+  ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
+  ;         we may need to re-fire
+  (fn [[_ id]]
+    [(rf/subscribe [:source id]) (rf/subscribe [:all-drag-items])])
+
+  ; now, instead of looking in the db, we look in the results of the 2 prereq
+  ; subscriptions
+  (fn [[source drag-items]]
+    (if source
+      (let [ret (map #(get drag-items %) source)]
+        (prn "found source " source "//" drag-items "//" ret)
+        ret)
+      [])))
+
+
+(rf/reg-sub
+  :filter-source
+  (fn [db _]
+    (keys (:builder/filter-source db))))
+
+(rf/reg-sub
+  :filter-list
+  (fn [db _]
+    (:builder/filter-list db)))
+
+(rf/reg-sub
+  :all-drag-items
+  (fn [db _]
+    ;(prn "all-drag-items " (:drag-items db))
+    (:builder/drag-items db)))
+
+(rf/reg-sub
+  :drag-items
+  (fn [db [_ source]]
+    ;(prn "drag-items " source)
+    (map #(get-in db [:builder/drag-items %]) (get db source))))
+
+
+
+(rf/reg-sub
+  :filters
+  (fn [db [_ id]]
+    ;(prn "filters " id "//" (get-in db [:filters id]))
+    (get-in db [:builder/filters id])))
+
+(rf/reg-sub
+  :filter-drag-items
+
+  ; this subscription depends on 2 other subscriptions:
+  ;
+  ;  1) :filters for the given widget, if this changes (add/remove/reorder) we
+  ;         need to re-fire
+  ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
+  ;         we may need ot re-fire
+  (fn [[_ id]]
+    [(rf/subscribe [:filters id]) (rf/subscribe [:all-drag-items])])
+
+  ; now, instead of looking in the db, we look in the results of the 2 prereq
+  ; subscriptions
+  (fn [[filters drag-items]]
+    (if filters
+      (let [ret (map #(get drag-items %) filters)]
+        (prn "found filters " filters "//" drag-items "//" ret)
+        ret)
+
+      [])))
 
 
 
@@ -260,7 +386,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; find the specific item from :filters nthat the user has dropped
+; find the specific item from :filters that the user has dropped
 ;
 (comment
 
@@ -339,5 +465,50 @@
   (def from-idx 0)
 
   (get-item db from from-idx)
+
+  ())
+
+
+
+(comment
+  (def drag-items @(rf/subscribe [:all-drag-items]))
+  (def source "b030b8be-07f8-4241-9c56-ccff897d529c")
+
+  (get drag-items source)
+
+  (def id source)
+  @(rf/subscribe [:source-drag-items id])
+
+  ())
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; working out replacing 'source' for a build widget
+;
+(comment
+  (def db @re-frame.db/app-db)
+  (def from :builder/data-sources-list)
+  (def to "6962d1b3-8ebe-404f-a32f-155a19f8c613")
+  (def new-widget (aUUID))
+  (def item (get-item db :builder/data-sources-list 0))
+  (def new-uuid (aUUID))
+
+  (assoc db
+    :builder/widgets (conj (:builder/widgets db) new-widget)
+    :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
+    :builder/drag-items (assoc (:builder/drag-items db)
+                          new-uuid (assoc item :id new-uuid)))
+
+
+  (new-widget db :builder/data-sources-list 0 "New" 0)
+
+
+  (def existing-to-source (get-in db [:builder/source to]))
+  (def to "e83ec36d-673c-4202-ba27-61d3aec9831f")
+  (if (some #{(:id item)} existing-to-source)
+    db
+    (assoc db :builder/source (assoc (:builder/source db) to #{new-uuid})
+              :builder/drag-items (assoc (:builder/drag-items db)
+                                    new-uuid (assoc item :id new-uuid))))
 
   ())

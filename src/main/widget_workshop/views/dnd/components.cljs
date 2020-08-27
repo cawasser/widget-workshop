@@ -34,15 +34,18 @@
 
   [{:keys [draggableId type source destination reason] :as event}]
 
-  ;(prn "on-drag-end " event (keyword (:droppableId source)) (keyword (:droppableId destination)))
+  (prn "on-drag-end " event (:droppableId source) (:droppableId destination)
+    (.substr (:droppableId destination) 0 (.indexOf (:droppableId destination) "-")))
 
   (if destination
-    (if (and (= (:droppableId source) (:droppableId destination))
-          (= (:index destination) (:index source)))
-      ()                                                    ;prn "nothing to do"
-      (rf/dispatch-sync [:handle-drop-event
-                         (:droppableId source) (:index source)
-                         (:droppableId destination) (:index destination)]))))
+    (let [clean-dest (.substr (:droppableId destination) 0
+                       (.indexOf (:droppableId destination) "@"))]
+      (if (and (= (:droppableId source) (:droppableId destination))
+            (= (:index destination) (:index source)))
+        ()                                                    ;prn "nothing to do"
+        (rf/dispatch-sync [:handle-drop-event
+                           (:droppableId source) (:index source)
+                           clean-dest (:index destination)])))))
 
 
 
@@ -126,7 +129,7 @@
      (for [[index {:keys [id name type]}] (map-indexed vector data)]
        (let [[bk-color txt-color] (get-colors type)]
          (prn "vlist" id name type bk-color txt-color)
-         (drag-item id name index bk-color txt-color)))
+         ^{:key index} (drag-item id name index bk-color txt-color)))
      (.-placeholder provided)]))
 
 
@@ -149,5 +152,13 @@
      (for [[index {:keys [id name type]}] (map-indexed vector data)]
        (let [[bk-color txt-color] (get-colors type)]
          ;(prn "hlist" id name type bk-color txt-color)
-         (drag-item id name index bk-color txt-color)))
+         ^{:key index} (drag-item id name index bk-color txt-color)))
      (.-placeholder provided)]))
+
+
+
+
+(comment
+  (.substr "testing-source" 0 (.indexOf "testing-source" "-"))
+
+  ())
