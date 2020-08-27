@@ -215,17 +215,17 @@
 
   [db from from-idx to-idx]
 
-  (let [{:keys [id name]} (get-source-filter-item db from from-idx)]
-    (prn "reorder-widget-filters " from from-idx to-idx name)
+  (let [item (get-source-filter-item db from from-idx)]
+    (prn "reorder-widget-filters " from from-idx to-idx item)
     (assoc db :builder/filters (assoc (:builder/filters db)
-                                 from (reorder (get-in db [:filters from])
+                                 from (reorder (get-in db [:builder/filters from])
                                         from-idx to-idx)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; hanalde the drop events, in all their flavors
+; handle the drop events, in all their flavors
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -255,7 +255,7 @@
     :do-nothing db
 
     ; reorder the 'filters' on a widget
-    :reorder-filters (reorder-widget-filters db from from-idx to-idx)
+    :reorder-filters (reorder-widget-filters db (s/strip-suffix from) from-idx to-idx)
 
     ; dropping from the sources onto a new widget
     :new-widget-from-source (new-widget db (keyword from) from-idx to to-idx)
@@ -576,3 +576,26 @@
   (get-source-filtered-item db from from-idx)
 
   ())
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; more play with reordering filters
+;
+(comment
+  (def db @re-frame.db/app-db)
+  (def from (s/strip-suffix "1deb4300-07e3-456b-b714-e90530596d2c@filter"))
+  (def from-idx 1)
+  (def to-idx 0)
+
+  (let [item (get-source-filter-item db from from-idx)]
+    (prn "reorder-widget-filters " from from-idx to-idx item)
+    (assoc db :builder/filters (assoc (:builder/filters db)
+                                 from (reorder (get-in db [:builder/filters from])
+                                        from-idx to-idx))))
+
+  ())
+
+

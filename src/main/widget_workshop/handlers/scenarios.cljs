@@ -38,8 +38,9 @@
     ; reorder the 'filters' on a widget
     (and
       (not= from "builder/data-sources-list")
+      (not= from "builder/filter-list")
       (not= to new-widget-id)
-      (= from to)) :reorder-filters
+      (= (strip-suffix from) to)) :reorder-filters
 
     ; dropping from the sources onto a new widget
     (and
@@ -81,11 +82,11 @@
       (not= to new-widget-id)) :add-filter-to-widget
 
     ; drop a filter from an existing widget onto another widget
-    (and
-      (not= from "data-sources-list")
-      (not= from "filter-list")
-      (<= 0 (.indexOf from "@filter"))
-      (not= to new-widget-id)) :add-filter-from-widget-to-widget
+    ;(and
+    ;  (not= from "data-sources-list")
+    ;  (not= from "filter-list")
+    ;  (<= 0 (.indexOf from "@filter"))
+    ;  (not= to new-widget-id)) :add-filter-from-widget-to-widget
 
     ; can't do anything else
     :default :do-nothing))
