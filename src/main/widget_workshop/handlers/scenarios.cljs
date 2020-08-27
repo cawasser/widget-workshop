@@ -51,10 +51,11 @@
     ;  (= from "filter-list")
     ;  (= to new-widget-id)) :new-widget-from-filters
 
-    ; drop from an existing widget onto the 'new' widget
+    ; drop the source from an existing widget onto the 'new' widget
     (and
       (not= from "data-sources-list")
       (not= from "filter-list")
+      (<= 0 (.indexOf from "@source"))
       (= to new-widget-id)) :new-widget-from-widget
 
     ; drop from an existing widget onto the 'new' widget
@@ -79,8 +80,20 @@
       (= from "builder/filter-list")
       (not= to new-widget-id)) :add-filter-to-widget
 
+    ; drop a filter from an existing widget onto another widget
+    (and
+      (not= from "data-sources-list")
+      (not= from "filter-list")
+      (<= 0 (.indexOf from "@filter"))
+      (not= to new-widget-id)) :add-filter-from-widget-to-widget
+
     ; can't do anything else
     :default :do-nothing))
 
 
 
+(comment
+  (def from "something")
+  (if (<= 0 (.indexOf from "@source")) true false)
+
+  ())
