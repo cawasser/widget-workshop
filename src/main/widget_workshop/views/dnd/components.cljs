@@ -38,8 +38,7 @@
     (.substr (:droppableId destination) 0 (.indexOf (:droppableId destination) "-")))
 
   (if destination
-    (let [clean-dest (.substr (:droppableId destination) 0
-                       (.indexOf (:droppableId destination) "@"))]
+    (let [clean-dest (s/strip-suffix (:droppableId destination))]
       (if (and (= (:droppableId source) (:droppableId destination))
             (= (:index destination) (:index source)))
         ()                                                    ;prn "nothing to do"

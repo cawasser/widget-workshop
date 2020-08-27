@@ -2,6 +2,15 @@
   (:require [widget-workshop.views.dnd.new-widget :refer [new-widget-id]]))
 
 
+
+(defn strip-suffix
+  "strip any suffix (@source, @filter) from the given 'name'"
+
+  [name]
+  (.substr name 0 (.indexOf name "@")))
+
+
+
 (def drop-scenario-values [:do-nothing                      ; default
                            :add-source-to-widget
                            :connect-widgets
@@ -43,10 +52,10 @@
     ;  (= to new-widget-id)) :new-widget-from-filters
 
     ; drop from an existing widget onto the 'new' widget
-    ;(and
-    ;  (not= from "data-sources-list")
-    ;  (not= from "filter-list")
-    ;  (= to new-widget-id)) :new-widget-from-widget
+    (and
+      (not= from "data-sources-list")
+      (not= from "filter-list")
+      (= to new-widget-id)) :new-widget-from-widget
 
     ; drop from an existing widget onto the 'new' widget
     ;(and

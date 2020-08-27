@@ -27,6 +27,19 @@
     (nth (get db source))
     (get (:builder/drag-items db))))
 
+(defn- get-source-item
+  "returns the name (string) to be displayed for a given item in one of the vectors
+  inside the app-db
+
+  - db  - the app-db for convenience
+  - idx - the numeric position of the given item in the given source vector
+
+  returns the item to be displayed in the UI"
+
+  [db source _]
+  (->> (get-in db [:builder/source (s/strip-suffix source)])
+    first
+    (get (:builder/drag-items db))))
 
 (defn- get-source-filtered-item
   "returns a vector of the (source) id and name of the item being dropped
@@ -154,20 +167,20 @@
 
 
 
-(defn- connect-to-new-widget [db from from-idx to to-idx]
+(defn- new-widget-form-widget [db from from-idx to to-idx]
   "the user wants to connect an existing widgets to a 'new' widget using the item
   dropped on the 'blank widget'"
 
   [db from from-idx to to-idx]
 
   (let [new-widget (aUUID)
-        {:keys [id name]} (get-source-filtered-item db from from-idx)
+        item       (get-source-item db from from-idx)
         new-uuid   (aUUID)]
-    (prn "connect-to-new-widget " from from-idx new-uuid name)
+    (prn "new-widget-from-widget" from from-idx new-uuid item)
     (assoc db :builder/widgets (conj (:builder/widgets db) new-widget)
-              :builder/filters (assoc (:builder/filters db) new-widget [new-uuid])
+              :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
               :builder/drag-items (assoc (:builder/drag-items db)
-                                    new-uuid {:id new-uuid :name name}))))
+                                    new-uuid (assoc item :id new-uuid)))))
 
 
 
@@ -222,7 +235,7 @@
     :new-widget-from-source (new-widget db (keyword from) from-idx to to-idx)
 
     ; drop from an existing widget onto the 'new' widget
-    ;:new-widget-from-widget (connect-to-new-widget db from from-idx to to-idx)
+    :new-widget-from-widget (new-widget-form-widget db from from-idx to to-idx)
 
     ; drop from one widget to another
     ;:connect-widgets (connect-widgets db from from-idx to to-idx)
@@ -510,5 +523,19 @@
     (assoc db :builder/source (assoc (:builder/source db) to #{new-uuid})
               :builder/drag-items (assoc (:builder/drag-items db)
                                     new-uuid (assoc item :id new-uuid))))
+
+  ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; get a source item from an existing widget
+;
+(comment
+  (def db @re-frame.db/app-db)
+  (def from "fdcdbeeb-cff2-4e13-9a6c-ffe280af8ab4@source")
+  (def from-idx 0)
+
+  (get-source-item db from from-idx)
 
   ())
