@@ -22,34 +22,39 @@
 
    ; a map to a set with a single data-source for this widget, this is where the data
    ; will come from (singleton per widget)
-   :builder/source {}
+   :builder/source            {}
 
    ; a map of filters to the dsl used to actually perform the operation
    ; on a data set
-   :builder/filter-source {}
+   :builder/filter-source     {}
 
    ; a vector of :filter ids
    ;
    ; used to create the UI for dragging filters
-   :builder/filter-list []
+   :builder/filter-list       []
 
    ; map of UUIDs to uniquely identify a draggable item, each mapped to {:id} which
    ; provides human-readable naming for the item
    ;
    ; used to create each draggable in the UI (sidebar or widgets)
-   :builder/filters {}
+   :builder/filters           {}
 
    ; uuids for widgets 'under construction' on the builder page
    ;
    ; used to generate the widgets in the widget panel 'builder' UI
-   :builder/widgets []
+   :builder/widget-list       []
+
+   ; 'content' for :widgets 'under construction' on the builder page
+   ;
+   ; provides data like :name, :bar-color, :text-color, etc
+   :builder/widgets           {}
 
    ; map of uuids to {:id <uuid> :name <name>} for each draggble, so they are uniquely identified
    ; throughout the entire app
    ;
    ; use to identify draggable items for use in the UI, as well as any data needed for
    ; UI presentation (id, color, etc.)
-   :builder/drag-items {}
+   :builder/drag-items        {}
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ; LIVE DATA
@@ -60,16 +65,16 @@
 
    ;
    ;
-   :live/data {}
+   :live/data                 {}
 
    ; uuids for 'real' widgets
    ;
    ; used to generate the widgets in the widget panel UI
-   :live/widgets []
+   :live/widgets              []
 
    ;
    ;
-   :live/widget-layout {}
+   :live/widget-layout        {}
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -81,14 +86,14 @@
 
    ; map of the data-sources, with id mapped to the function used to generate
    ; the most up-to-date data
-   :server/data-sources {}
+   :server/data-sources       {}
 
 
 
    ; map of 'data-source' to map of the subscribers (:client, :widget)
    ;
    ; used to update clients when sources 'change'
-   :server/subscriptions {}})
+   :server/subscriptions      {}})
 
 
 
@@ -135,7 +140,7 @@
   :remove-builder-widget
   (fn [db [_ id]]
     ;(prn "removing widget " id)
-    (assoc db :builder/widgets (disjoin (:builder/widgets db) id)
+    (assoc db :builder/widget-list (disjoin (:builder/widget-list db) id)
               :builder/filters (remove-filters db id)
               :builder/drag-items (remove-drag-items db id))))
 
@@ -163,7 +168,7 @@
 (rf/reg-sub
   :buildable-widgets
   (fn [db _]
-    (:builder/widgets db)))
+    (:builder/widget-list db)))
 
 
 

@@ -121,7 +121,7 @@
   "the user wants to create a new widget based upon the source item dropped on
   the 'blank widget'
 
-  1) move the 'blank' widget id (a guid) into the :widgets key
+  1) move the 'blank' widget id (a guid) into the :builder/widget-list key
   2) create a new guid for a new 'blank' and place into the :blank-widget key"
   [db from from-idx to to-idx]
 
@@ -129,7 +129,7 @@
         item       (get-item db from from-idx)
         new-uuid   (aUUID)]
     (prn "new-widget " from from-idx new-uuid name)
-    (assoc db :builder/widgets (conj (:builder/widgets db) new-widget)
+    (assoc db :builder/widget-list (conj (:builder/widget-list db) new-widget)
               :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
               :builder/drag-items (assoc (:builder/drag-items db)
                                     new-uuid (assoc item :id new-uuid)))))
@@ -203,7 +203,7 @@
 ;        item       (get-source-item db from from-idx)
 ;        new-uuid   (aUUID)]
 ;    (prn "new-widget-from-widget" from from-idx new-uuid item)
-;    (assoc db :builder/widgets (conj (:builder/widgets db) new-widget)
+;    (assoc db :builder/widget-list (conj (:builder/widgets-list db) new-widget)
 ;              :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
 ;              :builder/drag-items (assoc (:builder/drag-items db)
 ;                                    new-uuid (assoc item :id new-uuid)))))
@@ -413,7 +413,7 @@
 
 
   (def db @re-frame.db/app-db)
-  (assoc db :builder/widgets (conj (:builder/widgets db) to)
+  (assoc db :builder/widget-list (conj (:builder/widget-list db) to)
             :builder/filters (assoc (:builder/filters db) to [item]))
 
 
@@ -500,7 +500,9 @@
   ())
 
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; getting an item form a dnd list
+;
 (comment
   (def db @re-frame.db/app-db)
   (def from :builder/filter-list)
@@ -511,7 +513,9 @@
   ())
 
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; poking at some drag-item stuff
+;
 (comment
   (def drag-items @(rf/subscribe [:all-drag-items]))
   (def source "b030b8be-07f8-4241-9c56-ccff897d529c")
@@ -536,7 +540,7 @@
   (def new-uuid (aUUID))
 
   (assoc db
-    :builder/widgets (conj (:builder/widgets db) new-widget)
+    :builder/widget-list (conj (:builder/widget-list db) new-widget)
     :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
     :builder/drag-items (assoc (:builder/drag-items db)
                           new-uuid (assoc item :id new-uuid)))
@@ -576,8 +580,6 @@
   (get-source-filtered-item db from from-idx)
 
   ())
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
