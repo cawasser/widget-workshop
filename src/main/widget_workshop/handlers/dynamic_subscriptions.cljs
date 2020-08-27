@@ -27,6 +27,8 @@
     (nth (get db source))
     (get (:builder/drag-items db))))
 
+
+
 (defn- get-source-item
   "returns the name (string) to be displayed for a given item in one of the vectors
   inside the app-db
@@ -41,8 +43,31 @@
     first
     (get (:builder/drag-items db))))
 
-(defn- get-source-filtered-item
-  "returns a vector of the (source) id and name of the item being dropped
+
+
+(defn- get-filter-item
+  "returns a vector of the (filter) id and name of the item being dropped
+
+  this data will be used to construct a NEW item inside the 'to' widget
+
+  - db       - the app-db for convenience
+  - from     - the id of the source vector for the dragged item
+  - from-idx - the numeric position of the given item in the 'from' vector
+
+  returns the map of details about the given dragged item found, keyed by the item's uuid"
+
+  [db from idx]
+
+  (if-let [filters (get-in db [:builder/filter-list])]
+    (do
+      (prn "get-filter-item " filters from idx)
+      (->> (nth filters idx)
+        (vector :builder/drag-items)
+        (get-in db)))))
+
+
+(defn- get-source-filter-item
+  "returns a vector of the (filter) id and name of the item being dropped
 
   this data will be used to construct a NEW item inside the 'to' widget
 
@@ -56,11 +81,10 @@
 
   (if-let [filters (get-in db [:builder/filters from])]
     (do
-      (prn "get-source-filtered-item " filters from idx)
+      (prn "get-source-filter-item " filters from idx)
       (->> (nth filters idx)
         (vector :builder/drag-items)
         (get-in db)))))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -112,7 +136,6 @@
 
 
 
-; TODO: split between -source and -filter
 (defn- add-source-to-widget [db from from-idx to to-idx]
   "the user wants to replace the source on an existing widget"
 
@@ -135,10 +158,13 @@
 
   [db from from-idx to to-idx]
 
-  (let [item                (get-item db from from-idx)
+  (prn "add-filter-to-widget BEFORE" from from-idx to to-idx)
+
+  (let [item                (get-filter-item db from from-idx)
         new-uuid            (aUUID)
         existing-to-filters (get-in db [:builder/filters to])]
-    (prn "add-filter-to-widget " from from-idx new-uuid item to to-idx)
+
+    (prn "add-filter-to-widget AFTER" from from-idx new-uuid item to to-idx)
     (if (allow-drop? db name existing-to-filters)
       (assoc db :builder/filters (assoc (:builder/filters db)
                                    to (splice existing-to-filters to-idx 0 new-uuid))
@@ -148,39 +174,39 @@
 
 
 
-(defn- connect-widgets [db from from-idx to to-idx]
-  "the user wants to connect two widgets together using the item dropped on
-  the 'to widget'"
+;(defn- connect-widgets [db from from-idx to to-idx]
+;  "the user wants to connect two widgets together using the item dropped on
+;  the 'to widget'"
+;
+;  [db from from-idx to to-idx]
+;
+;  (let [{:keys [id name]} (get-source-filtered-item db from from-idx)
+;        new-uuid            (aUUID)
+;        existing-to-filters (get-in db [:builder/filters to])]
+;    (prn "connect-widgets " from from-idx new-uuid name to to-idx)
+;    (if (allow-drop? db name existing-to-filters)
+;      (assoc db :builder/filters (assoc (:builder/filters db)
+;                                   to (splice existing-to-filters to-idx 0 new-uuid))
+;                :builder/drag-items (assoc (:builder/drag-items db)
+;                                      new-uuid {:id new-uuid :name name}))
+;      db)))
 
-  [db from from-idx to to-idx]
-
-  (let [{:keys [id name]} (get-source-filtered-item db from from-idx)
-        new-uuid            (aUUID)
-        existing-to-filters (get-in db [:builder/filters to])]
-    (prn "connect-widgets " from from-idx new-uuid name to to-idx)
-    (if (allow-drop? db name existing-to-filters)
-      (assoc db :builder/filters (assoc (:builder/filters db)
-                                   to (splice existing-to-filters to-idx 0 new-uuid))
-                :builder/drag-items (assoc (:builder/drag-items db)
-                                      new-uuid {:id new-uuid :name name}))
-      db)))
 
 
-
-(defn- new-widget-form-widget [db from from-idx to to-idx]
-  "the user wants to connect an existing widgets to a 'new' widget using the item
-  dropped on the 'blank widget'"
-
-  [db from from-idx to to-idx]
-
-  (let [new-widget (aUUID)
-        item       (get-source-item db from from-idx)
-        new-uuid   (aUUID)]
-    (prn "new-widget-from-widget" from from-idx new-uuid item)
-    (assoc db :builder/widgets (conj (:builder/widgets db) new-widget)
-              :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
-              :builder/drag-items (assoc (:builder/drag-items db)
-                                    new-uuid (assoc item :id new-uuid)))))
+;(defn- new-widget-from-widget [db from from-idx to to-idx]
+;  "the user wants to connect an existing widgets to a 'new' widget using the item
+;  dropped on the 'blank widget'"
+;
+;  [db from from-idx to to-idx]
+;
+;  (let [new-widget (aUUID)
+;        item       (get-source-item db from from-idx)
+;        new-uuid   (aUUID)]
+;    (prn "new-widget-from-widget" from from-idx new-uuid item)
+;    (assoc db :builder/widgets (conj (:builder/widgets db) new-widget)
+;              :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
+;              :builder/drag-items (assoc (:builder/drag-items db)
+;                                    new-uuid (assoc item :id new-uuid)))))
 
 
 
@@ -189,7 +215,7 @@
 
   [db from from-idx to-idx]
 
-  (let [{:keys [id name]} (get-source-filtered-item db from from-idx)]
+  (let [{:keys [id name]} (get-source-filter-item db from from-idx)]
     (prn "reorder-widget-filters " from from-idx to-idx name)
     (assoc db :builder/filters (assoc (:builder/filters db)
                                  from (reorder (get-in db [:filters from])
@@ -235,7 +261,7 @@
     :new-widget-from-source (new-widget db (keyword from) from-idx to to-idx)
 
     ; drop from an existing widget onto the 'new' widget
-    :new-widget-from-widget (new-widget-form-widget db from from-idx to to-idx)
+    ;:new-widget-from-widget (new-widget-form-widget db from from-idx to to-idx)
 
     ; drop from one widget to another
     ;:connect-widgets (connect-widgets db from from-idx to to-idx)
@@ -245,6 +271,9 @@
 
     ; drop new filter onto a widget (not a new widget)
     :add-filter-to-widget (add-filter-to-widget db (keyword from) from-idx to to-idx)
+
+    ; drop filter from one widget onto another widget (not a new widget)
+    ;:add-filter-from-widget-to-widget (add-filter-to-widget db from from-idx to to-idx)
 
     ; can't do anything else
     :default db))
@@ -533,9 +562,17 @@
 ;
 (comment
   (def db @re-frame.db/app-db)
-  (def from "fdcdbeeb-cff2-4e13-9a6c-ffe280af8ab4@source")
-  (def from-idx 0)
+  (def idx 0)
 
   (get-source-item db from from-idx)
+
+  (if-let [filters (get-in db [:builder/filter-list])]
+    (do
+      (prn "get-source-filtered-item " filters from idx)
+      (->> (nth filters idx)
+        (vector :builder/drag-items)
+        (get-in db))))
+
+  (get-source-filtered-item db from from-idx)
 
   ())
