@@ -26,10 +26,7 @@
 
 (defn widget [id can-delete]
   ;(prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
-  [:div {:style {:border       "solid"
-                 :border-width "1px"
-                 :height       "auto"
-                 :width        "500px"}}
+  [:div.widget
    [title-bar @(rf/subscribe [:buildable-widget id]) can-delete]
    [:div {:style {:border       "solid"
                   :border-width "1px"
@@ -55,10 +52,7 @@
     ;  @(rf/subscribe [:filter-drag-items id])
     ;  context)
 
-    [:div {:style {:border       "solid"
-                   :border-width "1px"
-                   :height       "auto"
-                   :width        "500px"}}
+    [:div.widget
      [title-bar context can-delete]
      [:div {:style {:border       "solid"
                     :border-width "1px"
