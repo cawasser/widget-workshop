@@ -22,7 +22,7 @@
      [:div#nav-menu.navbar-menu
       {:class (when @expanded? :is-active)}
       [:div.navbar-end
-       [nav-link "#/" "Home" :home]
+       [nav-link "#/" "Dashboard" :home]
        [nav-link "#/builder" "Builder" :builder]
        [nav-link "#/about" "About" :about]]]]))
 
