@@ -37,8 +37,10 @@
 
 
 (defn widget-panel []
-  [:div {:style {:height "auto"}}
-   [:h2 "Widgets"]])
+  [:div
+   [:h2 "Widgets"]
+   [:div.widget-panel
+    [:p.widget "widgets go here"]]])
 
 
 

@@ -1,0 +1,14 @@
+.widget-panel {
+  width: 1020px;
+  height: auto;
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.widget {
+  border:       solid;
+  border-width: 1px;
+  height:       auto;
+  min-width:    500px;
+  margin: 5px;
+};
