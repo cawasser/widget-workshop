@@ -9,9 +9,30 @@
 
 
 
+(defn- widget-button [item on?]
+  [:p.is-6
+   {:style    {:border           "1px solid lightgray"
+               :border-radius    "5px"
+               :padding          "8px"
+               :padding-left     "3px"
+               :padding-right    "3px"
+               :margin-bottom    "8px"
+               :max-width        "220px"
+               :color            "black"
+               :background-color (if @on? "lightgreen" "darkgray")}
+    :on-click #(do
+                 (swap! on? not)
+                 (rf/dispatch-sync [:add-remove-widget (:id item)]))}
+   (:name item)])
+
+
 
 (defn widgets-panel [content]
-  [:p (:name content)])
+  (prn "widgets-panel" content)
+  (into [:div]
+     (for [[index id] (map-indexed vector content)]
+       (let [on? (r/atom false)]
+        ^{:key index} [widget-button @(rf/subscribe [:widget id]) on?]))))
 
 
 
@@ -33,14 +54,17 @@
        [widgets-panel
         ;(fuzzy-filter @the-filter
         ;  (map (comp name :id)
-        @(rf/subscribe [:live/widgets])]])))
+        @(rf/subscribe [:widget-list])]])))
 
 
 (defn widget-panel []
   [:div
    [:h2 "Widgets"]
-   [:div.widget-panel
-    [:p.widget "widgets go here"]]])
+   [:div.widget-panel]])
+    ;(for [[idx id] (map-indexed vector @(rf/subscribe [:buildable-widgets]))]
+    ;  ^{:key idx} [w/buildable-widget id true])
+    ;[w/buildable-widget new-widget-id false]]])
+
 
 
 
@@ -137,11 +161,17 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; messing with filters on the sidebar
+; getting the sidebar working
 ;
 (comment
-  @re-frame.db/app-db
+  (def content ["one" "two" "three"])
+  (map-indexed vector content)
 
-  @(rf/subscribe [:drag-items :filter-list])
+  (for [[index name] (map-indexed vector content)]
+    ;(let [on? (r/atom false)]
+    ^{:key index} [:p.is-6 name])
+
+  (def id "one")
+  @(rf/subscribe [:widget id])
 
   ())

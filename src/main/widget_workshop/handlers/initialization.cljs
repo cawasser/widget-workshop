@@ -68,10 +68,25 @@
    ;
    :live/data                 {}
 
-   ; uuids for 'real' widgets
+   ; map of uuid to relevant for 'real' widgets
    ;
    ; used to generate the widgets in the widget panel UI
-   :live/widgets              []
+   :live/widgets              {"one" {:id "one" :name "one"
+                                      :source "test-1" :filters ["f-1" "f-2"]}
+                               "two" {:id "two" :name "two"
+                                      :source "test-2" :filters ["g-1" "g-2"]}
+                               "three" {:id "three" :name "three"
+                                        :source "test-3" :filters ["h-1" "h-2"]}}
+
+   ;  map of uuid to relevant 'active' widgets, the one we actually SHOW
+   ;
+   :live/active-widgets       {}
+
+
+   ; uuids for 'real' widgets
+   ;
+   ; used to generate the widgets in the widget sidebar UI
+   :live/widget-list          ["one" "two" "three"]
 
    ;
    ;
@@ -147,6 +162,17 @@
 
 
 
+(rf/reg-event-db
+  :add-remove-widget
+  (fn [db [_ id]]
+    (let [item (get-in db [:live/widgets id])]
+      (if (contains? (:live/active-widgets db) id)
+        (assoc db :live/active-widgets
+                  (dissoc (:live/active-widgets db) id))
+        (assoc db :live/widgets
+                  (assoc (:live/active-widgets db) id item))))))
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -182,18 +208,29 @@
 (rf/reg-sub
   :widgets
   (fn [db _]
-    (:live/widgets db)))
+    (-> db :live/widgets)))
+
+(rf/reg-sub
+  :widget-list
+  (fn [db _]
+    (-> db :live/widget-list)))
+
+(rf/reg-sub
+  :widget
+  (fn [db [_ id]]
+    (get-in db [:live/widgets id])))
+
 
 (rf/reg-sub
   :widget-layout
   (fn [db _]
-    (:live/widget-layout db)))
+    (-> db :live/widget-layout)))
 
 
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; let's play with the app-db
 ;
@@ -342,4 +379,26 @@
 
 
 
+  ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; add-remove a widget form the dashboard UI
+;
+(comment
+  (def db @re-frame.db/app-db)
+  (def id "one")
+  (:live/widgets db)
+
+
+  (contains? (:live/active-widgets db) id)
+
+  (def item (get-in db [:live/widgets id]))
+
+  (if (contains? (:live/active-widgets db) id)
+    (assoc db :live/active-widgets
+              (dissoc (:live/active-widgets db) id))
+    (assoc db :live/widgets
+              (assoc (:live/active-widgets db) id item)))
   ())
