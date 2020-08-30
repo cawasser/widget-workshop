@@ -60,10 +60,10 @@
 (defn widget-panel []
   [:div
    [:h2 "Widgets"]
+   [w/widget "New Widget" true]
    [:div.widget-panel]])
-    ;(for [[idx id] (map-indexed vector @(rf/subscribe [:buildable-widgets]))]
-    ;  ^{:key idx} [w/buildable-widget id true])
-    ;[w/buildable-widget new-widget-id false]]])
+    ;(for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
+    ;  ^{:key idx} [w/widget id true]))
 
 
 

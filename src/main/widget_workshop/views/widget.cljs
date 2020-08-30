@@ -3,21 +3,28 @@
             [re-frame.core :as rf]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.views.dnd.components :as d]
-            [widget-workshop.views.dnd.new-widget :refer [new-widget-id]]))
+            [widget-workshop.views.dnd.new-widget :refer [new-widget-id]]
+            [widget-workshop.views.oz.content :as oz]))
 
 
 
 (defn- title-bar [context can-delete]
   ;(prn "title-bar" context can-delete)
-  [:div.container.level
+  [:div.container.level {:style {:width            "auto"
+                                 :height           "auto"
+                                 :background-color (:title-color context)
+                                 :color            (:text-color context)}}
    [:div.level-left.has-text-left
-    [:h3 {:style {:height           "30px"
-                  :background-color (:title-color context)
-                  :color            (:text-color context)}}
+    {:style {:width  "auto"
+             :height "auto"}}
+    [:h3 {:style {:margin   5
+                  :position :relative
+                  :top      "50%"}}
      (:name context)]
     (if can-delete
-      [:div.level-right.has-text-centered
-       [:button.delete.is-large {:style    {:margin-right "10px"}
+      [:div.level-right.has-text-centered {:style {:position     :absolute :top "50%" :right "0%"
+                                                   :margin-right "10px" :margin-left "5px"}}
+       [:button.delete.is-large {
                                  :on-click #(do
                                               ;(prn "delete button " id)
                                               (rf/dispatch [:remove-widget (:id context)])
@@ -26,11 +33,11 @@
 
 (defn widget [id can-delete]
   ;(prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
-  [:div.widget
+  [:div.widget {:style {:width "500px"}}
    [title-bar @(rf/subscribe [:buildable-widget id]) can-delete]
    [:div {:style {:border       "solid"
-                  :border-width "1px"
-                  :height       "200px"}}]])
+                  :border-width "1px"}}
+    [oz.core/vega-lite @oz/line-plot]]])
 
 
 (defn prep-id [id suffix]
