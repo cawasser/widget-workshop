@@ -33,10 +33,11 @@
 
 (defn widget [id can-delete]
   ;(prn "widget " id @(rf/subscribe [:filters id]) @(rf/subscribe [:filter-drag-items id]))
-  [:div.widget {:style {:width "500px"}}
+  [:div.widget {:style {:width "500px" :height "300px"}}
    [title-bar @(rf/subscribe [:buildable-widget id]) can-delete]
-   [:div {:style {:border       "solid"
-                  :border-width "1px"}}
+   [:div#vega {:style {:height       "250px"
+                       :border       "solid"
+                       :border-width "1px"}}
     [oz.core/vega-lite @oz/line-plot]]])
 
 

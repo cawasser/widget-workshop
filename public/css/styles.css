@@ -12,3 +12,8 @@
   min-width:    500px;
   margin: 5px;
 };
+
+.vega-embed .chart-wrapper {
+  width: inherit;
+  height: inherit;
+}

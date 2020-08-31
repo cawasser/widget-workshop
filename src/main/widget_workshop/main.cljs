@@ -7,9 +7,9 @@
             [reagent.core :as r]
             [reagent.dom :as rd]
             [re-frame.core :as rf]
-            [widget-workshop.views.home-page :refer [home-page]]
-            [widget-workshop.views.builder :refer [builder-page]]
-            [widget-workshop.views.about-page :refer [about-page]]
+            [widget-workshop.views.dashboard.view :as dashboard]
+            [widget-workshop.views.builder.view :as builder]
+            [widget-workshop.views.about.view :as about]
             [widget-workshop.nav-bar :as navbar]
             [widget-workshop.session :refer [session]]
             [widget-workshop.handlers.initialization]
@@ -21,9 +21,9 @@
 
 
 (def pages
-  {:home  #'home-page
-   :builder #'builder-page
-   :about #'about-page})
+  {:home  #'dashboard/page
+   :builder #'builder/page
+   :about #'about/page})
 
 (defn page []
   [(pages (:page @session))])

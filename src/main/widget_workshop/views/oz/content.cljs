@@ -13,7 +13,12 @@
            :encoding {:x     {:field "time" :type "quantitative"}
                       :y     {:field "quantity" :type "quantitative"}
                       :color {:field "item" :type "nominal"}}
-           :mark     "line"}))
+           :mark     "line"
+           :width    345
+           :height   195}))
+;:autosize {:type     "fit"
+;           :contains "content"
+;           :resize   true}}))
 
 
 
@@ -66,7 +71,10 @@
 
 
 
-  (def data (r/atom {:data     {:values (play-data "monkey" "slipper" "broom")}
+  (def data (r/atom {:autosize {:type     "fit"
+                                :contains "padding"}
+
+                     :data     {:values (play-data "monkey" "slipper" "broom")}
                      :encoding {:x     {:field "time" :type "quantitative"}
                                 :y     {:field "quantity" :type "quantitative"}
                                 :color {:field "item" :type "nominal"}}

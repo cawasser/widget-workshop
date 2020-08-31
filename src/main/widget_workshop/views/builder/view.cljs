@@ -1,4 +1,4 @@
-(ns widget-workshop.views.builder
+(ns widget-workshop.views.builder.view
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [widget-workshop.views.dnd.components :as d]
@@ -71,7 +71,7 @@
 
 
 
-(defn builder-page []
+(defn page []
   [:> DragDropContext
    {:onDragStart  #()
     :onDragUpdate #()                                       ;d/on-drag-update (js->clj % :keywordize-keys true)

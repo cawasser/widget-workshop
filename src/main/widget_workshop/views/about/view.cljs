@@ -1,8 +1,8 @@
-(ns widget-workshop.views.about-page
+(ns widget-workshop.views.about.view
   (:require [re-frame.core :as rf]))
 
 
-(defn about-page []
+(defn page []
   [:section.section>div.container>div.content
    [:img {:src "/img/warning_clojure.png"}]
    [:div

@@ -1,4 +1,4 @@
-(ns widget-workshop.views.home-page
+(ns widget-workshop.views.dashboard.view
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [widget-workshop.views.dnd.components :as d]
@@ -68,7 +68,7 @@
 
 
 
-(defn home-page []
+(defn page []
   [:section.section>div.container>div.content
    [:div.columns
     [:div.column.is-one-fifth
