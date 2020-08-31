@@ -5,11 +5,22 @@
   flex-flow: row wrap;
 }
 
-.widget {
-  border:       solid;
+.gallery {
+  height: auto;
+  padding: 2px;
+  margin: 5px;
+  border: solid;
   border-width: 1px;
-  height:       auto;
-  min-width:    500px;
+  backgound-color: lightpink;
+  display: flex;
+  overflow: auto;
+  flex-flow: row;
+}
+
+.widget {
+  border: solid;
+  border-width: 1px;
+  height: auto;
   margin: 5px;
 };
 

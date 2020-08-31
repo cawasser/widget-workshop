@@ -14,8 +14,8 @@
                       :y     {:field "quantity" :type "quantitative"}
                       :color {:field "item" :type "nominal"}}
            :mark     "line"
-           :width    345
-           :height   195}))
+           :autosize {:type     "fit"
+                      :contains "padding"}}))
 ;:autosize {:type     "fit"
 ;           :contains "content"
 ;           :resize   true}}))

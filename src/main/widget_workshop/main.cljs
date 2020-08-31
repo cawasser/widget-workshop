@@ -68,13 +68,13 @@
   (rf/dispatch-sync [:initialize])
 
   ; register some 'data-sources'
-  (sm/register-data-source "generic-source"
-    widget-workshop.server.source.generic-data/get-data)
-  (sm/register-data-source "config-source"
-    widget-workshop.server.source.config-data/get-data)
+  ;(sm/register-data-source "generic-source"
+  ;  widget-workshop.server.source.generic-data/get-data)
+  ;(sm/register-data-source "config-source"
+  ;  widget-workshop.server.source.config-data/get-data)
 
-  (sm/register-filter "take 5" [:take 5])
-  (sm/register-filter "extract datetime" [:select [:id :datetime]])
+  ;(sm/register-filter "take" [:take {:param :number}])
+  ;(sm/register-filter "extract datetime" [:select [:id :datetime]])
 
   (mount-components))
 

@@ -122,7 +122,7 @@
                           :border-style     "solid"
                           :border-radius    "5px"
                           :min-height       "30px"
-                          :margin           "1px"}}
+                          :margin           "auto"}}
             (js->clj (.-droppableProps provided)))
      ;(prn "draggable-item-vlist " data)
      (for [[index {:keys [id name type]}] (map-indexed vector data)]
@@ -140,7 +140,7 @@
                           :border-width     (if isDraggingOver "1px" "inherit")
                           :border-style     "solid"
                           :border-radius    "5px"
-                          :margin           "1px"
+                          :margin           "auto"
                           :display          :flex
                           :min-height       "50px"
                           :flex-flow        "row wrap"
