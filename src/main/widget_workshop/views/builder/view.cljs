@@ -13,30 +13,34 @@
   (let [current-widget @(rf/subscribe [:buildable-widget])
         widget         @(rf/subscribe [:widget current-widget])]
 
-    [:div {:style {:border-radius    "5px"
-                   :margin-right     "5px"
-                   :background-color "lightblue"}}
-     [:h2 {:style {:text-align :center}} "Content"]
-     [:div.panel-block {:style {:margin-bottom "5px"}}
+    [:div
+     [:div.panel-block {:style {:margin-bottom           "5px"
+                                :border-top-right-radius "5px"
+                                :border-top-left-radius  "5px"
+                                :background-color        "lightblue"}}
       [:div
-       [:p.is-5 "source:"]
+       [:h2 {:style {:text-align :center}} "Source"]
        [:> Droppable {:droppable-id   "builder/source-list"
                       :isDropDisabled false
                       :type           "source"}
 
         (fn [provided snapshot]
           (r/as-element
-            [d/draggable-item-hlist provided snapshot @(rf/subscribe [:source-drag-items (:source widget)]) "cadetblue"]))]]
+            [d/draggable-item-hlist provided snapshot @(rf/subscribe [:source-drag-items (:source widget)]) "cadetblue"]))]]]
 
+     [:div.panel-block {:style {:margin-bottom    "5px"
+                                :border-bottom-right-radius "5px"
+                                :border-bottom-left-radius  "5px"
+                                :background-color "lightgray"}}
       [:div
-       [:p.is-5 "steps:"]]]]))
-;[:> Droppable {:droppable-id   "builder/filter-list"
-;               :isDropDisabled false
-;               :type           "filter"}
-;
-; (fn [provided snapshot]
-;   (r/as-element
-;     [d/draggable-item-vlist provided snapshot @(rf/subscribe [:filter-drag-items (:id widget)]) "cadetblue"]))]]))
+       [:h2 {:style {:text-align :center}} "Steps:"]
+       [:> Droppable {:droppable-id   "builder/filter-list"
+                      :isDropDisabled false
+                      :type           "filter"}
+
+        (fn [provided snapshot]
+          (r/as-element
+            [d/draggable-item-vlist provided snapshot @(rf/subscribe [:filter-drag-items (:id widget)]) "cadetblue"]))]]]]))
 
 
 
@@ -188,5 +192,26 @@
       ret)
     [])
 
+  ())
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; getting the filters
+;
+(comment
+  @re-frame.db/app-db
+
+  (def current-widget @(rf/subscribe [:buildable-widget]))
+  (def widget @(rf/subscribe [:widget current-widget]))
+
+  (def filters @(rf/subscribe [:filters (:id widget)]))
+  (def drag-items @(rf/subscribe [:all-drag-items]))
+
+  @(rf/subscribe [:filter-drag-items (:id widget)])
+
+  (let [ret (map #(get drag-items %) filters)]
+    ;(prn "found filters " filters "//" drag-items "//" ret)
+    ret)
 
   ())
