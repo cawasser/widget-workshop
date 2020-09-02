@@ -4,7 +4,7 @@
             [widget-workshop.views.dnd.components :as d]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.views.widget :as w]
-            [widget-workshop.handlers.dynamic-subscriptions]))
+            [widget-workshop.handlers.compose-widgets]))
 
 
 

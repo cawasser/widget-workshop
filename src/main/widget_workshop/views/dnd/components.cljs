@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
-            [widget-workshop.handlers.dynamic-subscriptions]
+            [widget-workshop.handlers.compose-widgets]
             [widget-workshop.handlers.scenarios :as s]))
 
 

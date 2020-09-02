@@ -1,4 +1,4 @@
-(ns widget-workshop.handlers.dynamic-subscriptions
+(ns widget-workshop.handlers.compose-widgets
   (:require [re-frame.core :as rf]
             [widget-workshop.util.uuid :refer [aUUID]]
             [widget-workshop.util.vectors :refer [splice reorder]]
@@ -120,21 +120,35 @@
 
 
 
+(defn- replace-source
+  "replace the current source for the current widget under construction
+
+  NOTE: this current LEAKS drag-items (we never delete to old one)"
+  [db widget new-uuid]
+  (-> (get-in db [:widgets (:id widget)])
+    (assoc :source new-uuid)))
+
+
 
 (defn- add-source-to-widget [db from from-idx to to-idx]
   "the user wants to replace the source on an existing widget"
 
   [db from from-idx to to-idx]
 
-  (let [item               (get-item db from from-idx)
-        new-uuid           (aUUID)
-        existing-to-source (get-in db [:builder/source to])]
-    ;(prn "add-source-to-widget " from from-idx new-uuid item to to-idx existing-to-source)
-    (if (some #{(:id item)} existing-to-source)
+  (let [item           (get-item db from from-idx)
+        new-uuid       (aUUID)
+        current-widget (:builder/current-widget db)
+        widget (get-in db [:widgets current-widget])]
+
+    (prn "add-source-to-widget " from from-idx item to to-idx current-widget new-uuid)
+
+    (if (some #{(:id item)} (:source current-widget))
       db
-      (assoc db :builder/source (assoc (:builder/source db) to #{new-uuid})
-                :builder/drag-items (assoc (:builder/drag-items db)
-                                      new-uuid (assoc item :id new-uuid))))))
+      (-> db
+        (assoc-in [:widgets current-widget]
+          (replace-source db widget new-uuid))
+        (assoc-in [:builder/drag-items new-uuid]
+          (assoc item :id new-uuid))))))
 
 
 
@@ -156,42 +170,6 @@
                 :builder/drag-items (assoc (:builder/drag-items db)
                                       new-uuid (assoc item :id new-uuid)))
       db)))
-
-
-
-;(defn- connect-widgets [db from from-idx to to-idx]
-;  "the user wants to connect two widgets together using the item dropped on
-;  the 'to widget'"
-;
-;  [db from from-idx to to-idx]
-;
-;  (let [{:keys [id name]} (get-source-filtered-item db from from-idx)
-;        new-uuid            (aUUID)
-;        existing-to-:steps (get-in db [:builder/:steps to])]
-;    (prn "connect-widgets " from from-idx new-uuid name to to-idx)
-;    (if (allow-drop? db name existing-to-:steps)
-;      (assoc db :builder/:steps (assoc (:builder/:steps db)
-;                                   to (splice existing-to-:steps to-idx 0 new-uuid))
-;                :builder/drag-items (assoc (:builder/drag-items db)
-;                                      new-uuid {:id new-uuid :name name}))
-;      db)))
-
-
-
-;(defn- new-widget-from-widget [db from from-idx to to-idx]
-;  "the user wants to connect an existing widgets to a 'new' widget using the item
-;  dropped on the 'blank widget'"
-;
-;  [db from from-idx to to-idx]
-;
-;  (let [new-widget (aUUID)
-;        item       (get-source-item db from from-idx)
-;        new-uuid   (aUUID)]
-;    (prn "new-widget-from-widget" from from-idx new-uuid item)
-;    (assoc db :builder/widget-list (conj (:builder/widgets-list db) new-widget)
-;              :builder/source (assoc (:builder/source db) new-widget #{new-uuid})
-;              :builder/drag-items (assoc (:builder/drag-items db)
-;                                    new-uuid (assoc item :id new-uuid)))))
 
 
 
@@ -233,7 +211,7 @@
 
   [db from from-idx to to-idx]
 
-  ;(prn "-handle-drop-event " from to (s/drop-scenario? from to))
+  (prn "-handle-drop-event " from to (s/drop-scenario? from to))
 
   (condp = (s/drop-scenario? from to)
     ; nothing to do (eg, can't reorder the sources list)
@@ -308,11 +286,13 @@
   ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
   ;         we may need to re-fire
   (fn [[_ id]]
+    (prn "pre-subscription" id)
     [(rf/subscribe [:source id]) (rf/subscribe [:all-drag-items])])
 
   ; now, instead of looking in the db, we look in the results of the 2 prereq
   ; subscriptions
   (fn [[source drag-items]]
+    (prn ":source-drag-items" source drag-items)
     (if source
       (let [ret (map #(get drag-items %) source)]
         ;(prn "found source " source "//" drag-items "//" ret)
@@ -337,11 +317,16 @@
     (:builder/drag-items db)))
 
 (rf/reg-sub
+  :drag-item
+  (fn [db [_ id]]
+    ;(prn "drag-item " id)
+    (get-in db [:builder/drag-items id])))
+
+(rf/reg-sub
   :drag-items
   (fn [db [_ source]]
-    ;(prn "drag-items " source)
+    ;(prn "drag-item " id)
     (map #(get-in db [:builder/drag-items %]) (get db source))))
-
 
 
 (rf/reg-sub
@@ -374,6 +359,37 @@
 
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; add/replace the source for the :current-widget
+(comment
+  (def db @re-frame.db/app-db)
+  (def from :builder/sources-list)
+  (def from-idx 0)
+  (def item (get-item db from from-idx))
+  (def new-uuid (aUUID))
+  (def current-widget (:builder/current-widget db))
+
+
+
+  (defn- replace-source
+    "replace the current source for the current widget under construction
+
+    NOTE: this current LEAKS drag-items (we never delete to old one)"
+    [widget new-uuid]
+    (-> (get-in db [:widgets (:id widget)])
+      (assoc :source new-uuid)))
+
+  (def widget (get-in db [:widgets current-widget]))
+  (if (some #{(:id item)} (:source widget))
+    db
+    (-> db
+      (assoc-in [:widgets current-widget]
+        (replace-source widget new-uuid))
+      (assoc-in [:builder/drag-items new-uuid]
+              (assoc item :id new-uuid))))
+
+  ())
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -174,40 +174,6 @@
   (def dsl [:testing])
   (def source-sn #())
 
-  (let [drag-id (aUUID)]
-    (assoc db
-      :server/data-sources (assoc (:server/data-sources db) id source-fn)
-      :builder/data-sources (conj (:builder/data-sources db) id)
-      :builder/data-sources-list (conj (:builder/data-sources-list db) drag-id)
-      :builder/drag-items (assoc (:builder/drag-items db)
-                            drag-id {:id (aUUID) :type :source :name id})))
-
-  (let [drag-id (aUUID)]
-    ;(prn ":add-filter" id dsl drag-id)
-    (assoc db
-      :builder/filter-source (assoc (:builder/filter-source db) id dsl)
-      :builder/filter-list (conj (:builder/filter-list db) drag-id)
-      :builder/drag-items (assoc (:builder/drag-items db)
-                            drag-id {:id (aUUID) :type :filter
-                                     :name id :filter dsl})))
-
-
-  (register-data-source
-    "generic-source"
-    widget-workshop.server.source.generic-data/get-data)
-
-  (register-data-source
-    "config-source"
-    widget-workshop.server.source.config-data/get-data)
-
-
-
-  (register-data-source :really-big-source #())
-  (unregister-data-source :generic-source)
-  (unregister-data-source :really-big-source)
-
-
-  ((get-in @re-frame.db/app-db [:data-sources :generic-source]))
 
   ())
 
@@ -220,24 +186,6 @@
   (def db @re-frame.db/app-db)
   (def result ((get-in db [:builder/data-sources "generic-source"])))
 
-  (let [result    ((get-in db [:builder/data-sources "generic-source"]))]
-    (assoc result :data (f/apply-filters [[:ds/extract [:id :datetime :x]]
-                                          [:ds/group-by [:x]]]
-                                          ;[:ds/take 2]]
-                          (:data result))))
-
-  ; TODO: :group-by breaks the code to recreate the :keys meta-data!
-
-  (def filters [[:ds/extract [:id :x :y]]
-                [:ds/group-by [:x]]])
-                ;[:ds/take 2]])
-  (def id "generic-source")
-
-  (let [result    ((get-in db [:builder/data-sources id]))
-        ;:steps (get-in db [::steps source])
-        filtered  (f/apply-filters filters (:live/data result))]
-    (assoc result :data filtered
-                  :keys (into [] (keys (first filtered)))))
 
   (rf/dispatch [:publish "generic-source"])
 
@@ -256,23 +204,6 @@
   (def results ((get-in db [:builder/data-sources source])))
 
 
-  (defn apply-filters [dsl data]
-    (if (empty? dsl)
-      data
-      (recur (rest dsl) (filter-step (first dsl) data))))
-
-  (map #(get-in db [:builder/filter %]) (get-in db [:builder/filters id]))
-
-  (let [filters  (get-in db [:builder/filters id])
-        filtered (f/apply-filters filters (:live/data results))]
-    (assoc-in db
-      [:live/data id]
-      (assoc results :data filtered
-                     :keys (into [] (keys (first filtered))))))
-
-  (let [source-fn (get-in db [:server/data-sources id])
-        result    (source-fn)]
-    (map #(pub-to-subscriber db % result) (get-in db [:server/subscriptions id])))
 
   ())
 

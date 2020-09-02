@@ -4,7 +4,7 @@
             [widget-workshop.views.dnd.components :as d]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.views.widget :as w]
-            [widget-workshop.handlers.dynamic-subscriptions]
+            [widget-workshop.handlers.compose-widgets]
             [widget-workshop.util.uuid :refer [aUUID]]
             [widget-workshop.handlers.default-data :refer [gen-widget]]))
 
@@ -27,9 +27,10 @@
                  :type           "source"}
 
    (fn [provided snapshot]
+     (prn "sources-tool" widget @(rf/subscribe [:drag-items (:source widget)]))
      (r/as-element
        [d/draggable-item-vlist provided snapshot
-        @(rf/subscribe [:source-drag-items (:source widget)]) "cadetblue"]))])
+        [@(rf/subscribe [:drag-item (:source widget)])] "cadetblue"]))])
 
 
 
@@ -40,7 +41,8 @@
 
    (fn [provided snapshot]
      (r/as-element
-       [d/draggable-item-vlist provided snapshot @(rf/subscribe [:filter-drag-items (:id widget)]) "cadetblue"]))])
+       [d/draggable-item-vlist provided snapshot
+        @(rf/subscribe [:drag-item (:id widget)]) "cadetblue"]))])
 
 
 
@@ -69,7 +71,7 @@
 
 
 (defn sources-panel [content]
-  [:> Droppable {:droppable-id   "builder/data-sources-list"
+  [:> Droppable {:droppable-id   "builder/sources-list"
                  :isDropDisabled true                       ; can't drop anything onto the source list
                  :type           "source"}
    (fn [provided snapshot]
@@ -102,7 +104,7 @@
 
 (defn steps-panel [content]
   ;(prn ":steps-panel " content)
-  [:> Droppable {:droppable-id   "builder/filter-list"
+  [:> Droppable {:droppable-id   "builder/steps-list"
                  :isDropDisabled true                       ; can't drop anything onto the source list
                  :type           "filter"}
 
@@ -193,27 +195,32 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; builder-panel
 (comment
-  (def current-widget @(rf/subscribe [:buildable-widget]))
+
+  (def db @re-frame.db/app-db)
+  (def current-widget @(rf/subscribe [:current-widget]))
   (def widget @(rf/subscribe [:widget current-widget]))
-
-  (w/fullsize-widget @(rf/subscribe [:widget current-widget]))
-
-  (:source widget)
+  (def source (:source widget))
 
 
-  (def id (-> @(rf/subscribe [:source-drag-items (:source widget)]) first :id))
-  (map :id @(rf/subscribe [:source-drag-items (:source widget)]))
+  (def id (:id @(rf/subscribe [:drag-items (:source widget)])))
+  (map :id [@(rf/subscribe [:drag-items (:source widget)])])
 
-  (def source @(rf/subscribe [:source (:source widget)]))
-  (def drag-items @(rf/subscribe [:all-drag-items]))
 
-  (if source
-    (let [ret (map #(get drag-items %) source)]
-      ;(prn "found source " source "//" drag-items "//" ret)
-      ret)
-    [])
+  (get db :builder/drag-items)
+  (-> db
+    :builder/drag-items
+    (get source))
+  (get-in db [:builder/drag-items source])
+
+  @(rf/subscribe [:drag-item (:source widget)])
+
+
+  (sources-tool @(rf/subscribe [:drag-item (:source widget)]))
+
 
   ())
+
+
 
 
 
@@ -240,5 +247,13 @@
 ;;;;;;;;;;;;;;;
 ; quick test of adding a new 'blank' widget
 (comment
+  (def db @re-frame.db/app-db)
   (rf/dispatch [:new-widget])
+
+  (def widget (get-in db [:widgets "alpha"]))
+
+  (get-in db [:builder/all-drag-items (:source widget)])
+
+  @(rf/subscribe [:drag-items (:source widget)])
+
   ())
