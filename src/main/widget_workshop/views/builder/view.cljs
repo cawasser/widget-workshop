@@ -2,14 +2,50 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf]
             [widget-workshop.views.dnd.components :as d]
-            [widget-workshop.views.dnd.new-widget :refer [new-widget-id new-widget-context]]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.views.widget :as w]
-            [widget-workshop.handlers.dynamic-subscriptions]))
+            [widget-workshop.handlers.dynamic-subscriptions]
+            [widget-workshop.util.uuid :refer [aUUID]]
+            [widget-workshop.handlers.default-data :refer [gen-widget]]))
+
+
+
+
+(rf/reg-event-db
+  :new-widget
+  (fn [db _]
+    (let [new-id (aUUID)]
+      ;(prn "new-widget " new-id)
+      (assoc db :builder/widget-list (conj (:builder/widget-list db) new-id)
+                :widgets (assoc (:widgets db) new-id (gen-widget new-id))))))
+
+
+(defn- sources-tool [widget]
+  [:> Droppable {:droppable-id   "builder/source-list"
+                 :isDropDisabled false
+                 :min-height     "50px"
+                 :type           "source"}
+
+   (fn [provided snapshot]
+     (r/as-element
+       [d/draggable-item-vlist provided snapshot
+        @(rf/subscribe [:source-drag-items (:source widget)]) "cadetblue"]))])
+
+
+
+(defn- steps-tool [widget]
+  [:> Droppable {:droppable-id   "builder/steps-list"
+                 :isDropDisabled false
+                 :type           "filter"}
+
+   (fn [provided snapshot]
+     (r/as-element
+       [d/draggable-item-vlist provided snapshot @(rf/subscribe [:filter-drag-items (:id widget)]) "cadetblue"]))])
+
 
 
 (defn builder-panel []
-  ;(prn "filters-panel " content)
+  ;(prn ":steps-panel " content)
   (let [current-widget @(rf/subscribe [:buildable-widget])
         widget         @(rf/subscribe [:widget current-widget])]
 
@@ -20,30 +56,15 @@
                                 :background-color        "lightblue"}}
       [:div
        [:h2 {:style {:text-align :center}} "Source"]
-       [:> Droppable {:droppable-id   "builder/source-list"
-                      :isDropDisabled false
-                      :type           "source"}
+       [sources-tool widget]]]
 
-        (fn [provided snapshot]
-          (r/as-element
-            [d/draggable-item-hlist provided snapshot @(rf/subscribe [:source-drag-items (:source widget)]) "cadetblue"]))]]]
-
-     [:div.panel-block {:style {:margin-bottom    "5px"
+     [:div.panel-block {:style {:margin-bottom              "5px"
                                 :border-bottom-right-radius "5px"
                                 :border-bottom-left-radius  "5px"
-                                :background-color "lightgray"}}
+                                :background-color           "lightgray"}}
       [:div
        [:h2 {:style {:text-align :center}} "Steps:"]
-       [:> Droppable {:droppable-id   "builder/filter-list"
-                      :isDropDisabled false
-                      :type           "filter"}
-
-        (fn [provided snapshot]
-          (r/as-element
-            [d/draggable-item-vlist provided snapshot @(rf/subscribe [:filter-drag-items (:id widget)]) "cadetblue"]))]]]]))
-
-
-
+       [steps-tool widget]]]]))
 
 
 
@@ -75,12 +96,12 @@
        [sources-panel
         ;(fuzzy-filter @the-filter
         ;  (map (comp name :id)
-        @(rf/subscribe [:drag-items :builder/data-sources-list])]])))
+        @(rf/subscribe [:drag-items :builder/sources-list])]])))
 
 
 
-(defn filters-panel [content]
-  ;(prn "filters-panel " content)
+(defn steps-panel [content]
+  ;(prn ":steps-panel " content)
   [:> Droppable {:droppable-id   "builder/filter-list"
                  :isDropDisabled true                       ; can't drop anything onto the source list
                  :type           "filter"}
@@ -91,12 +112,12 @@
 
 
 
-(defn filters-sidebar []
+(defn steps-sidebar []
   [:div {:style {:border-radius    "5px"
                  :margin-right     "5px"
                  :background-color "lightgray"}}
    [:h2 {:style {:text-align :center}} "Filters"]
-   [filters-panel @(rf/subscribe [:drag-items :builder/filter-list])]])
+   [steps-panel @(rf/subscribe [:drag-items :builder/steps-list])]])
 
 
 
@@ -113,10 +134,12 @@
                  :background-color "lightblue"}}
    [:h2 "Gallery"]
    [:div.gallery {}
+    [:button.button.is-large {:style    {:position :relative}
+                              :on-click #(rf/dispatch [:new-widget])} "Add"]
     (doall
       (for [w @(rf/subscribe [:buildable-widgets])]
-        ^{:key w} [w/small-widget @(rf/subscribe [:widget w])]))
-    [:button.button.is-large {:style {:position :relative}} "Add"]]])
+        ^{:key w} [w/small-widget @(rf/subscribe [:widget w])]))]])
+
 
 
 
@@ -130,7 +153,7 @@
     [:div.columns
      [:div.column.is-one-fifth
       [sources-sidebar]
-      [filters-sidebar]]
+      [steps-sidebar]]
      [:div.column.is-one-fifth
       [builder-panel]]
      [:div.column {:style {:background-color "lightgray"
@@ -140,7 +163,6 @@
 
 
 
-; TODO: the drop targets can move OUT of the widget and into their own panel
 ; code for drop targets that needs a new home
 (comment
 
@@ -170,7 +192,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; builder-panel
-;
 (comment
   (def current-widget @(rf/subscribe [:buildable-widget]))
   (def widget @(rf/subscribe [:widget current-widget]))
@@ -197,21 +218,27 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; getting the filters
-;
+; getting the :steps
 (comment
   @re-frame.db/app-db
 
   (def current-widget @(rf/subscribe [:buildable-widget]))
   (def widget @(rf/subscribe [:widget current-widget]))
 
-  (def filters @(rf/subscribe [:filters (:id widget)]))
+  (def filters @(rf/subscribe [:steps (:id widget)]))
   (def drag-items @(rf/subscribe [:all-drag-items]))
 
   @(rf/subscribe [:filter-drag-items (:id widget)])
 
   (let [ret (map #(get drag-items %) filters)]
-    ;(prn "found filters " filters "//" drag-items "//" ret)
+    ;(prn "found :steps " :steps "//" drag-items "//" ret)
     ret)
 
+  ())
+
+
+;;;;;;;;;;;;;;;
+; quick test of adding a new 'blank' widget
+(comment
+  (rf/dispatch [:new-widget])
   ())

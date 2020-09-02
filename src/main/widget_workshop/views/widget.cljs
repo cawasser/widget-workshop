@@ -3,9 +3,21 @@
             [re-frame.core :as rf]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.views.dnd.components :as d]
-            [widget-workshop.views.dnd.new-widget :refer [new-widget-id]]
             [widget-workshop.views.oz.content :as oz]))
 
+
+
+
+(rf/reg-event-db
+  :current-widget
+  (fn [db [_ id]]
+    (assoc db :builder/current-widget id)))
+
+
+(rf/reg-sub
+  :current-widget
+  (fn [db _]
+    (:builder/current-widget db)))
 
 
 (defn- title-bar [widget delete?]
@@ -37,10 +49,16 @@
 
 
 (defn small-widget [widget]
-  (prn "small-widget" widget)
-  [:div
-   [:div.widget {:style {:width "150px" :height "80px"}}
-    [handle-content widget]]
+  (prn "small-widget" widget @(rf/subscribe [:current-widget]))
+  [:div {:on-click #(rf/dispatch [:current-widget (:id widget)])}
+   [:div.widget {:style {:width        "150px" :height "80px"
+                         :border-width (if (= (:id widget) @(rf/subscribe [:current-widget]))
+                                         "5px"
+                                         "1px")
+                         :border-color (if (= (:id widget) @(rf/subscribe [:current-widget]))
+                                         "blue"
+                                         "gray")}}]
+   ;[handle-content widget]]
    [:p.is-6 {:style {:text-align :center}} (:name widget)]])
 
 

@@ -34,8 +34,8 @@
 
   [{:keys [draggableId type source destination reason] :as event}]
 
-  ;(prn "on-drag-end " event (:droppableId source) (:droppableId destination)
-  ;  (.substr (:droppableId destination) 0 (.indexOf (:droppableId destination) "-")))
+  (prn "on-drag-end " event (:droppableId source) (:droppableId destination)
+    (.substr (:droppableId destination) 0 (.indexOf (:droppableId destination) "-")))
 
   (if destination
     (let [clean-dest (s/strip-suffix (:droppableId destination))]
@@ -62,7 +62,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; data filters
+; data :steps
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

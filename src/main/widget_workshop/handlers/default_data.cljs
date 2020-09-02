@@ -10,36 +10,36 @@
    ;
    ; :builder/* keys are used to support the 'builder' features, where
    ; authorized users can create new widgets by defining data-sources
-   ; and filters
+   ; and :steps
 
    ; list of :data-sources id's. should always contain the same uuids as
    ; :server/data-sources
    ;
    ; used to create the UI for dragging
-   :builder/data-sources-list
+   :builder/sources-list
                            ["generic-source" "config-source"]
 
    ; a map to a set with a single data-source for this widget, this is where the data
    ; will come from (singleton per widget)
-   :builder/source
+   :builder/sources
                            {"generic-source" ["generic-source"]
                             "config-source"  ["config-source"]}
 
-   ; a map of filters to the dsl used to actually perform the operation
+   ; a map of :steps to the dsl used to actually perform the operation
    ; on a data set
-   :builder/filter-source
-                           {"take" [:take {:param :number}]}
+   :builder/step-source
+                           {}
 
    ; a vector of :filter ids
    ;
-   ; used to create the UI for dragging filters
-   :builder/filter-list    ["take" "extract" "f-1" "f-2"]
+   ; used to create the UI for dragging :steps
+   :builder/steps-list      ["take" "extract" "f-1" "f-2"]
 
    ; map of UUIDs to uniquely identify a draggable item, each mapped to {:id} which
    ; provides human-readable naming for the item
    ;
    ; used to create each draggable in the UI (sidebar or widgets)
-   :builder/filters        {"alpha" ["2239ee68-bfef-4074-92e3-0809ca0e593e"
+   :builder/steps          {"alpha" ["2239ee68-bfef-4074-92e3-0809ca0e593e"
                                      "7bc854f6-b351-4bf0-b097-43b05e501f4a"]}
 
    ; uuids for widgets 'under construction' on the builder page
@@ -136,16 +136,25 @@
    ; since widgets show up in multiple places, we use this unqualified key
    ; to hold a map of the widget uuid's to the context and content
    ;
-   :widgets                {"alpha" {:id      "alpha" :name "Alpha"
-                                     :source  "b7170586-fe9d-4cc9-a84b-904a720cc343"
-                                     :filters ["f-1" "f-2"]}
-                            "beta"  {:id      "beta" :name "Beta"
-                                     :source  "b7170586-fe9d-4cc9-a84b-904a720cc343"
-                                     :filters ["f-1" "f-2"]}
-                            "delta" {:id      "delta" :name "Delta"
-                                     :source  "b7170586-fe9d-4cc9-a84b-904a720cc343"
-                                     :filters ["f-1" "f-2"]}}})
+   :widgets                {"alpha" {:id     "alpha" :name "Alpha"
+                                     :source "b7170586-fe9d-4cc9-a84b-904a720cc343"
+                                     :steps  ["f-1" "f-2"]}
+                            "beta"  {:id     "beta" :name "Beta"
+                                     :source "b7170586-fe9d-4cc9-a84b-904a720cc343"
+                                     :steps  ["f-1" "f-2"]}
+                            "delta" {:id     "delta" :name "Delta"
+                                     :source "b7170586-fe9d-4cc9-a84b-904a720cc343"
+                                     :steps  ["f-1" "f-2"]}}})
 
+
+
+(defn gen-widget [id]
+  {:id          id :name "Widget"
+   :title-color "darkgray"
+   :text-color  "white"
+   :source      #{}
+   :steps       []
+   :content     {}})
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -155,4 +164,8 @@
 
   (re-frame.core/dispatch-sync [:initialize])
   (widget-workshop.util.uuid/aUUID)
+
+
+  (gen-widget "skadsljfkdajf")
+
   ())

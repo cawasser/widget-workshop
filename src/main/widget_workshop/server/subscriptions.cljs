@@ -66,8 +66,8 @@
 
 
 (defn- pub-to-subscriber [db id results])
-  ;(let [filters  (get-in db [:builder/filters id])
-  ;      filtered (f/apply-filters filters (:live/data results))]
+  ;(let [:steps  (get-in db [:builder/:steps id])
+  ;      filtered (f/apply-:steps :steps (:live/data results))]
   ;  (assoc-in db
   ;    [:data id]
   ;    (assoc results :data filtered
@@ -143,7 +143,7 @@
   from the associated source
 
   - id  - name used to uniquely identify the filter within the server
-  - dsl - dsl (see apply-filters ns) for the filter 'step'"
+  - dsl - dsl (see apply-:steps ns) for the filter 'step'"
 
   [id dsl]
 
@@ -234,7 +234,7 @@
   (def id "generic-source")
 
   (let [result    ((get-in db [:builder/data-sources id]))
-        ;filters (get-in db [:filters source])
+        ;:steps (get-in db [::steps source])
         filtered  (f/apply-filters filters (:live/data result))]
     (assoc result :data filtered
                   :keys (into [] (keys (first filtered)))))
@@ -246,7 +246,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; publish to multiple subscribers, using their unique filters
+; publish to multiple subscribers, using their unique :steps
 ;
 (comment
   (def db @re-frame.db/app-db)
