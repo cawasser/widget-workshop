@@ -166,12 +166,12 @@
   (prn "add-step-to-widget BEFORE" from from-idx to to-idx)
 
   (let [item           (get-step-item db from from-idx)
-        current-widget @(rf/subscribe [:current-widget])
-        widget         @(rf/subscribe [:widget current-widget])
+        ;current-widget @(rf/subscribe [:current-widget-id])
+        widget         @(rf/subscribe [:current-widget])
         new-uuid       (aUUID)]
 
     (-> db
-      (assoc-in [:widgets current-widget]
+      (assoc-in [:widgets (:id widget)]
         (add-step db widget new-uuid to-idx))
       (assoc-in [:builder/drag-items new-uuid]
         (assoc item :id new-uuid)))))
@@ -442,12 +442,11 @@
   (def item           (get-step-item db from from-idx))
 
   (let [item           (get-step-item db from from-idx)
-        current-widget @(rf/subscribe [:current-widget])
-        widget         @(rf/subscribe :widget current-widget)
+        widget         @(rf/subscribe [:current-widget])
         new-uuid       (aUUID)]
 
     (-> db
-      (assoc-in [:widgets current-widget]
+      (assoc-in [:widgets (:id widget)]
         (add-step db widget new-uuid to-idx))
       (assoc-in [:builder/drag-items new-uuid]
         (assoc item :id new-uuid))))

@@ -15,17 +15,24 @@
 
 
 (rf/reg-sub
-  :current-widget
+  :current-widget-id
   (fn [db _]
     (:builder/current-widget db)))
 
 
+(rf/reg-sub
+  :current-widget
+  (fn [db _]
+    (get-in db [:widgets (:builder/current-widget db)])))
+
+
+
 (defn- title-bar [widget delete?]
-  ;(prn "title-bar" widget can-delete)
-  [:div.container.level {:style {:width            "auto"
-                                 :height           "auto"
-                                 :background-color (:title-color widget)
-                                 :color            (:text-color widget)}}
+  (prn "title-bar" widget delete?)
+  [:div#title-bar.container.level {:style {:width            "auto"
+                                           :height           "auto"
+                                           :background-color (:title-color widget)
+                                           :color            (:text-color widget)}}
    [:div.level-left.has-text-left
     {:style {:width  "auto"
              :height "auto"}}
@@ -49,13 +56,13 @@
 
 
 (defn small-widget [widget]
-  (prn "small-widget" widget @(rf/subscribe [:current-widget]))
+  (prn "small-widget" widget @(rf/subscribe [:current-widget-id]))
   [:div {:on-click #(rf/dispatch [:current-widget (:id widget)])}
    [:div.widget {:style {:width        "150px" :height "80px"
-                         :border-width (if (= (:id widget) @(rf/subscribe [:current-widget]))
+                         :border-width (if (= (:id widget) @(rf/subscribe [:current-widget-id]))
                                          "5px"
                                          "1px")
-                         :border-color (if (= (:id widget) @(rf/subscribe [:current-widget]))
+                         :border-color (if (= (:id widget) @(rf/subscribe [:current-widget-id]))
                                          "blue"
                                          "gray")}}]
    ;[handle-content widget]]
@@ -66,7 +73,7 @@
 (defn resizable-widget [widget]
   (prn "resizable-widget" widget)
   [:div.widget {:style {:width "500px" :height "300px"}}
-   [title-bar (:id widget) true]
+   [title-bar widget true]
    [handle-content widget]])
 
 
@@ -115,5 +122,3 @@
    (fn [provided snapshot]
      (r/as-element
        [d/draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))])
-
-()

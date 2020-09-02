@@ -33,7 +33,7 @@
    ; a vector of :filter ids
    ;
    ; used to create the UI for dragging :steps
-   :builder/steps-list      ["take" "extract" "f-1" "f-2"]
+   :builder/steps-list     ["extract" "group-by" "first" "last" "take" "drop"]
 
    ;; map of UUIDs to uniquely identify a draggable item, each mapped to {:id} which
    ;; provides human-readable naming for the item
@@ -52,28 +52,42 @@
    ;
    ; use to identify draggable items for use in the UI, as well as any data needed for
    ; UI presentation (id, color, etc.)
+   ;     [:ds/first]
+   ;     [:ds/last]
+   ;     [:ds/nth n]
+
    :builder/drag-items     {
-                            "generic-source"                       {:id "generic-source" :type :source :name "generic-source"}
-                            "config-source"                        {:id "config-source" :type :source :name "config-source"}
-                            "f-1"                                  {:id "f-1" :type :filter :name "f-1"}
-                            "f-2"                                  {:id "f-2" :type :filter :name "f-2"}
-                            "take"                                 {:id     "take" :type :filter :name "take"
-                                                                    :filter [:take {:param {:scalar :number}}]}
-                            "extract"                              {:id     "extract" :type :filter :name "extract"
-                                                                    :filter [:extract {:param {:vector :keyword}}]}}
-                            ;"23329dbf-ae47-410e-82e1-70487224fe36"
-                            ;                                       {:id   "23329dbf-ae47-410e-82e1-70487224fe36"
-                            ;                                        :type :source :name "generic-source"}
-                            ;"b7170586-fe9d-4cc9-a84b-904a720cc343" {:id   "b7170586-fe9d-4cc9-a84b-904a720cc343"
-                            ;                                        :type :source :name "config-source"}
-                            ;"2239ee68-bfef-4074-92e3-0809ca0e593e"
-                            ;                                       {:id     "2239ee68-bfef-4074-92e3-0809ca0e593e"
-                            ;                                        :type   :filter :name "take"
-                            ;                                        :filter [:take {:param {:scalar :number}}]}
-                            ;"7bc854f6-b351-4bf0-b097-43b05e501f4a"
-                            ;                                       {:id     "7bc854f6-b351-4bf0-b097-43b05e501f4a"
-                            ;                                        :type   :filter :name "extract"
-                            ;                                        :filter [:extract {:param {:vector :keyword}}]}}
+                            "generic-source" {:id "generic-source" :type :source :name "generic-source"}
+                            "config-source"  {:id "config-source" :type :source :name "config-source"}
+                            "group-by"       {:id   "group-by" :type :filter :name "group-by"
+                                              :step [:group-by {:param {:vector :keyword}
+                                                                :value []}]}
+                            "first"          {:id   "first" :type :filter :name "first"
+                                              :step [:first]}
+                            "last"           {:id   "last" :type :filter :name "last"
+                                              :step [:last]}
+                            "take"           {:id    "take" :type :filter :name "take"
+                                              :steps [:take {:param {:scalar :number}
+                                                             :value 0}]}
+                            "drop"           {:id    "drop" :type :filter :name "drop"
+                                              :steps [:take {:param {:scalar :number}
+                                                             :value 0}]}
+                            "extract"        {:id    "extract" :type :filter :name "extract"
+                                              :steps [:extract {:param {:vector :keyword}
+                                                                :value []}]}}
+   ;"23329dbf-ae47-410e-82e1-70487224fe36"
+   ;                                       {:id   "23329dbf-ae47-410e-82e1-70487224fe36"
+   ;                                        :type :source :name "generic-source"}
+   ;"b7170586-fe9d-4cc9-a84b-904a720cc343" {:id   "b7170586-fe9d-4cc9-a84b-904a720cc343"
+   ;                                        :type :source :name "config-source"}
+   ;"2239ee68-bfef-4074-92e3-0809ca0e593e"
+   ;                                       {:id     "2239ee68-bfef-4074-92e3-0809ca0e593e"
+   ;                                        :type   :filter :name "take"
+   ;                                        :filter [:take {:param {:scalar :number}}]}
+   ;"7bc854f6-b351-4bf0-b097-43b05e501f4a"
+   ;                                       {:id     "7bc854f6-b351-4bf0-b097-43b05e501f4a"
+   ;                                        :type   :filter :name "extract"
+   ;                                        :filter [:extract {:param {:vector :keyword}}]}}
 
 
 

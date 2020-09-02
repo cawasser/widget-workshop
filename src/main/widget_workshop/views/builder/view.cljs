@@ -128,7 +128,7 @@
 
 (defn building-widget-panel []
   [:div {:style {:height "auto"}}
-   [w/fullsize-widget @(rf/subscribe [:buildable-widgets])]])
+   [w/fullsize-widget @(rf/subscribe [:current-widget])]])
 
 
 
