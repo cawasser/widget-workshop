@@ -34,18 +34,17 @@
 
   [{:keys [draggableId type source destination reason] :as event}]
 
-  (prn "on-drag-end " event (:droppableId source) (:droppableId destination)
-    (.substr (:droppableId destination) 0 (.indexOf (:droppableId destination) "-")))
+  (prn "on-drag-end " event (:droppableId source) (:droppableId destination))
+    ;(.substr (:droppableId destination) 0 (.indexOf (:droppableId destination) "-")))
 
   (if destination
-    (let [clean-dest (s/strip-suffix (:droppableId destination))]
+    ;(let [clean-dest (s/strip-suffix (:droppableId destination))]
       (if (and (= (:droppableId source) (:droppableId destination))
             (= (:index destination) (:index source)))
-        ()                                                    ;prn "nothing to do"
+        (prn "do nothing")                                                    ;prn "nothing to do"
         (rf/dispatch-sync [:handle-drop-event
                            (:droppableId source) (:index source)
-                           clean-dest (:index destination)])))))
-
+                           (:droppableId destination) (:index destination)]))))
 
 
 
@@ -56,7 +55,6 @@
       :filter ["cadetblue" "white"]
       :default ["black" "white"])
     ["black" "white"]))
-
 
 
 

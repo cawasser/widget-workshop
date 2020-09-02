@@ -46,8 +46,8 @@
 
 
 
-(defn- get-filter-item
-  "returns a vector of the (filter) id and name of the item being dropped
+(defn- get-step-item
+  "returns a vector of the (step) id and name of the item being dropped
 
   this data will be used to construct a NEW item inside the 'to' widget
 
@@ -59,12 +59,13 @@
 
   [db from idx]
 
-  (if-let [filters (get-in db [:builder/filter-list])]
+  (if-let [steps (get-in db [from])]
     (do
       ;(prn "get-filter-item " :steps from idx)
-      (->> (nth filters idx)
+      (->> (nth steps idx)
         (vector :builder/drag-items)
         (get-in db)))))
+
 
 
 (defn- get-source-filter-item
@@ -138,7 +139,7 @@
   (let [item           (get-item db from from-idx)
         new-uuid       (aUUID)
         current-widget (:builder/current-widget db)
-        widget (get-in db [:widgets current-widget])]
+        widget         (get-in db [:widgets current-widget])]
 
     (prn "add-source-to-widget " from from-idx item to to-idx current-widget new-uuid)
 
@@ -151,25 +152,29 @@
           (assoc item :id new-uuid))))))
 
 
+(defn- add-step [db widget new-uuid to-idx]
+  (let [x (get-in db [:widgets (:id widget)])]
+    (assoc x :steps (conj (:steps x) new-uuid))))
 
-(defn- add-filter-to-widget [db from from-idx to to-idx]
+
+
+(defn- add-step-to-widget [db from from-idx to to-idx]
   "the user wants to add more :steps to an existing widget"
 
   [db from from-idx to to-idx]
 
-  ;(prn "add-filter-to-widget BEFORE" from from-idx to to-idx)
+  (prn "add-step-to-widget BEFORE" from from-idx to to-idx)
 
-  (let [item                (get-filter-item db from from-idx)
-        new-uuid            (aUUID)
-        existing-to-filters (get-in db [:builder/filters to])]
+  (let [item           (get-step-item db from from-idx)
+        current-widget @(rf/subscribe [:current-widget])
+        widget         @(rf/subscribe [:widget current-widget])
+        new-uuid       (aUUID)]
 
-    ;(prn "add-filter-to-widget AFTER" from from-idx new-uuid item to to-idx)
-    (if (allow-drop? db (:name item) existing-to-filters)
-      (assoc db :builder/filters (assoc (:builder/filters db)
-                                   to (splice existing-to-filters to-idx 0 new-uuid))
-                :builder/drag-items (assoc (:builder/drag-items db)
-                                      new-uuid (assoc item :id new-uuid)))
-      db)))
+    (-> db
+      (assoc-in [:widgets current-widget]
+        (add-step db widget new-uuid to-idx))
+      (assoc-in [:builder/drag-items new-uuid]
+        (assoc item :id new-uuid)))))
 
 
 
@@ -211,32 +216,21 @@
 
   [db from from-idx to to-idx]
 
-  (prn "-handle-drop-event " from to (s/drop-scenario? from to))
+  (prn "handle-drop-event" from to (s/drop-scenario? from to))
 
   (condp = (s/drop-scenario? from to)
     ; nothing to do (eg, can't reorder the sources list)
     :do-nothing db
 
-    ; reorder the ':steps' on a widget
-    :reorder-filters (reorder-widget-filters db (s/strip-suffix from) from-idx to-idx)
-
-    ; dropping from the sources onto a new widget
-    ;:new-widget-from-source (new-widget db (keyword from) from-idx to to-idx)
-
-    ; drop from an existing widget onto the 'new' widget
-    ;:new-widget-from-widget (new-widget-form-widget db from from-idx to to-idx)
-
-    ; drop from one widget to another
-    ;:connect-widgets (connect-widgets db from from-idx to to-idx)
-
     ; drop new sources onto a widget (not a new widget)
     :add-source-to-widget (add-source-to-widget db (keyword from) from-idx to to-idx)
 
     ; drop new filter onto a widget (not a new widget)
-    :add-filter-to-widget (add-filter-to-widget db (keyword from) from-idx to to-idx)
+    :add-step-to-widget (add-step-to-widget db (keyword from) from-idx to to-idx)
 
-    ; drop filter from one widget onto another widget (not a new widget)
-    ;:add-filter-from-widget-to-widget (add-filter-to-widget db from from-idx to to-idx)
+    ; reorder the ':steps' on a widget
+    :reorder-filters (reorder-widget-filters db (s/strip-suffix from) from-idx to-idx)
+
 
     ; can't do anything else
     :default db))
@@ -300,15 +294,15 @@
       [])))
 
 
-(rf/reg-sub
-  :filter-source
-  (fn [db _]
-    (keys (:builder/filter-source db))))
-
-(rf/reg-sub
-  :filter-list
-  (fn [db _]
-    (:builder/filter-list db)))
+;(rf/reg-sub
+;  :filter-source
+;  (fn [db _]
+;    (keys (:builder/filter-source db))))
+;
+;(rf/reg-sub
+;  :filter-list
+;  (fn [db _]
+;    (:builder/filter-list db)))
 
 (rf/reg-sub
   :all-drag-items
@@ -329,34 +323,34 @@
     (map #(get-in db [:builder/drag-items %]) (get db source))))
 
 
-(rf/reg-sub
-  :steps
-  (fn [db [_ id]]
-    ;(prn ":steps " id "//" (get-in db [::steps id]))
-    (get-in db [:builder/filters id])))
-
-(rf/reg-sub
-  :filter-drag-items
-
-  ; this subscription depends on 2 other subscriptions:
-  ;
-  ;  1) ::steps for the given widget, if this changes (add/remove/reorder) we
-  ;         need to re-fire
-  ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
-  ;         we may need ot re-fire
-  (fn [[_ id]]
-    [(rf/subscribe [:steps id]) (rf/subscribe [:all-drag-items])])
-
-  ; now, instead of looking in the db, we look in the results of the 2 prereq
-  ; subscriptions
-  (fn [[filters drag-items]]
-    (if filters
-      (let [ret (map #(get drag-items %) filters)]
-        ;(prn "found :steps " :steps "//" drag-items "//" ret)
-        ret)
-
-      [])))
-
+;(rf/reg-sub
+;  :steps
+;  (fn [db [_ id]]
+;    ;(prn ":steps " id "//" (get-in db [::steps id]))
+;    (get-in db [:builder/steps id])))
+;
+;(rf/reg-sub
+;  :filter-drag-items
+;
+;  ; this subscription depends on 2 other subscriptions:
+;  ;
+;  ;  1) ::steps for the given widget, if this changes (add/remove/reorder) we
+;  ;         need to re-fire
+;  ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
+;  ;         we may need ot re-fire
+;  (fn [[_ id]]
+;    [(rf/subscribe [:steps id]) (rf/subscribe [:all-drag-items])])
+;
+;  ; now, instead of looking in the db, we look in the results of the 2 prereq
+;  ; subscriptions
+;  (fn [[filters drag-items]]
+;    (if filters
+;      (let [ret (map #(get drag-items %) filters)]
+;        ;(prn "found :steps " :steps "//" drag-items "//" ret)
+;        ret)
+;
+;      [])))
+;
 
 
 
@@ -387,7 +381,7 @@
       (assoc-in [:widgets current-widget]
         (replace-source widget new-uuid))
       (assoc-in [:builder/drag-items new-uuid]
-              (assoc item :id new-uuid))))
+        (assoc item :id new-uuid))))
 
   ())
 
@@ -417,8 +411,6 @@
   (assoc db :builder/widget-list (conj (:builder/widget-list db) to)
             :builder/filters (assoc (:builder/filters db) to [item]))
 
-
-
   (->> 0
     (nth (get db from))
     (get (:builder/drag-items db))
@@ -427,24 +419,61 @@
   ())
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; handle adding to current-widget's :step
+(comment
+  (def db @re-frame.db/app-db)
+  (def new-uuid (aUUID))
+  (def from :builder/steps-list)
+  (def from-idx 0)
+  (def to "builder/steps-tool")
+  (def to-idx 0)
+  (def current-widget (:builder/current-widget db))
+  (def widget (get-in db [:widgets current-widget]))
+
+  (let [x (get-in db [:widgets (:id widget)])]
+    (assoc x :steps (conj (:steps x) new-uuid)))
+
+  (:source widget)
+  (:steps widget)
+  (get-in db [:widgets current-widget])
+
+  (def item           (get-step-item db from from-idx))
+
+  (let [item           (get-step-item db from from-idx)
+        current-widget @(rf/subscribe [:current-widget])
+        widget         @(rf/subscribe :widget current-widget)
+        new-uuid       (aUUID)]
+
+    (-> db
+      (assoc-in [:widgets current-widget]
+        (add-step db widget new-uuid to-idx))
+      (assoc-in [:builder/drag-items new-uuid]
+        (assoc item :id new-uuid))))
+  ())
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; find the specific item from ::steps that the user has dropped
+; find the specific item from :steps that the user has dropped
 ;
 (comment
-
   (def db @re-frame.db/app-db)
-  (def from "228f87c6-3411-49bc-95be-f2904aa2e2ec")
-  (def from-idx 0)
+  (def from :builder/steps-list)
+  (def from-idx 3)
+  (def idx 2)
 
-  (if-let [filters (get-in db [:builder/filters from])]
+  (if-let [steps (get-in db [from])]
     (do
-      ;(prn "get-source-filtered-item " :steps)
-      (->> (nth filters from-idx)
+      ;(prn "get-filter-item " :steps from idx)
+      (->> (nth steps idx)
         (vector :builder/drag-items)
         (get-in db))))
 
-  (get-source-filtered-item db from from-idx)
+
+
+  (get-step-item db from from-idx)
 
   ())
 

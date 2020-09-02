@@ -21,7 +21,7 @@
 
 
 (defn- sources-tool [widget]
-  [:> Droppable {:droppable-id   "builder/source-list"
+  [:> Droppable {:droppable-id   "builder/source-tool"
                  :isDropDisabled false
                  :min-height     "50px"
                  :type           "source"}
@@ -35,14 +35,17 @@
 
 
 (defn- steps-tool [widget]
-  [:> Droppable {:droppable-id   "builder/steps-list"
+  [:> Droppable {:droppable-id   "builder/steps-tool"
                  :isDropDisabled false
                  :type           "filter"}
 
    (fn [provided snapshot]
+     (prn "steps-tool" (:steps widget))
      (r/as-element
        [d/draggable-item-vlist provided snapshot
-        @(rf/subscribe [:drag-item (:id widget)]) "cadetblue"]))])
+        (map (fn [w]
+               @(rf/subscribe [:drag-item w]))
+          (:steps widget)) "cadetblue"]))])
 
 
 
@@ -200,7 +203,10 @@
   (def current-widget @(rf/subscribe [:current-widget]))
   (def widget @(rf/subscribe [:widget current-widget]))
   (def source (:source widget))
+  (def steps (:steps widget))
 
+
+  @(rf/subscribe [:drag-item (:source widget)])
 
   (def id (:id @(rf/subscribe [:drag-items (:source widget)])))
   (map :id [@(rf/subscribe [:drag-items (:source widget)])])
@@ -212,8 +218,10 @@
     (get source))
   (get-in db [:builder/drag-items source])
 
-  @(rf/subscribe [:drag-item (:source widget)])
 
+  (map #(get-in db [:builder/drag-items %]) (:steps widget))
+
+  @(rf/subscribe [:drag-items (:steps widget)])
 
   (sources-tool @(rf/subscribe [:drag-item (:source widget)]))
 
@@ -227,17 +235,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; getting the :steps
 (comment
-  @re-frame.db/app-db
-
+  (def db @re-frame.db/app-db)
   (def current-widget @(rf/subscribe [:buildable-widget]))
   (def widget @(rf/subscribe [:widget current-widget]))
 
-  (def filters @(rf/subscribe [:steps (:id widget)]))
+  (def steps (:steps widget))
   (def drag-items @(rf/subscribe [:all-drag-items]))
 
   @(rf/subscribe [:filter-drag-items (:id widget)])
 
-  (let [ret (map #(get drag-items %) filters)]
+  (let [ret (map #(get drag-items %) steps)]
     ;(prn "found :steps " :steps "//" drag-items "//" ret)
     ret)
 

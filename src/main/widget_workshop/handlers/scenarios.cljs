@@ -32,9 +32,8 @@
     ; drop new sources onto an existing widget (not a new widget)
     (= from "builder/sources-list") :add-source-to-widget
 
-    ;; drop new filter onto an existing widget (not a new widget)
-    ;(= from "builder/steps-list") :add-filter-to-widget
-    ;
+    ; drop new filter onto an existing widget (not a new widget)
+    (= from "builder/steps-list") :add-step-to-widget
 
     ;; reorder the ':steps' on a widget
     ;(and

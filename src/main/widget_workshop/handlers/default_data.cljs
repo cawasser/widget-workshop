@@ -25,23 +25,23 @@
                            {"generic-source" ["generic-source"]
                             "config-source"  ["config-source"]}
 
-   ; a map of :steps to the dsl used to actually perform the operation
-   ; on a data set
-   :builder/step-source
-                           {}
+   ;; a map of :steps to the dsl used to actually perform the operation
+   ;; on a data set
+   ;:builder/step-source
+   ;                        {}
 
    ; a vector of :filter ids
    ;
    ; used to create the UI for dragging :steps
    :builder/steps-list      ["take" "extract" "f-1" "f-2"]
 
-   ; map of UUIDs to uniquely identify a draggable item, each mapped to {:id} which
-   ; provides human-readable naming for the item
+   ;; map of UUIDs to uniquely identify a draggable item, each mapped to {:id} which
+   ;; provides human-readable naming for the item
+   ;;
+   ;; used to create each draggable in the UI (sidebar or widgets)
+   ;:builder/steps          {"alpha" ["2239ee68-bfef-4074-92e3-0809ca0e593e"
+   ;                                  "7bc854f6-b351-4bf0-b097-43b05e501f4a"]}
    ;
-   ; used to create each draggable in the UI (sidebar or widgets)
-   :builder/steps          {"alpha" ["2239ee68-bfef-4074-92e3-0809ca0e593e"
-                                     "7bc854f6-b351-4bf0-b097-43b05e501f4a"]}
-
    ; uuids for widgets 'under construction' on the builder page
    ;
    ; used to generate the widgets in the gallery  UI
@@ -137,9 +137,9 @@
    ; since widgets show up in multiple places, we use this unqualified key
    ; to hold a map of the widget uuid's to the context and content
    ;
-   :widgets                {"alpha" {:id     "alpha" :name "Alpha"}
-                                     ;:source "b7170586-fe9d-4cc9-a84b-904a720cc343"
-                                     ;:steps  ["f-1" "f-2"]}
+   :widgets                {"alpha" {:id     "alpha" :name "Alpha"
+                                     :source ""
+                                     :steps  []}
                             "beta"  {:id     "beta" :name "Beta"
                                      :source "b7170586-fe9d-4cc9-a84b-904a720cc343"
                                      :steps  ["f-1" "f-2"]}
