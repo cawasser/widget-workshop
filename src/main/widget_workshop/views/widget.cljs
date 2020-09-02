@@ -28,7 +28,7 @@
 
 
 (defn- title-bar [widget delete?]
-  (prn "title-bar" widget delete?)
+  ;(prn "title-bar" widget delete?)
   [:div#title-bar.container.level {:style {:width            "auto"
                                            :height           "auto"
                                            :background-color (:title-color widget)
@@ -56,7 +56,7 @@
 
 
 (defn small-widget [widget]
-  (prn "small-widget" widget @(rf/subscribe [:current-widget-id]))
+  ;(prn "small-widget" widget @(rf/subscribe [:current-widget-id]))
   [:div {:on-click #(rf/dispatch [:current-widget (:id widget)])}
    [:div.widget {:style {:width        "150px" :height "80px"
                          :border-width (if (= (:id widget) @(rf/subscribe [:current-widget-id]))
@@ -71,7 +71,7 @@
 
 
 (defn resizable-widget [widget]
-  (prn "resizable-widget" widget)
+  ;(prn "resizable-widget" widget)
   [:div.widget {:style {:width "500px" :height "300px"}}
    [title-bar widget true]
    [handle-content widget]])
@@ -79,7 +79,7 @@
 
 
 (defn fullsize-widget [widget]
-  (prn "fullsize-widget" widget)
+  ;(prn "fullsize-widget" widget)
   [:div.widget
    [title-bar widget false]
    [handle-content widget]])

@@ -27,7 +27,7 @@
 
 
 (defn widgets-panel [content]
-  (prn "widgets-panel" content)
+  ;(prn "widgets-panel" content)
   (into [:div]
      (for [[index id] (map-indexed vector content)]
        (let [on? (r/atom false)]

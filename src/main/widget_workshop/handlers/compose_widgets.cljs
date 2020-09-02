@@ -112,7 +112,7 @@
   false - if 'name' already exists"
   [db name filters]
 
-  (prn "drop-allowed?" name filters (map #(-> (get-in db [:builder/drag-items %]) :name) filters))
+  ;(prn "drop-allowed?" name filters (map #(-> (get-in db [:builder/drag-items %]) :name) filters))
   (if (some #{name}
         (map #(-> (get-in db [:builder/drag-items %]) :name)
           filters))
@@ -141,7 +141,7 @@
         current-widget (:builder/current-widget db)
         widget         (get-in db [:widgets current-widget])]
 
-    (prn "add-source-to-widget " from from-idx item to to-idx current-widget new-uuid)
+    ;(prn "add-source-to-widget " from from-idx item to to-idx current-widget new-uuid)
 
     (if (some #{(:id item)} (:source current-widget))
       db
@@ -163,7 +163,7 @@
 
   [db from from-idx to to-idx]
 
-  (prn "add-step-to-widget BEFORE" from from-idx to to-idx)
+  ;(prn "add-step-to-widget BEFORE" from from-idx to to-idx)
 
   (let [item           (get-step-item db from from-idx)
         ;current-widget @(rf/subscribe [:current-widget-id])
@@ -216,7 +216,7 @@
 
   [db from from-idx to to-idx]
 
-  (prn "handle-drop-event" from to (s/drop-scenario? from to))
+  ;(prn "handle-drop-event" from to (s/drop-scenario? from to))
 
   (condp = (s/drop-scenario? from to)
     ; nothing to do (eg, can't reorder the sources list)
@@ -280,13 +280,13 @@
   ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
   ;         we may need to re-fire
   (fn [[_ id]]
-    (prn "pre-subscription" id)
+    ;(prn "pre-subscription" id)
     [(rf/subscribe [:source id]) (rf/subscribe [:all-drag-items])])
 
   ; now, instead of looking in the db, we look in the results of the 2 prereq
   ; subscriptions
   (fn [[source drag-items]]
-    (prn ":source-drag-items" source drag-items)
+    ;(prn ":source-drag-items" source drag-items)
     (if source
       (let [ret (map #(get drag-items %) source)]
         ;(prn "found source " source "//" drag-items "//" ret)
