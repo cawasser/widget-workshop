@@ -39,12 +39,14 @@
 
   (if destination
     ;(let [clean-dest (s/strip-suffix (:droppableId destination))]
-      (if (and (= (:droppableId source) (:droppableId destination))
-            (= (:index destination) (:index source)))
-        ;(prn "do nothing")                                                    ;prn "nothing to do"
+      (if (not (and (= (:droppableId source) (:droppableId destination))
+                 (= (:index destination) (:index source))))
         (rf/dispatch-sync [:handle-drop-event
                            (:droppableId source) (:index source)
-                           (:droppableId destination) (:index destination)]))))
+                           (:droppableId destination) (:index destination)])
+        (do
+         (prn "do nothing")
+         ()))))
 
 
 
@@ -122,10 +124,10 @@
                           :min-height       "30px"
                           :margin           "auto"}}
             (js->clj (.-droppableProps provided)))
-     ;(prn "draggable-item-vlist " data)
+     (prn "draggable-item-vlist " data)
      (for [[index {:keys [id name type]}] (map-indexed vector data)]
        (let [[bk-color txt-color] (get-colors type)]
-         ;(prn "vlist" id name type bk-color txt-color)
+         (prn "vlist" id name type bk-color txt-color)
          ^{:key index} (drag-item id name index bk-color txt-color)))
      (.-placeholder provided)]))
 
@@ -148,7 +150,7 @@
      ;(prn "draggable-item-hlist " data)
      (for [[index {:keys [id name type]}] (map-indexed vector data)]
        (let [[bk-color txt-color] (get-colors type)]
-         ;(prn "hlist" id name type bk-color txt-color)
+         (prn "hlist" id name type bk-color txt-color)
          ^{:key index} (drag-item id name index bk-color txt-color)))
      (.-placeholder provided)]))
 
