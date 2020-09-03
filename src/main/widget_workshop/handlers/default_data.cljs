@@ -59,22 +59,22 @@
    :builder/drag-items     {
                             "generic-source" {:id "generic-source" :type :source :name "generic-source"}
                             "config-source"  {:id "config-source" :type :source :name "config-source"}
-                            "group-by"       {:id   "group-by" :type :filter :name "group-by"
+                            "group-by"       {:id   "group-by" :type :step :name "group-by"
                                               :step [:group-by {:param {:vector :keyword}
                                                                 :value []}]}
-                            "first"          {:id   "first" :type :filter :name "first"
+                            "first"          {:id   "first" :type :step :name "first"
                                               :step [:first]}
-                            "last"           {:id   "last" :type :filter :name "last"
+                            "last"           {:id   "last" :type :step :name "last"
                                               :step [:last]}
-                            "take"           {:id    "take" :type :filter :name "take"
+                            "take"           {:id    "take" :type :step :name "take"
                                               :steps [:take {:param {:scalar :number}
                                                              :value 0}]}
-                            "drop"           {:id    "drop" :type :filter :name "drop"
+                            "drop"           {:id    "drop" :type :step :name "drop"
                                               :steps [:take {:param {:scalar :number}
                                                              :value 0}]}
-                            "extract"        {:id    "extract" :type :filter :name "extract"
-                                              :steps [:extract {:param {:vector :keyword}
-                                                                :value []}]}}
+                            "extract"        {:id    "extract" :type :step :name "extract"
+                                              :step [:extract {:param {:vector :keyword}
+                                                               :value []}]}}
 
    ; hold the uuid for the widget currently 'under construction'
    :builder/current-widget "alpha"
