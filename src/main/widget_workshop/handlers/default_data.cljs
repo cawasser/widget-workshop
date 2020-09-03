@@ -60,19 +60,23 @@
                             "generic-source" {:id "generic-source" :type :source :name "generic-source"}
                             "config-source"  {:id "config-source" :type :source :name "config-source"}
                             "group-by"       {:id   "group-by" :type :step :name "group-by"
+                                              :static true
                                               :step [:group-by {:param {:vector :keyword}
                                                                 :value []}]}
                             "first"          {:id   "first" :type :step :name "first"
-                                              :step [:first]}
+                                              :static true :step [:first {:param :none}]}
                             "last"           {:id   "last" :type :step :name "last"
-                                              :step [:last]}
+                                              :static true :step [:last {:param :none}]}
                             "take"           {:id    "take" :type :step :name "take"
+                                              :static true
                                               :steps [:take {:param {:scalar :number}
                                                              :value 0}]}
                             "drop"           {:id    "drop" :type :step :name "drop"
+                                              :static true
                                               :steps [:take {:param {:scalar :number}
                                                              :value 0}]}
                             "extract"        {:id    "extract" :type :step :name "extract"
+                                              :static true
                                               :step [:extract {:param {:vector :keyword}
                                                                :value []}]}}
 

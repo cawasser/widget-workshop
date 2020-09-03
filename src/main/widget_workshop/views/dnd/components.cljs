@@ -113,7 +113,7 @@
 
 
 
-(defn step-drag-item [{:keys [id name type step] :as item} index]
+(defn step-drag-item [{:keys [id name type step static] :as item} index]
   (let [[bg-color txt-color] (get-colors type)]
     (prn "step-drag-item" item id name type step)
 
@@ -136,7 +136,13 @@
                                :color            txt-color
                                :background-color bg-color}
                     :on-click #(prn "clicked " name)}
-           [:span name] [:span (e/edit-panel item)]]]))]))
+           [:span name]
+           (if (not static)
+             [:span {:style {:color "lightgray"
+                             :margin-left "10px"
+                             :cursor :default}
+                     :on-click #(prn "click ot edit!!!")}
+              (e/edit-panel item)])]]))]))
 
 
 

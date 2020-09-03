@@ -174,7 +174,7 @@
       (assoc-in [:widgets (:id widget)]
         (add-step db widget new-uuid to-idx))
       (assoc-in [:builder/drag-items new-uuid]
-        (assoc item :id new-uuid)))))
+        (assoc item :id new-uuid :static false)))))
 
 
 
