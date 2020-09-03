@@ -75,21 +75,6 @@
                             "extract"        {:id    "extract" :type :filter :name "extract"
                                               :steps [:extract {:param {:vector :keyword}
                                                                 :value []}]}}
-   ;"23329dbf-ae47-410e-82e1-70487224fe36"
-   ;                                       {:id   "23329dbf-ae47-410e-82e1-70487224fe36"
-   ;                                        :type :source :name "generic-source"}
-   ;"b7170586-fe9d-4cc9-a84b-904a720cc343" {:id   "b7170586-fe9d-4cc9-a84b-904a720cc343"
-   ;                                        :type :source :name "config-source"}
-   ;"2239ee68-bfef-4074-92e3-0809ca0e593e"
-   ;                                       {:id     "2239ee68-bfef-4074-92e3-0809ca0e593e"
-   ;                                        :type   :filter :name "take"
-   ;                                        :filter [:take {:param {:scalar :number}}]}
-   ;"7bc854f6-b351-4bf0-b097-43b05e501f4a"
-   ;                                       {:id     "7bc854f6-b351-4bf0-b097-43b05e501f4a"
-   ;                                        :type   :filter :name "extract"
-   ;                                        :filter [:extract {:param {:vector :keyword}}]}}
-
-
 
    ; hold the uuid for the widget currently 'under construction'
    :builder/current-widget "alpha"
@@ -155,11 +140,11 @@
                                      :source ""
                                      :steps  []}
                             "beta"  {:id     "beta" :name "Beta"
-                                     :source "b7170586-fe9d-4cc9-a84b-904a720cc343"
-                                     :steps  ["f-1" "f-2"]}
+                                     :source ""
+                                     :steps  []}
                             "delta" {:id     "delta" :name "Delta"
-                                     :source "b7170586-fe9d-4cc9-a84b-904a720cc343"
-                                     :steps  ["f-1" "f-2"]}}})
+                                     :source ""
+                                     :steps  []}}})
 
 
 
