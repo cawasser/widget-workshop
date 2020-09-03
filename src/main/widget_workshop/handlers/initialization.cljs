@@ -187,13 +187,6 @@
         b (splice a 2 0 1)]
     b)
 
-
-
-
-
-
-
-
   (rf/dispatch [:arrange-list :data-sources 0 1])
   (rf/dispatch [:arrange-list :data-sources 1 2])
   (rf/dispatch [:arrange-list :data-sources 2 0])
@@ -209,46 +202,25 @@
   (def id)
 
   (map #(get-in db [:drag-items %]) (get-in db [:steps id]))
-  @(rf/subscribe [:filter-drag-items id])
 
   ())
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; getting the id from the filter uuid
-;
-(comment
-  (def id "55a1f781-3ae8-422d-b930-b083438b7644")
-  (def db @re-frame.db/app-db)
-  (def blank widget-workshop.views.dnd.components/new-widget)
-
-
-  (if-let [filters (get-in db [:builder/filters id])]
-    (do
-      ;(prn "found :steps " :steps)
-      (->> filters
-        (map #(get-in db [:builder/drag-items %])))))
-  ;(map (juxt :id :name)))))
-
-  ())
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-; getting the drag-items for a given widget's filter
+; getting the drag-items for a given widget's steps
 ;
 (comment
 
   @re-frame.db/app-db
 
-  (def filters
+  (def steps
     @(rf/subscribe [:steps
                     "b89aaa52-e4db-43f6-aedb-8324233d6a5a"]))
   (def drag-items @(rf/subscribe [:builder/all-drag-items]))
 
 
-  (map #(get drag-items %) filters)
+  (map #(get drag-items %) steps)
   ())
 
 

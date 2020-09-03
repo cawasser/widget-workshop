@@ -31,36 +31,36 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(rf/reg-event-db
-  :add-source
-  (fn [db [_ id source-fn]]
-    (let [drag-id (aUUID)]
-      (assoc db
-        :server/data-sources (assoc (:server/data-sources db) id source-fn)
-        :builder/data-sources-list (conj (:builder/data-sources-list db) drag-id)
-        :builder/drag-items (assoc (:builder/drag-items db)
-                              drag-id {:id (aUUID) :type :source :name id})))))
-
-
-(rf/reg-event-db
-  :add-filter
-  (fn [db [_ id dsl]]
-    (let [drag-id (aUUID)]
-      ;(prn ":add-filter" id dsl drag-id)
-      (assoc db
-        :builder/filter-source (assoc (:builder/filter-source db) id dsl)
-        :builder/filter-list (conj (:builder/filter-list db) drag-id)
-        :builder/drag-items (assoc (:builder/drag-items db)
-                              drag-id {:id (aUUID) :type :filter :name id :filter dsl})))))
-
-
-(rf/reg-event-db
-  :remove-source
-  (fn [db [_ id]]
-    (assoc db
-      :server/data-sources (dissoc (:builder/data-sources db) id)
-      :builder/data-sources-list (disj (:builder/data-sources-list db) id)
-      :builder/drag-items (remove-drag-item db id))))
+;(rf/reg-event-db
+;  :add-source
+;  (fn [db [_ id source-fn]]
+;    (let [drag-id (aUUID)]
+;      (assoc db
+;        :server/data-sources (assoc (:server/data-sources db) id source-fn)
+;        :builder/data-sources-list (conj (:builder/data-sources-list db) drag-id)
+;        :builder/drag-items (assoc (:builder/drag-items db)
+;                              drag-id {:id (aUUID) :type :source :name id})))))
+;
+;
+;(rf/reg-event-db
+;  :add-filter
+;  (fn [db [_ id dsl]]
+;    (let [drag-id (aUUID)]
+;      ;(prn ":add-filter" id dsl drag-id)
+;      (assoc db
+;        :builder/filter-source (assoc (:builder/filter-source db) id dsl)
+;        :builder/filter-list (conj (:builder/filter-list db) drag-id)
+;        :builder/drag-items (assoc (:builder/drag-items db)
+;                              drag-id {:id (aUUID) :type :step :name id :filter dsl})))))
+;
+;
+;(rf/reg-event-db
+;  :remove-source
+;  (fn [db [_ id]]
+;    (assoc db
+;      :server/data-sources (dissoc (:builder/data-sources db) id)
+;      :builder/data-sources-list (disj (:builder/data-sources-list db) id)
+;      :builder/drag-items (remove-drag-item db id))))
 
 
 

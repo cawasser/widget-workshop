@@ -96,29 +96,3 @@
   ())
 
 
-; TODO: the drop targets can move OUT of the widget and into their own panel
-; code for drop targets that needs a new home
-(comment
-
-  (defn prep-id [id suffix]
-    ;(prn "prep-id" id widget-workshop.views.dnd.new-widget/new-widget-id suffix)
-    ;(if (= widget-workshop.views.dnd.new-widget/new-widget-id id)
-    ;  widget-workshop.views.dnd.new-widget/new-widget-id
-    (str id suffix))
-
-  source-id (prep-id id "@source")
-  filter-id (prep-id id "@filter")
-
-  [:> Droppable {:droppable-id source-id
-                 :type         "source"
-                 :direction    "horizontal"}
-   (fn [provided snapshot]
-     (r/as-element
-       [d/draggable-item-hlist provided snapshot @(rf/subscribe [:source-drag-items id])]))]
-
-  [:> Droppable {:droppable-id filter-id
-                 :type         "filter"
-                 :direction    "horizontal"}
-   (fn [provided snapshot]
-     (r/as-element
-       [d/draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))])

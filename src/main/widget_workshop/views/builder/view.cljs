@@ -37,7 +37,7 @@
 (defn- steps-tool [widget]
   [:> Droppable {:droppable-id   "builder/steps-tool"
                  :isDropDisabled false
-                 :type           "filter"}
+                 :type           "steps"}
 
    (fn [provided snapshot]
      ;(prn "steps-tool" (:steps widget))
@@ -109,7 +109,7 @@
   ;(prn ":steps-panel " content)
   [:> Droppable {:droppable-id   "builder/steps-list"
                  :isDropDisabled true                       ; can't drop anything onto the source list
-                 :type           "filter"}
+                 :type           "steps"}
 
    (fn [provided snapshot]
      (r/as-element
@@ -121,7 +121,7 @@
   [:div {:style {:border-radius    "5px"
                  :margin-right     "5px"
                  :background-color "lightgray"}}
-   [:h2 {:style {:text-align :center}} "Filters"]
+   [:h2 {:style {:text-align :center}} "Steps"]
    [steps-panel @(rf/subscribe [:drag-items :builder/steps-list])]])
 
 
@@ -167,32 +167,6 @@
 
 
 
-
-; code for drop targets that needs a new home
-(comment
-
-  (defn prep-id [id suffix]
-    ;(prn "prep-id" id widget-workshop.views.dnd.new-widget/new-widget-id suffix)
-    ;(if (= widget-workshop.views.dnd.new-widget/new-widget-id id)
-    ;  widget-workshop.views.dnd.new-widget/new-widget-id
-    (str id suffix))
-
-  source-id (prep-id id "@source")
-  filter-id (prep-id id "@filter")
-
-  [:> Droppable {:droppable-id source-id
-                 :type         "source"
-                 :direction    "horizontal"}
-   (fn [provided snapshot]
-     (r/as-element
-       [d/draggable-item-hlist provided snapshot @(rf/subscribe [:source-drag-items id])]))]
-
-  [:> Droppable {:droppable-id filter-id
-                 :type         "filter"
-                 :direction    "horizontal"}
-   (fn [provided snapshot]
-     (r/as-element
-       [d/draggable-item-hlist provided snapshot @(rf/subscribe [:filter-drag-items id])]))])
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
