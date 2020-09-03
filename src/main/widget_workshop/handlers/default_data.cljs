@@ -69,12 +69,12 @@
                                               :static true :step [:last {:param :none}]}
                             "take"           {:id    "take" :type :step :name "take"
                                               :static true
-                                              :steps [:take {:param {:scalar :number}
-                                                             :value 0}]}
+                                              :step [:take {:param {:scalar :number}
+                                                            :value 5}]}
                             "drop"           {:id    "drop" :type :step :name "drop"
                                               :static true
-                                              :steps [:take {:param {:scalar :number}
-                                                             :value 0}]}
+                                              :step [:take {:param {:scalar :number}
+                                                            :value 5}]}
                             "extract"        {:id    "extract" :type :step :name "extract"
                                               :static true
                                               :step [:extract {:param {:vector :keyword}

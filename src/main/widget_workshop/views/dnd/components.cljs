@@ -124,18 +124,18 @@
                  (js->clj (.-draggableProps provided))
                  (js->clj (.-dragHandleProps provided)))
 
-          [:p.is-6 {:key      id
-                    :index    index
-                    :style    {:border           "1px solid lightgray"
-                               :border-radius    "5px"
-                               :padding          "8px"
-                               :padding-left     "3px"
-                               :padding-right    "3px"
-                               :margin-bottom    "8px"
-                               :max-width        "220px"
-                               :color            txt-color
-                               :background-color bg-color}
-                    :on-click #(prn "clicked " name)}
+          [:div {:key      id
+                 :index    index
+                 :style    {:border           "1px solid lightgray"
+                            :border-radius    "5px"
+                            :padding          "8px"
+                            :padding-left     "3px"
+                            :padding-right    "3px"
+                            :margin-bottom    "8px"
+                            :max-width        "220px"
+                            :color            txt-color
+                            :background-color bg-color}
+                 :on-click #(prn "clicked " name)}
            [:span name]
            (if (not static)
              [:span {:style {:color "lightgray"
