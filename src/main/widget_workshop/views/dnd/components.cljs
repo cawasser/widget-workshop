@@ -1,10 +1,12 @@
 (ns widget-workshop.views.dnd.components
   (:require [reagent.core :as r]
+            [reagent.dom :as rd]
             [re-frame.core :as rf]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.handlers.compose-widgets]
             [widget-workshop.handlers.scenarios :as s]
-            [widget-workshop.views.dnd.edit-panel :as e]))
+            [widget-workshop.views.dnd.edit-panel :as e]
+            ["react-simple-popover" :as Popover]))
 
 
 ; Drag & Drop code mimics:
@@ -86,8 +88,22 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+
+
+(defn- popover [this ref content isActive?]
+  [:> Popover
+   {:placement :right
+    :container this
+    :target    ref
+    :show      @isActive?
+    :onHide    #(swap! isActive? not)}
+   content])
+
+
 (defn source-drag-item [{:keys [id name type] :as item} index]
-  (let [[bg-color txt-color] (get-colors type)]
+  (let [[bg-color txt-color] (get-colors type)
+        isActive? (r/atom false)]
     (prn "source-drag-item" id name type bg-color txt-color)
 
     [:> Draggable {:key id :draggable-id id :index index}
@@ -97,24 +113,31 @@
                  (js->clj (.-draggableProps provided))
                  (js->clj (.-dragHandleProps provided)))
 
-          [:p.is-6 {:key      id
-                    :index    index
-                    :style    {:border           "1px solid lightgray"
-                               :border-radius    "5px"
-                               :padding          "8px"
-                               :padding-left     "3px"
-                               :padding-right    "3px"
-                               :margin-bottom    "8px"
-                               :max-width        "220px"
-                               :color            txt-color
-                               :background-color bg-color}
-                    :on-click #(prn "clicked " name)}
-           name]]))]))
+          ;[Popover (rd/dom-node ) (.-innerRef provided)
+          ; (str (:sample item)) isActive?]
+
+          [:div.flow-h {:key   id
+                        :index index
+                        :style {:border           "1px solid lightgray"
+                                :border-radius    "5px"
+                                :padding          "8px"
+                                :padding-left     "3px"
+                                :padding-right    "3px"
+                                :margin-bottom    "8px"
+                                :max-width        "220px"
+                                :color            txt-color
+                                :background-color bg-color}}
+           [:span name]
+           [:span {:style    {:color       txt-color
+                              :margin-left "10px"
+                              :cursor      "e-resize"}
+                   :on-click #(prn "show the meta-data")} ">"]]]))]))
 
 
 
 (defn step-drag-item [{:keys [id name type step static] :as item} index]
-  (let [[bg-color txt-color] (get-colors type)]
+  (let [[bg-color txt-color] (get-colors type)
+        isOpen? (r/atom false)]
     (prn "step-drag-item" item id name type step)
 
     [:> Draggable {:key id :draggable-id id :index index}
@@ -124,25 +147,28 @@
                  (js->clj (.-draggableProps provided))
                  (js->clj (.-dragHandleProps provided)))
 
-          [:div {:key      id
-                 :index    index
-                 :style    {:border           "1px solid lightgray"
-                            :border-radius    "5px"
-                            :padding          "8px"
-                            :padding-left     "3px"
-                            :padding-right    "3px"
-                            :margin-bottom    "8px"
-                            :max-width        "220px"
-                            :color            txt-color
-                            :background-color bg-color}
-                 :on-click #(prn "clicked " name)}
-           [:span name]
+          [:div.flow-h {:key   id
+                        :index index
+                        :style {:border           "1px solid lightgray"
+                                :border-radius    "5px"
+                                :padding          "8px"
+                                :padding-left     "3px"
+                                :padding-right    "3px"
+                                :margin-bottom    "8px"
+                                :max-width        "220px"
+                                :color            txt-color
+                                :background-color bg-color}}
+           [:p name]
            (if (not static)
-             [:span {:style {:color "lightgray"
-                             :margin-left "10px"
-                             :cursor :default}
-                     :on-click #(prn "click ot edit!!!")}
-              (e/edit-panel item)])]]))]))
+             [:div {:style           {:color       "lightgray"
+                                      :margin-left "10px"
+                                      :cursor      :default}}
+              (e/edit-panel item isOpen?)])
+           (if (not static)
+             [:div {:style    {:color       txt-color
+                               :margin-left "10px"
+                               :cursor      "e-resize"}
+                    :on-click #(prn "show the step")} ">"])]]))]))
 
 
 
@@ -203,4 +229,6 @@
 (comment
   (.substr "testing-source" 0 (.indexOf "testing-source" "-"))
 
+
+  (empty? [nil])
   ())

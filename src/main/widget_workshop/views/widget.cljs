@@ -27,6 +27,32 @@
 
 
 
+(rf/reg-sub
+  :widget-source
+  (fn [db [_ id]]
+    (let [ret (get-in db [:widgets id :source])]
+      (prn ":widget-source" ret)
+      ret)))
+
+(rf/reg-sub
+  :build/sources
+  (fn [db _]
+    (:build/sources db)))
+
+(rf/reg-sub
+  :widget-source-sample
+
+  (fn [[_ id]]
+    ;(prn "pre-subscription" id)
+    [ (rf/subscribe [:widget-source id]) (rf/subscribe [:build/sources])])
+
+  (fn [source-id sources]
+    (get sources :sample)))
+
+
+
+
+
 (defn- title-bar [widget delete?]
   ;(prn "title-bar" widget delete?)
   [:div#title-bar.container.level {:style {:width            "auto"
@@ -78,11 +104,18 @@
 
 
 
+(defn- handle-sample-data [widget]
+  (let [source @(rf/subscribe [:widget-source-sample (:source widget)])]
+    (prn "handle-sample-data" widget source)
+
+    [:p "sample data"]))
+
+
 (defn fullsize-widget [widget]
   ;(prn "fullsize-widget" widget)
   [:div.widget
    [title-bar widget false]
-   [handle-content widget]])
+   [handle-sample-data widget]])
 
 
 

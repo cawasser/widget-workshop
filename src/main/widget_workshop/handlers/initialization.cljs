@@ -161,9 +161,6 @@
 ; re-arranging the data-sources collection
 ;
 (comment
-  (defonce db {:builder/data-sources [:basic-data :intermediate-data :three]})
-  (def ddb (:builder/data-sources db))
-
   (:builder/data-sources db)
 
   (def from-idx 1)

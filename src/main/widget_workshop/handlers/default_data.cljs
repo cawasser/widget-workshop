@@ -3,6 +3,37 @@
             [widget-workshop.server.source.config-data]))
 
 
+(def sample-generic-data
+  [{:id 1 :x 100 :y 100 :datetime #inst"2020-08-11T10:00:00.000Z"}
+   {:id 2 :x 200 :y 50 :datetime #inst"2020-08-11T11:00:00.000Z"}
+   {:id 3 :x 300 :y 25 :datetime #inst"2020-08-11T12:00:00.000Z"}
+   {:id 4 :x 400 :y 12.5 :datetime #inst"2020-08-11T13:00:00.000Z"}])
+
+(def sample-config-data
+  [{:datetime #inst"2020-08-11T10:00:00.000Z" :id 1 :kind "alpha" :param-1 "off" :param-2 "off"}
+   {:datetime #inst"2020-08-11T11:00:00.000Z" :id 1 :kind "alpha" :param-1 "off" :param-2 "on"}
+   {:datetime #inst"2020-08-11T12:00:00.000Z" :id 1 :kind "alpha" :param-1 "on" :param-2 "off"}
+   {:datetime #inst"2020-08-11T13:00:00.000Z" :id 1 :kind "alpha" :param-1 "on" :param-2 "on"}
+   {:datetime #inst"2020-08-11T13:00:00.000Z" :id 1 :kind "alpha" :param-1 "off" :param-2 "off"}
+
+   {:datetime #inst"2020-08-11T10:00:00.000Z" :id 2 :kind "alpha" :param-1 "on" :param-2 "on"}
+   {:datetime #inst"2020-08-11T12:00:00.000Z" :id 2 :kind "alpha" :param-1 "on" :param-2 "off"}
+   {:datetime #inst"2020-08-11T13:00:00.000Z" :id 2 :kind "alpha" :param-1 "on" :param-2 "on"}
+
+   {:datetime #inst"2020-08-11T12:00:00.000Z" :id 3 :kind "alpha" :param-1 "of" :param-2 "on"}
+   {:datetime #inst"2020-08-11T15:00:00.000Z" :id 3 :kind "alpha" :param-1 "on" :param-2 "off"}
+   {:datetime #inst"2020-08-11T17:00:00.000Z" :id 3 :kind "alpha" :param-1 "on" :param-2 "on"}
+
+   ; for example, :id 4 has different params than the other 3:
+   {:datetime #inst"2020-08-11T12:00:00.000Z" :id 4 :kind "alpha 2" :param-1 "of" :param-3 "on"}
+   {:datetime #inst"2020-08-11T15:00:00.000Z" :id 4 :kind "alpha 2" :param-1 "on" :param-3 "off"}
+   {:datetime #inst"2020-08-11T17:00:00.000Z" :id 4 :kind "alpha 2" :param-1 "on" :param-3 "on"}
+
+   ; for example, :id 5 is a completely different 'thing':
+   {:datetime #inst"2020-08-11T12:00:00.000Z" :id 5 :kind "beta" :x 100 :y 100}
+   {:datetime #inst"2020-08-11T15:00:00.000Z" :id 5 :kind "beta" :x 120 :y 100}
+   {:datetime #inst"2020-08-11T17:00:00.000Z" :id 5 :kind "beta" :x 140 :y 100}])
+
 (def init-db
   {
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -21,9 +52,8 @@
 
    ; a map to a set with a single data-source for this widget, this is where the data
    ; will come from (singleton per widget)
-   :builder/sources
-                           {"generic-source" ["generic-source"]
-                            "config-source"  ["config-source"]}
+   :builder/sources        {"generic-source" {:name "generic-source" :sample sample-generic-data}
+                            "config-source"  {:name "config-source" :sample sample-config-data}}
 
    ;; a map of :steps to the dsl used to actually perform the operation
    ;; on a data set
@@ -59,26 +89,26 @@
    :builder/drag-items     {
                             "generic-source" {:id "generic-source" :type :source :name "generic-source"}
                             "config-source"  {:id "config-source" :type :source :name "config-source"}
-                            "group-by"       {:id   "group-by" :type :step :name "group-by"
+                            "group-by"       {:id     "group-by" :type :step :name "group-by"
                                               :static true
-                                              :step [:group-by {:param {:vector :keyword}
-                                                                :value []}]}
-                            "first"          {:id   "first" :type :step :name "first"
+                                              :step   [:group-by {:param {:vector :keyword}
+                                                                  :value []}]}
+                            "first"          {:id     "first" :type :step :name "first"
                                               :static true :step [:first {:param :none}]}
-                            "last"           {:id   "last" :type :step :name "last"
+                            "last"           {:id     "last" :type :step :name "last"
                                               :static true :step [:last {:param :none}]}
-                            "take"           {:id    "take" :type :step :name "take"
+                            "take"           {:id     "take" :type :step :name "take"
                                               :static true
-                                              :step [:take {:param {:scalar :number}
-                                                            :value 5}]}
-                            "drop"           {:id    "drop" :type :step :name "drop"
+                                              :step   [:take {:param {:scalar :number}
+                                                              :value 5}]}
+                            "drop"           {:id     "drop" :type :step :name "drop"
                                               :static true
-                                              :step [:take {:param {:scalar :number}
-                                                            :value 5}]}
-                            "extract"        {:id    "extract" :type :step :name "extract"
+                                              :step   [:take {:param {:scalar :number}
+                                                              :value 5}]}
+                            "extract"        {:id     "extract" :type :step :name "extract"
                                               :static true
-                                              :step [:extract {:param {:vector :keyword}
-                                                               :value []}]}}
+                                              :step   [:extract {:param {:vector :keyword}
+                                                                 :value []}]}}
 
    ; hold the uuid for the widget currently 'under construction'
    :builder/current-widget "alpha"

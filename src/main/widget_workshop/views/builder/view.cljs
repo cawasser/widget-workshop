@@ -27,25 +27,28 @@
                  :type           "source"}
 
    (fn [provided snapshot]
-     ;(prn "sources-tool" widget @(rf/subscribe [:drag-items (:source widget)]))
-     (r/as-element
-       [d/draggable-item-vlist provided snapshot
-        [@(rf/subscribe [:drag-item (:source widget)])] "cadetblue"]))])
-
-
-
-(defn- steps-tool [widget]
-  [:> Droppable {:droppable-id   "builder/steps-tool"
-                 :isDropDisabled false
-                 :type           "steps"}
-
-   (fn [provided snapshot]
-     ;(prn "steps-tool" (:steps widget))
+     (prn "sources-tool" widget @(rf/subscribe [:drag-items (:source widget)]))
      (r/as-element
        [d/draggable-item-vlist provided snapshot
         (map (fn [w]
                @(rf/subscribe [:drag-item w]))
-          (:steps widget)) "cadetblue"]))])
+          [(:source widget)]) "cadetblue"]))])
+
+
+
+(defn- steps-tool [widget]
+  [:div
+   [:> Droppable {:droppable-id   "builder/steps-tool"
+                  :isDropDisabled false
+                  :type           "steps"}
+
+    (fn [provided snapshot]
+      ;(prn "steps-tool" (:steps widget))
+      (r/as-element
+        [d/draggable-item-vlist provided snapshot
+         (map (fn [w]
+                @(rf/subscribe [:drag-item w]))
+           (:steps widget)) "cadetblue"]))]])
 
 
 
@@ -58,6 +61,8 @@
      [:div.panel-block {:style {:margin-bottom           "5px"
                                 :border-top-right-radius "5px"
                                 :border-top-left-radius  "5px"
+                                :border                  :solid
+                                :border-width            "1px"
                                 :background-color        "lightblue"}}
       [:div
        [:h2 {:style {:text-align :center}} "Source"]
@@ -66,9 +71,11 @@
      [:div.panel-block {:style {:margin-bottom              "5px"
                                 :border-bottom-right-radius "5px"
                                 :border-bottom-left-radius  "5px"
-                                :background-color           "lightgray"}}
+                                :border                     :solid
+                                :border-width               "1px"
+                                :background-color           "lightblue"}}
       [:div
-       [:h2 {:style {:text-align :center}} "Steps:"]
+       [:h2 {:style {:text-align :center}} "Steps"]
        [steps-tool widget]]]]))
 
 
@@ -159,11 +166,14 @@
      [:div.column.is-one-fifth
       [sources-sidebar]
       [steps-sidebar]]
-     [:div.column.is-one-fifth
-      [builder-panel]]
+
      [:div.column {:style {:background-color "lightgray"
                            :border-radius    "5px"}}
-      [building-widget-panel]]]]])
+      [:div.columns
+       [:div.column.is-one-fifth
+        [builder-panel]]
+       [:div.column
+        [building-widget-panel]]]]]]])
 
 
 

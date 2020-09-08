@@ -12,6 +12,7 @@
     "react-beautiful-dnd": "^13.0.0",
     "react-dom": "16.13.0",
     "react-highlight.js": "1.0.7",
+    "react-simple-popover": "^0.2.4",
     "vega": "^5.14.0",
     "vega-embed": "^6.11.1",
     "vega-lite": "^4.14.1"
