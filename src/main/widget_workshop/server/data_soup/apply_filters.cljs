@@ -1,6 +1,9 @@
 (ns widget-workshop.server.data-soup.apply-filters)
 
 
+(defn- not-empty? [x]
+  (not (empty? x)))
+
 (defmulti filter-step
   (fn [[step params] data] step))
 
@@ -40,19 +43,21 @@
 
 
 (defmethod filter-step :ds/extract [[step {:keys [params value]}] data]
-  (->> data
-    (map (apply juxt value))
-    (map #(zipmap value %))))
+  (if (not-empty? value)
+    (->> data
+      (map (apply juxt (map keyword (clojure.string/split value " "))))
+      (map #(zipmap (map keyword (clojure.string/split value " ")) %)))))
 
 
 (defmethod filter-step :ds/pipe [[step {:keys [params value]}] data]
   (->> data
-    (map (apply comp value))))
+    (map (apply comp (map keyword (clojure.string/split value " "))))))
 
 
 (defmethod filter-step :ds/group-by [[step {:keys [params value]}] data]
-  (->> data
-    (group-by (apply juxt value))))
+  (if (not-empty? value)
+    (->> data
+      (group-by (apply juxt (map keyword (clojure.string/split value " ")))))))
 
 
 
@@ -99,5 +104,19 @@
 
   (apply-filters []
     (:data (widget-workshop.server.source.config-data/get-data)))
+
+  ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; TODO: HACK!!!!!
+; convert a string of words into a vector of keywords
+;
+; replace with a better means of picking the column-ids
+(comment
+  (def value "datetime id")
+
+  (clojure.string/split value " ")
+  (map keyword (clojure.string/split value " "))
 
   ())
