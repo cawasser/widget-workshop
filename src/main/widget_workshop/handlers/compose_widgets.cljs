@@ -323,36 +323,6 @@
     (map #(get-in db [:builder/drag-items %]) (get db source))))
 
 
-;(rf/reg-sub
-;  :steps
-;  (fn [db [_ id]]
-;    ;(prn ":steps " id "//" (get-in db [::steps id]))
-;    (get-in db [:builder/steps id])))
-;
-;(rf/reg-sub
-;  :filter-drag-items
-;
-;  ; this subscription depends on 2 other subscriptions:
-;  ;
-;  ;  1) ::steps for the given widget, if this changes (add/remove/reorder) we
-;  ;         need to re-fire
-;  ;  2) any changes to the entire :all-drag-items key, if we add new drag-items
-;  ;         we may need ot re-fire
-;  (fn [[_ id]]
-;    [(rf/subscribe [:steps id]) (rf/subscribe [:all-drag-items])])
-;
-;  ; now, instead of looking in the db, we look in the results of the 2 prereq
-;  ; subscriptions
-;  (fn [[filters drag-items]]
-;    (if filters
-;      (let [ret (map #(get drag-items %) filters)]
-;        ;(prn "found :steps " :steps "//" drag-items "//" ret)
-;        ret)
-;
-;      [])))
-;
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; add/replace the source for the :current-widget

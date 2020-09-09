@@ -3,7 +3,8 @@
             [re-frame.core :as rf]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.views.dnd.components :as d]
-            [widget-workshop.views.oz.content :as oz]))
+            [widget-workshop.views.oz.content :as oz]
+            [widget-workshop.views.oz.themes :as themes]))
 
 
 
@@ -37,17 +38,32 @@
 (rf/reg-sub
   :build/sources
   (fn [db _]
-    (:build/sources db)))
+    (if-let [ret (:builder/drag-items db)]
+      (do
+        (prn ":build/sources" ret)
+        ret)
+      (do
+        (prn ":build/sources []")
+        []))))
+
+
+
 
 (rf/reg-sub
   :widget-source-sample
-
   (fn [[_ id]]
-    ;(prn "pre-subscription" id)
-    [ (rf/subscribe [:widget-source id]) (rf/subscribe [:build/sources])])
+    (prn "pre-subscription" id)
+    (if (not (empty? id))
+      [(rf/subscribe [:widget-source id]) (rf/subscribe [:build/sources])]
+      []))
 
-  (fn [source-id sources]
-    (get sources :sample)))
+  (fn [[source-id sources]]
+    (prn ":widget-source-sample" source-id sources)
+    (if (and
+          (not (empty? sources))
+          (not= "" source-id))
+      (get-in sources [source-id :sample])
+      [])))
 
 
 
@@ -77,7 +93,7 @@
 
 
 (defn- handle-content [widget]
-  [oz.core/vega-lite @oz/line-plot])
+  [oz.core/vega-lite (merge themes/darkTheme @oz/line-plot)])
 
 
 
@@ -105,10 +121,10 @@
 
 
 (defn- handle-sample-data [widget]
-  (let [source @(rf/subscribe [:widget-source-sample (:source widget)])]
+  (let [source @(rf/subscribe [:widget-source-sample (:id widget)])]
     (prn "handle-sample-data" widget source)
 
-    [:p "sample data"]))
+    [:p (str source)]))
 
 
 (defn fullsize-widget [widget]
@@ -126,6 +142,46 @@
   (if (= widget-workshop.views.dnd.new-widget/new-widget-id id)
     widget-workshop.views.dnd.new-widget/new-widget-id
     (str id suffix))
+  ())
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; get the sample data for the source of the curent-widget
+(comment
+  (def db @re-frame.db/app-db)
+  (def widget @(rf/subscribe [:current-widget]))
+  (def id (:builder/current-widget db))
+
+  (get-in db [:widgets id :source])
+  @(rf/subscribe [:widget-source id])
+
+  (:builder/drag-items db)
+  @(rf/subscribe [:build/sources])
+
+  (if-let [ret (:builder/drag-items db)]
+    ret
+    [])
+
+  (let [[id sources] [@(rf/subscribe [:widget-source id])
+                      @(rf/subscribe [:build/sources])]]
+    (if (and
+          (not (empty? sources))
+          (not= "" id))
+      (get-in sources [id :sample])
+      []))
+
+
+  @(rf/subscribe [:widget-source-sample (:source widget)])
+
+
+
+  (-> db
+    (assoc-in [:widgets current-widget]
+      (replace-source db widget new-uuid))
+    (assoc-in [:builder/drag-items new-uuid]
+      (assoc item :id new-uuid)))
+
   ())
 
 

@@ -158,17 +158,25 @@
                                 :max-width        "220px"
                                 :color            txt-color
                                 :background-color bg-color}}
-           [:p name]
+                        ;:on-click #(do
+                        ;             (prn "close! :div.flow-h")
+                        ;             (reset! isOpen? false))}
+           [:p {:on-click #(do
+                             (prn "close! :p")
+                             (reset! isOpen? false))} name]
            (if (not static)
-             [:div {:style           {:color       "lightgray"
-                                      :margin-left "10px"
-                                      :cursor      :default}}
-              (e/edit-panel item isOpen?)])
+             [:div#edit {:style           {:color       "lightgray"
+                                           :margin-left "10px"
+                                           :cursor      :default}}
+              [e/edit-panel item isOpen?]])
            (if (not static)
-             [:div {:style    {:color       txt-color
-                               :margin-left "10px"
-                               :cursor      "e-resize"}
-                    :on-click #(prn "show the step")} ">"])]]))]))
+             [:div#popover {:style    {:color       txt-color
+                                       :margin-left "10px"
+                                       :cursor      "e-resize"}
+                            :on-click #(do
+                                         (prn "close! arrow")
+                                         (prn "popover!")
+                                         (reset! isOpen? false))} ">"])]]))]))
 
 
 

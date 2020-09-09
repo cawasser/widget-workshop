@@ -87,8 +87,10 @@
    ;     [:ds/nth n]
 
    :builder/drag-items     {
-                            "generic-source" {:id "generic-source" :type :source :name "generic-source"}
-                            "config-source"  {:id "config-source" :type :source :name "config-source"}
+                            "generic-source"  {:id "generic-source" :type :source
+                                               :name "generic-source" :sample sample-generic-data}
+                            "config-source"  {:id "config-source" :type :source
+                                              :name "config-source" :sample sample-config-data}
                             "group-by"       {:id     "group-by" :type :step :name "group-by"
                                               :static true
                                               :step   [:group-by {:param {:vector :keyword}
