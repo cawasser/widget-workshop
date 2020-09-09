@@ -7,7 +7,12 @@
   [{:id 1 :x 100 :y 100 :datetime #inst"2020-08-11T10:00:00.000Z"}
    {:id 2 :x 200 :y 50 :datetime #inst"2020-08-11T11:00:00.000Z"}
    {:id 3 :x 300 :y 25 :datetime #inst"2020-08-11T12:00:00.000Z"}
-   {:id 4 :x 400 :y 12.5 :datetime #inst"2020-08-11T13:00:00.000Z"}])
+   {:id 4 :x 400 :y 6.25 :datetime #inst"2020-08-11T13:00:00.000Z"}
+   {:id 5 :x 500 :y 3.125 :datetime #inst"2020-08-11T14:00:00.000Z"}
+   {:id 6 :x 600 :y 6.25 :datetime #inst"2020-08-11T15:00:00.000Z"}
+   {:id 7 :x 700 :y 12.5 :datetime #inst"2020-08-11T16:00:00.000Z"}
+   {:id 8 :x 800 :y 25 :datetime #inst"2020-08-11T17:00:00.000Z"}
+   {:id 9 :x 900 :y 11.7 :datetime #inst"2020-08-11T18:00:00.000Z"}])
 
 (def sample-config-data
   [{:datetime #inst"2020-08-11T10:00:00.000Z" :id 1 :kind "alpha" :param-1 "off" :param-2 "off"}
@@ -93,24 +98,24 @@
                                               :name "config-source" :sample sample-config-data}
                             "group-by"       {:id     "group-by" :type :step :name "group-by"
                                               :static true
-                                              :step   [:group-by {:param {:vector :keyword}
-                                                                  :value []}]}
+                                              :step   [:ds/group-by {:param {:vector :keyword}
+                                                                     :value []}]}
                             "first"          {:id     "first" :type :step :name "first"
-                                              :static true :step [:first {:param :none}]}
+                                              :static true :step [:ds/first {:param :none}]}
                             "last"           {:id     "last" :type :step :name "last"
-                                              :static true :step [:last {:param :none}]}
+                                              :static true :step [:ds/last {:param :none}]}
                             "take"           {:id     "take" :type :step :name "take"
                                               :static true
-                                              :step   [:take {:param {:scalar :number}
-                                                              :value 5}]}
+                                              :step   [:ds/take {:param {:scalar :number}
+                                                                 :value 5}]}
                             "drop"           {:id     "drop" :type :step :name "drop"
                                               :static true
-                                              :step   [:take {:param {:scalar :number}
-                                                              :value 5}]}
+                                              :step   [:ds/take {:param {:scalar :number}
+                                                                 :value 5}]}
                             "extract"        {:id     "extract" :type :step :name "extract"
                                               :static true
-                                              :step   [:extract {:param {:vector :keyword}
-                                                                 :value []}]}}
+                                              :step   [:ds/extract {:param {:vector :keyword}
+                                                                    :value []}]}}
 
    ; hold the uuid for the widget currently 'under construction'
    :builder/current-widget "alpha"

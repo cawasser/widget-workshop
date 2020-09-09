@@ -27,7 +27,7 @@
                  :type           "source"}
 
    (fn [provided snapshot]
-     (prn "sources-tool" widget @(rf/subscribe [:drag-items (:source widget)]))
+     ;(prn "sources-tool" widget @(rf/subscribe [:drag-items (:source widget)]))
      (r/as-element
        [d/draggable-item-vlist provided snapshot
         (map (fn [w]

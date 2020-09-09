@@ -104,7 +104,7 @@
 (defn source-drag-item [{:keys [id name type] :as item} index]
   (let [[bg-color txt-color] (get-colors type)
         isActive? (r/atom false)]
-    (prn "source-drag-item" id name type bg-color txt-color)
+   ; (prn "source-drag-item" id name type bg-color txt-color)
 
     [:> Draggable {:key id :draggable-id id :index index}
      (fn [provided snapshot]
@@ -138,7 +138,7 @@
 (defn step-drag-item [{:keys [id name type step static] :as item} index]
   (let [[bg-color txt-color] (get-colors type)
         isOpen? (r/atom false)]
-    (prn "step-drag-item" item id name type step)
+    ;(prn "step-drag-item" item id name type step)
 
     [:> Draggable {:key id :draggable-id id :index index}
      (fn [provided snapshot]
@@ -162,7 +162,7 @@
                         ;             (prn "close! :div.flow-h")
                         ;             (reset! isOpen? false))}
            [:p {:on-click #(do
-                             (prn "close! :p")
+                             ;(prn "close! :p")
                              (reset! isOpen? false))} name]
            (if (not static)
              [:div#edit {:style           {:color       "lightgray"
@@ -174,8 +174,8 @@
                                        :margin-left "10px"
                                        :cursor      "e-resize"}
                             :on-click #(do
-                                         (prn "close! arrow")
-                                         (prn "popover!")
+                                         ;(prn "close! arrow")
+                                        ;(prn "popover!")
                                          (reset! isOpen? false))} ">"])]]))]))
 
 
@@ -205,7 +205,7 @@
                           :min-height       "30px"
                           :margin           "auto"}}
             (js->clj (.-droppableProps provided)))
-     (prn "draggable-item-vlist " data)
+     ;(prn "draggable-item-vlist " data)
      (for [[index item] (map-indexed vector data)]
        ^{:key index} (drag-item item index))
      (.-placeholder provided)]))

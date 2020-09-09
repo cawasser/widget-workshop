@@ -27,7 +27,7 @@
 (rf/reg-event-db
   :update-step
   (fn [db [_ id new-value]]
-    (prn ":update-step" id new-value)
+    ;(prn ":update-step" id new-value)
     (let [[orig-step orig-param] (get-in db [:builder/drag-items id :step])]
       (assoc-in db [:builder/drag-items id :step]
         [orig-step (assoc orig-param :value new-value)]))))
@@ -41,7 +41,7 @@
 
   (fn []
    (let [value @(rf/subscribe [:step-value (:id item)])]
-     (prn "vector-field" item (:id item) value)
+     ;(prn "vector-field" item (:id item) value)
      [:div.field
         {:on-double-click #(do
                              (rf/dispatch-sync
@@ -114,7 +114,7 @@
   (let [step  (second (:step item))
         param (:param step)
         type  (first (keys param))]
-    (prn "map-value" param type (:value step))
+    ;(prn "map-value" param type (:value step))
     (fn []
       (if @isOpen?
         (cond
@@ -134,7 +134,7 @@
 (defn edit-panel [{:keys [step] :as item} isOpen?]
   (fn []
     (let [param (:param (second step))]
-      (prn "edit-panel" item step param)
+      ;(prn "edit-panel" item step param)
       (cond
         (map? param) (map-value @(rf/subscribe [:step (:id item)]) isOpen?)
         (= param :none) [:p]

@@ -23,36 +23,36 @@
 
 
 
-(defmethod filter-step :ds/map [[step params] data]
-  (map (apply juxt params) data))
+(defmethod filter-step :ds/map [[step {:keys [params value]}] data]
+  (map (apply juxt value) data))
 
 
-(defmethod filter-step :ds/take [[step params] data]
-  (take params data))
+(defmethod filter-step :ds/take [[step {:keys [params value]}] data]
+  (take value data))
 
 
-(defmethod filter-step :ds/first [[step params] data]
+(defmethod filter-step :ds/first [[step {:keys [params value]}] data]
   (first data))
 
 
-(defmethod filter-step :ds/last [[step params] data]
+(defmethod filter-step :ds/last [[step {:keys [params value]}] data]
   (last data))
 
 
-(defmethod filter-step :ds/extract [[step params] data]
+(defmethod filter-step :ds/extract [[step {:keys [params value]}] data]
   (->> data
-    (map (apply juxt params))
-    (map #(zipmap params %))))
+    (map (apply juxt value))
+    (map #(zipmap value %))))
 
 
-(defmethod filter-step :ds/pipe [[step params] data]
+(defmethod filter-step :ds/pipe [[step {:keys [params value]}] data]
   (->> data
-    (map (apply comp params))))
+    (map (apply comp value))))
 
 
-(defmethod filter-step :ds/group-by [[step params] data]
+(defmethod filter-step :ds/group-by [[step {:keys [params value]}] data]
   (->> data
-    (group-by (apply juxt params))))
+    (group-by (apply juxt value))))
 
 
 
@@ -70,9 +70,12 @@
 ;
 (comment
 
-  (def pipeline2 [[:ds/extract [:datetime :id :param-2]]
-                  [:ds/group-by [:id]]
-                  [:ds/take 2]])
+  (def pipeline2 [[:ds/extract {:param {:vector :keyword}
+                                :value [:datetime :id :param-2]}]
+                  [:ds/group-by {:param {:vector :keyword}
+                                 :value [:id]}]
+                  [:ds/take {:param {:scalar :number}
+                             :value 2}]])
 
   (filter-step (first pipeline2)
     (:data (widget-workshop.server.source.config-data/get-data)))

@@ -4,7 +4,8 @@
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.views.dnd.components :as d]
             [widget-workshop.views.oz.content :as oz]
-            [widget-workshop.views.oz.themes :as themes]))
+            [widget-workshop.views.oz.themes :as themes]
+            [widget-workshop.views.builder.sample-pipeline :as p]))
 
 
 
@@ -32,7 +33,7 @@
   :widget-source
   (fn [db [_ id]]
     (let [ret (get-in db [:widgets id :source])]
-      (prn ":widget-source" ret)
+      (prn ":widget-source" id ret)
       ret)))
 
 (rf/reg-sub
@@ -40,10 +41,10 @@
   (fn [db _]
     (if-let [ret (:builder/drag-items db)]
       (do
-        (prn ":build/sources" ret)
+        ;(prn ":build/sources" ret)
         ret)
       (do
-        (prn ":build/sources []")
+        ;(prn ":build/sources []")
         []))))
 
 
@@ -52,7 +53,7 @@
 (rf/reg-sub
   :widget-source-sample
   (fn [[_ id]]
-    (prn "pre-subscription" id)
+    (prn "pre :widget-source-sample" id)
     (if (not (empty? id))
       [(rf/subscribe [:widget-source id]) (rf/subscribe [:build/sources])]
       []))
@@ -121,10 +122,16 @@
 
 
 (defn- handle-sample-data [widget]
-  (let [source @(rf/subscribe [:widget-source-sample (:id widget)])]
-    (prn "handle-sample-data" widget source)
+  (prn "handle-sample-data" widget (:id widget))
+  (let [id (:id widget)
+        source (rf/subscribe [:widget-source-sample id])
+        steps (rf/subscribe [:widget-step-ids id])
+        pipeline (rf/subscribe [:widget-pipeline id])]
 
-    [:p (str source)]))
+    (fn []
+      (prn "handle-sample-data ===>" widget @steps @source @pipeline)
+      :div
+      [:p (p/run-pipeline @pipeline @source)])))
 
 
 (defn fullsize-widget [widget]
