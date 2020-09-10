@@ -79,37 +79,6 @@
 
 
 
-;(defn- numeric-value [item isOpen?]
-;  (fn []
-;    (prn "numeric-value" item @isOpen?)
-;
-;    (if @isOpen?
-;      [number-field :input.input item isOpen?]
-;
-;      [:p.is-6 {:style {:color "lightgray"
-;                        :font-weight :bold}
-;                :on-double-click #(do
-;                                    ;(prn "flipping edit on" item @(rf/subscribe [:step-value (:id item)]))
-;                                    (swap! isOpen? not))}
-;       @(rf/subscribe [:step-value (:id item)])])))
-;
-
-
-
-;(defn- vector-value [item isOpen?]
-;  (fn []
-;    (prn "vector-value" item @isOpen?)
-;
-;    (if @isOpen?
-;      [vector-field :input.input item isOpen?]
-;
-;      [:p {.is-6 {:style {:color "lightgray"
-;                          :font-weight :bold}
-;                  :on-double-click #(swap! isOpen? not)}}
-;       @(rf/subscribe [:step-value (:id item)])])))
-
-
-
 (defn map-value [item isOpen?]
   (let [step  (second (:step item))
         param (:param step)
@@ -122,12 +91,8 @@
           (= type :scalar) [number-field :input.input item isOpen?]
           :else [:p "dummy"])
 
-        [:p.is-6 {:style           {:color       "lightgray"
-                                    :font-weight :bold}
-                  :on-double-click #(swap! isOpen? not)}
+        [:span.tag.is-link {:on-double-click #(swap! isOpen? not)}
          (str @(rf/subscribe [:step-value (:id item)]))]))))
-
-
 
 
 
