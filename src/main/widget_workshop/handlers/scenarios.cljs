@@ -15,7 +15,7 @@
                            :connect-widgets
                            :new-widget-from-source
                            :new-widget-from-widget
-                           :reorder-filters])
+                           :reorder-steps])
 
 (defn drop-scenario?
   "examines the drag and drop scenario and returns a keyword
@@ -35,11 +35,11 @@
     ; drop new filter onto an existing widget (not a new widget)
     (= from "builder/steps-list") :add-step-to-widget
 
-    ;; reorder the ':steps' on a widget
-    ;(and
-    ;  (not= from "builder/sources-list")
-    ;  (not= from "builder/steps-list")
-    ;  (= (strip-suffix from) to)) :reorder-filters
+    ; reorder the ':steps' on a widget
+    (and
+      (not= from "builder/sources-list")
+      (not= from "builder/steps-list")
+      (= from to)) :reorder-steps
 
     ; can't do anything else
     :default :do-nothing))

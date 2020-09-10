@@ -178,16 +178,17 @@
 
 
 
-(defn- reorder-widget-filters
+(defn- reorder-widget-steps
   "the user wants to reorder the :steps in a widget"
 
-  [db from from-idx to-idx]
+  [db from-idx to-idx]
 
-  (let [item (get-source-filter-item db from from-idx)]
-    ;(prn "reorder-widget-:steps " from from-idx to-idx item)
-    (assoc db :builder/filters (assoc (:builder/filters db)
-                                 from (reorder (get-in db [:builder/filters from])
-                                        from-idx to-idx)))))
+  (let [from @(rf/subscribe [:current-widget-id])]
+    (prn "reorder steps" from from-idx to-idx)
+
+    (assoc-in db [:widgets from :steps]
+      (reorder (get-in db [:widgets from :steps])
+        from-idx to-idx))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -216,7 +217,7 @@
 
   [db from from-idx to to-idx]
 
-  ;(prn "handle-drop-event" from to (s/drop-scenario? from to))
+  (prn "handle-drop-event" from to (s/drop-scenario? from to))
 
   (condp = (s/drop-scenario? from to)
     ; nothing to do (eg, can't reorder the sources list)
@@ -229,7 +230,7 @@
     :add-step-to-widget (add-step-to-widget db (keyword from) from-idx to to-idx)
 
     ; reorder the ':steps' on a widget
-    :reorder-filters (reorder-widget-filters db (s/strip-suffix from) from-idx to-idx)
+    :reorder-steps (reorder-widget-steps db from-idx to-idx)
 
 
     ; can't do anything else
@@ -471,9 +472,31 @@
 ;
 (comment
   (def db @re-frame.db/app-db)
-  (def from "9e256d23-4107-4955-8853-136f18978879")
+  (def from "alpha")
+  (def from-idx 0)
+  (def to-idx 1)
 
-  (reorder (get-in db [:builder/filters from]) from-idx to-idx)
+  (get-in db [:widgets])
+  (get-in db [:widgets from])
+  (get-in db [:widgets from :steps])
+  (get-in db [:widgets from :steps 0])
+  (get-in db [:widgets from :steps 1])
+
+  (reorder (get-in db [:widgets from :steps]) from-idx to-idx)
+
+
+  (let [item (get-in db [:widgets from :steps from-idx])]
+    ;(prn "reorder-widget-:steps " from from-idx to-idx item)
+    (assoc-in db [:widgets from :steps]
+      (reorder (get-in db [:widgets from :steps])
+        from-idx to-idx)))
+
+
+  (let [from @(rf/subscribe [:current-widget-id])]
+    (assoc-in db [:widgets from :steps]
+      (reorder (get-in db [:widgets from :steps])
+        from-idx to-idx)))
+
 
   ())
 
@@ -614,6 +637,9 @@
                                  from (reorder (get-in db [:builder/filters from])
                                         from-idx to-idx))))
 
+  (assoc db :filters (assoc (:filters db)
+                       to (splice existing-to-filters to-idx 0 new-uuid))
+            :drag-items (assoc (:drag-items db) new-uuid {:id new-uuid :name name}))
   ())
 
 

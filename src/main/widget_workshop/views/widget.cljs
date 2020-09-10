@@ -129,9 +129,9 @@
         pipeline (rf/subscribe [:widget-pipeline id])]
 
     (fn []
-      (prn "handle-sample-data ===>" widget @steps @source @pipeline)
-      :div
-      [:p (p/run-pipeline @pipeline @source)])))
+      ;(prn "handle-sample-data ===>" widget @steps @source @pipeline)
+      (p/run-pipeline @pipeline @source))))
+
 
 
 (defn fullsize-widget [widget]
@@ -142,6 +142,7 @@
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (comment
   (def id "some-uuid")
   (= widget-workshop.views.dnd.new-widget-id id)
@@ -154,11 +155,11 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; get the sample data for the source of the curent-widget
+; get the sample data for the source of the current-widget
 (comment
   (def db @re-frame.db/app-db)
   (def widget @(rf/subscribe [:current-widget]))
-  (def id (:builder/current-widget db))
+  (def id (:id @(rf/subscribe [:current-widget])))
 
   (get-in db [:widgets id :source])
   @(rf/subscribe [:widget-source id])
@@ -188,6 +189,27 @@
       (replace-source db widget new-uuid))
     (assoc-in [:builder/drag-items new-uuid]
       (assoc item :id new-uuid)))
+
+
+  ())
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; HACK!
+;
+; format the sample data for the source of the current-widget so
+; it breaks lines after each hash-map
+(comment
+  (def id (:id @(rf/subscribe [:current-widget])))
+
+  (def x (p/run-pipeline
+           @(rf/subscribe [:widget-source-sample id])
+           @(rf/subscribe [:widget-pipeline id])))
+
+  (let [source (rf/subscribe [:widget-source-sample id])
+        pipeline (rf/subscribe [:widget-pipeline id])]
+    [:p (p/run-pipeline @pipeline @source)])
 
   ())
 

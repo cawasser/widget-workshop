@@ -29,11 +29,14 @@
 
 (defn run-pipeline [pipeline data]
   (prn "run-pipeline" data pipeline)
-  (if (and
-        (not (empty? data)))
-        ;(not (empty? pipeline)))
-    (str (f/apply-filters pipeline data))
-    "empty"))
+  [:div
+   (if (not (empty? data))
+     (let [ret (f/apply-filters pipeline data)]
+       (cond
+         (vector? ret) (map (fn [x] [:p (str x)]) ret)
+         (map? ret) (map (fn [[k v]] [:p (str k ": " v)]) ret)
+         :else (str ret)))
+     [:p "empty"])])
 
 
 
@@ -43,9 +46,11 @@
 (comment
   (def db @re-frame.db/app-db)
   (def widget @(rf/subscribe [:current-widget]))
-  (def id (:builder/current-widget db))
+  (def id (:id @(rf/subscribe [:current-widget])))
 
   (get-in db [:widgets id :steps])
+
+  (def data @(rf/subscribe [:all-drag-items]))
   (def steps @(rf/subscribe [:widget-step-ids id]))
 
   (def data @(rf/subscribe [:all-drag-items]))
@@ -58,9 +63,39 @@
       (map #(get-in data [% :step]) steps)))
 
 
-  @(rf/subscribe [:widget-pipeline id])
 
+
+  (def id (:id @(rf/subscribe [:current-widget])))
+  (def data @(rf/subscribe [:widget-source-sample id]))
+  (def pipeline @(rf/subscribe [:widget-pipeline id]))
+
+  (f/apply-filters pipeline data)
+  (map (fn [x] [:p (str x)]) (f/apply-filters pipeline data))
 
   ())
 
 
+
+(comment
+  (def id (:id @(rf/subscribe [:current-widget])))
+  (def data @(rf/subscribe [:widget-source-sample id]))
+  (def pipeline @(rf/subscribe [:widget-pipeline id]))
+
+  [:div
+   (if (not (empty? data))
+     (map #([:p str %]) (f/apply-filters pipeline data))
+     [:p "empty"])]
+
+
+  (def ret (f/apply-filters pipeline data))
+
+  (if (not (empty? data))
+    (let [ret (f/apply-filters pipeline data)]
+      (cond
+        (vector? ret) (map (fn [x] [:p (str x)]) ret)
+        (map? ret) (map (fn [[k v]] [:p (str k ": " v)]) ret)
+        :else (str ret)))
+
+    [:p "empty"])
+
+  ())

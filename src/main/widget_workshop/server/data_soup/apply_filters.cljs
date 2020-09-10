@@ -1,4 +1,5 @@
-(ns widget-workshop.server.data-soup.apply-filters)
+(ns widget-workshop.server.data-soup.apply-filters
+  (:require [re-frame.core :as rf]))
 
 
 (defn- not-empty? [x]
@@ -54,6 +55,7 @@
     (map (apply comp (map keyword (clojure.string/split value " "))))))
 
 
+; TODO: group-by produces a single map, keyed by vector from the juxt
 (defmethod filter-step :ds/group-by [[step {:keys [params value]}] data]
   (if (not-empty? value)
     (->> data
@@ -119,4 +121,21 @@
   (clojure.string/split value " ")
   (map keyword (clojure.string/split value " "))
 
+  ())
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
+;
+(comment
+  (def id (:id @(rf/subscribe [:current-widget])))
+  (def data @(rf/subscribe [:widget-source-sample id]))
+  (def pipeline @(rf/subscribe [:widget-pipeline id]))
+
+  (def value "y")
+
+  (->> data
+    (group-by (apply juxt (map keyword (clojure.string/split value " ")))))
   ())
