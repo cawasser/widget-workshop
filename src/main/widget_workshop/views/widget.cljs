@@ -93,8 +93,10 @@
                                               (.stopPropagation %))}]])]])
 
 
-(defn- handle-content [widget]
-  [oz.core/vega-lite (merge themes/darkTheme @oz/line-plot)])
+(defn- handle-content [widget type]
+  [oz.core/vega-lite (-> (merge themes/darkTheme @oz/plot)
+                       (assoc :mark type)
+                       (assoc-in [:data :values] (oz/play-data "sample")))])
 
 
 
@@ -122,15 +124,16 @@
 
 
 (defn- handle-sample-data [widget]
-  (prn "handle-sample-data" widget (:id widget))
+  ;(prn "handle-sample-data" widget (:id widget))
   (let [id (:id widget)
         source (rf/subscribe [:widget-source-sample id])
-        steps (rf/subscribe [:widget-step-ids id])
         pipeline (rf/subscribe [:widget-pipeline id])]
 
     (fn []
-      ;(prn "handle-sample-data ===>" widget @steps @source @pipeline)
-      (p/run-pipeline @pipeline @source))))
+      (prn "handle-sample-data ===>" widget @source @pipeline)
+      [oz.core/vega-lite (-> @oz/plot
+                           (assoc-in [:data :values] (p/run-pipeline @pipeline @source))
+                           (assoc :mark @(rf/subscribe [:vega-type])))])))
 
 
 
@@ -202,6 +205,8 @@
 ; it breaks lines after each hash-map
 (comment
   (def id (:id @(rf/subscribe [:current-widget])))
+  (def source (rf/subscribe [:widget-source-sample id]))
+  (def pipeline (rf/subscribe [:widget-pipeline id]))
 
   (def x (p/run-pipeline
            @(rf/subscribe [:widget-source-sample id])
@@ -209,7 +214,7 @@
 
   (let [source (rf/subscribe [:widget-source-sample id])
         pipeline (rf/subscribe [:widget-pipeline id])]
-    [:p (p/run-pipeline @pipeline @source)])
+    (p/run-pipeline @pipeline @source))
 
   ())
 

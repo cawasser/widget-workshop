@@ -8,12 +8,11 @@
         i (range 20)]
     {:time i :item n :quantity (+ (Math/pow (* i (count n)) 0.8) (rand-int (count n)))}))
 
-(def line-plot
-  (r/atom {:data     {:values (play-data "monkey" "slipper" "broom")}
-           :encoding {:x     {:field "time" :type "quantitative"}
-                      :y     {:field "quantity" :type "quantitative"}
-                      :color {:field "item" :type "nominal"}}
-           :mark     "line"
+(def plot
+  (r/atom {:data     {:values '()}
+           :encoding {:x     {:field "datetime" :type "quantitative"}
+                      :y     {:field "x" :type "quantitative"}
+                      :color {:field "y" :type "nominal"}}
            :autosize {:type     "fit"
                       :contains "padding"}}))
 ;:autosize {:type     "fit"

@@ -7,7 +7,7 @@
 (rf/reg-sub
   :widget-step-ids
   (fn [db [_ id]]
-    (prn ":widget-step-ids" id)
+    ;(prn ":widget-step-ids" id)
     (if (not (empty? id))
       (get-in db [:widgets id :steps])
       [])))
@@ -15,12 +15,12 @@
 (rf/reg-sub
   :widget-pipeline
   (fn [[_ id]]
-    (prn "pre :widget-pipeline" id)
+    ;(prn "pre :widget-pipeline" id)
     [(rf/subscribe [:all-drag-items])
      (rf/subscribe [:widget-step-ids id])])
 
   (fn [[data steps]]
-    (prn ":widget-pipeline (steps)" steps  " (data) " data)
+    ;(prn ":widget-pipeline (steps)" steps  " (data) " data)
     (into []
       (map #(get-in data [% :step]) steps))))
 
@@ -29,14 +29,9 @@
 
 (defn run-pipeline [pipeline data]
   (prn "run-pipeline" data pipeline)
-  [:div
-   (if (not (empty? data))
-     (let [ret (f/apply-filters pipeline data)]
-       (cond
-         (vector? ret) (map (fn [x] [:p (str x)]) ret)
-         (map? ret) (map (fn [[k v]] [:p (str k ": " v)]) ret)
-         :else (str ret)))
-     [:p "empty"])])
+  (if (not (empty? data))
+    (f/apply-filters pipeline data)
+    []))
 
 
 
@@ -76,26 +71,19 @@
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; run the pipeline for the current-widget
 (comment
   (def id (:id @(rf/subscribe [:current-widget])))
   (def data @(rf/subscribe [:widget-source-sample id]))
   (def pipeline @(rf/subscribe [:widget-pipeline id]))
 
-  [:div
-   (if (not (empty? data))
-     (map #([:p str %]) (f/apply-filters pipeline data))
-     [:p "empty"])]
+  (if (not (empty? data))
+    (f/apply-filters pipeline data)
+    [])
 
 
   (def ret (f/apply-filters pipeline data))
 
-  (if (not (empty? data))
-    (let [ret (f/apply-filters pipeline data)]
-      (cond
-        (vector? ret) (map (fn [x] [:p (str x)]) ret)
-        (map? ret) (map (fn [[k v]] [:p (str k ": " v)]) ret)
-        :else (str ret)))
-
-    [:p "empty"])
 
   ())

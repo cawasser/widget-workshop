@@ -20,6 +20,19 @@
                 :widgets (assoc (:widgets db) new-id (gen-widget new-id))))))
 
 
+
+(rf/reg-sub
+  :vega-type
+  (fn [db _]
+    (:builder/vega-type db)))
+
+
+(rf/reg-event-db
+  :update-vega-type
+  (fn [db [_ val]]
+    (assoc db :builder/vega-type val)))
+
+
 (defn- sources-tool [widget]
   [:> Droppable {:droppable-id   "builder/source-tool"
                  :isDropDisabled false
@@ -133,9 +146,25 @@
 
 
 
+(defn vega-input-field []
+  (fn []
+    (let [value @(rf/subscribe [:vega-type])]
+      ;(prn "vector-field" item (:id item) value)
+      [:div.field
+       [:input.input
+        {:type      :text
+         :value     value
+         :on-change #(do
+                       (prn "change vega-type")
+                       (rf/dispatch-sync
+                         [:update-vega-type (-> % .-target .-value)]))}]])))
+
+
 (defn building-widget-panel []
   [:div {:style {:height "auto"}}
-   [w/fullsize-widget @(rf/subscribe [:current-widget])]])
+   [w/fullsize-widget @(rf/subscribe [:current-widget])]
+   [:p @(rf/subscribe [:vega-type])]
+   [vega-input-field]])
 
 
 

@@ -154,6 +154,7 @@
 
 (defn- add-step [db widget new-uuid to-idx]
   (let [x (get-in db [:widgets (:id widget)])]
+    ; TODO: convert conj to reorder...
     (assoc x :steps (conj (:steps x) new-uuid))))
 
 
@@ -184,7 +185,7 @@
   [db from-idx to-idx]
 
   (let [from @(rf/subscribe [:current-widget-id])]
-    (prn "reorder steps" from from-idx to-idx)
+    ;(prn "reorder steps" from from-idx to-idx)
 
     (assoc-in db [:widgets from :steps]
       (reorder (get-in db [:widgets from :steps])
@@ -217,7 +218,7 @@
 
   [db from from-idx to to-idx]
 
-  (prn "handle-drop-event" from to (s/drop-scenario? from to))
+  ;(prn "handle-drop-event" from to (s/drop-scenario? from to))
 
   (condp = (s/drop-scenario? from to)
     ; nothing to do (eg, can't reorder the sources list)

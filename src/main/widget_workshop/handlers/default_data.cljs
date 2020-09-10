@@ -82,6 +82,9 @@
    ; used to generate the widgets in the gallery  UI
    :builder/widget-list    ["alpha" "beta" "delta"]
 
+   ;
+   :builder/vega-type "line"
+
    ; map of uuids to {:id <uuid> :name <name>} for each draggble, so they are uniquely identified
    ; throughout the entire app
    ;
@@ -98,24 +101,20 @@
                                               :name "config-source" :sample sample-config-data}
                             "group-by"       {:id     "group-by" :type :step :name "group-by"
                                               :static true
-                                              :step   [:ds/group-by {:param {:vector :keyword}
-                                                                     :value []}]}
+                                              :step   [:ds/group-by {:param {:vector :keyword} :value []}]}
                             "first"          {:id     "first" :type :step :name "first"
                                               :static true :step [:ds/first {:param :none}]}
                             "last"           {:id     "last" :type :step :name "last"
                                               :static true :step [:ds/last {:param :none}]}
                             "take"           {:id     "take" :type :step :name "take"
                                               :static true
-                                              :step   [:ds/take {:param {:scalar :number}
-                                                                 :value 5}]}
+                                              :step   [:ds/take {:param {:scalar :number} :value 5}]}
                             "drop"           {:id     "drop" :type :step :name "drop"
                                               :static true
-                                              :step   [:ds/take {:param {:scalar :number}
-                                                                 :value 5}]}
+                                              :step   [:ds/take {:param {:scalar :number} :value 5}]}
                             "extract"        {:id     "extract" :type :step :name "extract"
                                               :static true
-                                              :step   [:ds/extract {:param {:vector :keyword}
-                                                                    :value []}]}}
+                                              :step   [:ds/extract {:param {:vector :keyword} :value []}]}}
 
    ; hold the uuid for the widget currently 'under construction'
    :builder/current-widget "alpha"
