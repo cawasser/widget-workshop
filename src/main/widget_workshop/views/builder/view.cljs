@@ -45,7 +45,7 @@
        [d/draggable-item-vlist provided snapshot
         (map (fn [w]
                @(rf/subscribe [:drag-item w]))
-          [(:source widget)]) "cadetblue"]))])
+          [(:source widget)]) (:id widget)]))])
 
 
 
@@ -58,10 +58,10 @@
     (fn [provided snapshot]
       ;(prn "steps-tool" (:steps widget))
       (r/as-element
-        [d/draggable-item-vlist provided snapshot
+        [d/draggable-item-hlist provided snapshot
          (map (fn [w]
                 @(rf/subscribe [:drag-item w]))
-           (:steps widget)) "cadetblue"]))]])
+           (:steps widget)) (:id widget)]))]])
 
 
 
@@ -155,7 +155,7 @@
         {:type      :text
          :value     value
          :on-change #(do
-                       (prn "change vega-type")
+                       ;(prn "change vega-type")
                        (rf/dispatch-sync
                          [:update-vega-type (-> % .-target .-value)]))}]])))
 
@@ -198,11 +198,8 @@
 
      [:div.column {:style {:background-color "lightgray"
                            :border-radius    "5px"}}
-      [:div.columns
-       [:div.column.is-one-fifth
-        [builder-panel]]
-       [:div.column
-        [building-widget-panel]]]]]]])
+      [builder-panel]
+      [building-widget-panel]]]]])
 
 
 

@@ -111,7 +111,7 @@
                                               :step   [:ds/take {:param {:scalar :number} :value 5}]}
                             "drop"           {:id     "drop" :type :step :name "drop"
                                               :static true
-                                              :step   [:ds/take {:param {:scalar :number} :value 5}]}
+                                              :step   [:ds/drop {:param {:scalar :number} :value 5}]}
                             "extract"        {:id     "extract" :type :step :name "extract"
                                               :static true
                                               :step   [:ds/extract {:param {:vector :keyword} :value []}]}}

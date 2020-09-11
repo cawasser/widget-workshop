@@ -35,6 +35,11 @@
   (take value data))
 
 
+(defmethod filter-step :ds/drop [[step {:keys [params value]}] data]
+  ;(prn ":ds/drop" value)
+  (drop value data))
+
+
 (defmethod filter-step :ds/first [[step {:keys [params value]}] data]
   (first data))
 
@@ -78,11 +83,9 @@
 (comment
 
   (def pipeline2 [[:ds/extract {:param {:vector :keyword}
-                                :value [:datetime :id :param-2]}]
-                  [:ds/group-by {:param {:vector :keyword}
-                                 :value [:id]}]
-                  [:ds/take {:param {:scalar :number}
-                             :value 2}]])
+                                :value "datetime id param-2"}]
+                  [:ds/drop {:param {:scalar :number}
+                             :value 5}]])
 
   (filter-step (first pipeline2)
     (:data (widget-workshop.server.source.config-data/get-data)))
@@ -90,8 +93,11 @@
   (->> (:data (widget-workshop.server.source.config-data/get-data))
     (filter-step (nth pipeline2 0))
     (filter-step (nth pipeline2 1))
-    (filter-step (nth pipeline2 2)))
+    count)
 
+  (count
+    (:data
+      (widget-workshop.server.source.config-data/get-data)))
 
   ())
 

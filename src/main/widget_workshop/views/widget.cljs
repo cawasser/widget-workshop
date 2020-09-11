@@ -33,7 +33,7 @@
   :widget-source
   (fn [db [_ id]]
     (let [ret (get-in db [:widgets id :source])]
-      (prn ":widget-source" id ret)
+      ;(prn ":widget-source" id ret)
       ret)))
 
 (rf/reg-sub
@@ -53,13 +53,13 @@
 (rf/reg-sub
   :widget-source-sample
   (fn [[_ id]]
-    (prn "pre :widget-source-sample" id)
+   ;(prn "pre :widget-source-sample" id)
     (if (not (empty? id))
       [(rf/subscribe [:widget-source id]) (rf/subscribe [:build/sources])]
       []))
 
   (fn [[source-id sources]]
-    (prn ":widget-source-sample" source-id sources)
+    ;(prn ":widget-source-sample" source-id sources)
     (if (and
           (not (empty? sources))
           (not= "" source-id))
@@ -130,10 +130,11 @@
         pipeline (rf/subscribe [:widget-pipeline id])]
 
     (fn []
-      (prn "handle-sample-data ===>" widget @source @pipeline)
-      [oz.core/vega-lite (-> @oz/plot
-                           (assoc-in [:data :values] (p/run-pipeline @pipeline @source))
-                           (assoc :mark @(rf/subscribe [:vega-type])))])))
+      (let [after (p/run-pipeline @pipeline @source)]
+        ;(prn "handle-sample-data ===>" after)
+        [oz.core/vega-lite (-> @oz/plot
+                             (assoc-in [:data :values] after)
+                             (assoc :mark @(rf/subscribe [:vega-type])))]))))
 
 
 
