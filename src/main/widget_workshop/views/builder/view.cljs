@@ -6,8 +6,8 @@
             [widget-workshop.views.widget :as w]
             [widget-workshop.handlers.compose-widgets]
             [widget-workshop.util.uuid :refer [aUUID]]
-            [widget-workshop.handlers.default-data :refer [gen-widget]]))
-
+            [widget-workshop.handlers.default-data :refer [gen-widget]]
+            [widget-workshop.views.builder.data-table :as t]))
 
 
 
@@ -33,19 +33,31 @@
     (assoc db :builder/vega-type val)))
 
 
-(defn- sources-tool [widget]
-  [:> Droppable {:droppable-id   "builder/source-tool"
-                 :isDropDisabled false
-                 :min-height     "50px"
-                 :type           "source"}
+(defn- sources-drop-area [source widget]
+  [:div.flow-h
+   [:> Droppable {:droppable-id   "builder/source-tool"
+                  :isDropDisabled false
+                  :min-height     "50px"
+                  :type           "source"}
 
-   (fn [provided snapshot]
-     ;(prn "sources-tool" widget @(rf/subscribe [:drag-items (:source widget)]))
-     (r/as-element
-       [d/draggable-item-vlist provided snapshot
-        (map (fn [w]
-               @(rf/subscribe [:drag-item w]))
-          [(:source widget)]) (:id widget)]))])
+    (fn [provided snapshot]
+      (prn "sources-drop-area" widget source)
+      (r/as-element
+        [d/draggable-item-vlist
+         provided snapshot
+         [source]
+         (:id widget)]))]
+   [t/data-table]])
+
+
+
+(defn- sources-tool [widget]
+  (prn "sources-tool" widget)
+  [:div
+   (map (fn [w]
+          ^{:key w} [sources-drop-area @(rf/subscribe [:drag-item w]) widget])
+     [(:source widget)])])
+
 
 
 

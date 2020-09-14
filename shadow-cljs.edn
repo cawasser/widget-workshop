@@ -15,7 +15,8 @@
   [metosin/muuntaja "0.6.4"]
   [metosin/reitit "0.3.1"]
   [cljs-ajax "0.8.0"]
-  [metasoarous/oz "1.6.0-alpha25"]]
+  [metasoarous/oz "1.6.0-alpha25"]
+  [org.clojars.frozenlock/reagent-table "0.1.6"]]
 
 
  :dev-http {3333 "public"}

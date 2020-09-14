@@ -6,11 +6,26 @@ approach to creating UI widgets for browser-based "client" software.
 
 ## Development
 
-Clone the repo:
+Clone *both* repos:
 
     git clone https://github.com/cawasser/widget-workshop.git
 
+    git clone https://github.com/cawasser/reagent-table.git
+
+
+You first need to compile and "install" the react-table, as we've made changed to make
+it compatible with the latest Reagent
+
+
 Run:
+    lein uberjar
+
+    lein install
+
+This compiles the library and installs it into your *local* Maven repository. Don't  
+worry, shadow-cljs can find it automatically by the new veriosn number.
+
+Now Run:
 
     npm install
     shadow-cljs watch app
@@ -54,3 +69,13 @@ https://github.com/atlassian/react-beautiful-dnd/issues/427#issuecomment-4205639
 seems that Draggables must be inside a Droppable, not just inside a DragDropContext. this is
 just what the JS tutorial, through part 4, does. Might be some other configuration that removes
 this requirements (since we don't need to support dropping back on the data-sources list anyway)
+
+
+## Danger Will Robinson!
+
+If you need to update the react-table library, be sure to both:
+
+1. update the version number in project.clj
+2. run `lein uberjar`
+3. run `lein install`
+4. restart `shadow-cljs watch :app` so it picks recognized the updated CLJS dependency(ies)
