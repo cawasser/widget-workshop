@@ -59,7 +59,7 @@
 (defn widget-panel []
   [:div
    [:h2 "Widgets"]
-   [w/resizable-widget {}]
+   [w/resizable-widget "alpha"]
    [:div.widget-panel]])
     ;(for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
     ;  ^{:key idx} [w/widget id true]))
