@@ -34,6 +34,7 @@
 
 
 (defn- sources-drop-area [source widget]
+  (prn "sources-drop-area" widget source (:sample source) (:columns source) (:row-key-fn source))
   [:div.flow-h
    [:> Droppable {:droppable-id   "builder/source-tool"
                   :isDropDisabled false
@@ -41,13 +42,15 @@
                   :type           "source"}
 
     (fn [provided snapshot]
-      (prn "sources-drop-area" widget source)
       (r/as-element
         [d/draggable-item-vlist
          provided snapshot
          [source]
          (:id widget)]))]
-   [t/data-table]])
+
+   (if (not (empty? source))
+     [t/data-table (atom (:sample source)) (:columns source) (:row-key-fn source)]
+     [:div])])
 
 
 
