@@ -28,7 +28,7 @@
 
 
 (defn run-pipeline [pipeline data]
-  (prn "run-pipeline" data pipeline)
+  ;(prn "run-pipeline" data pipeline)
   (if (not (empty? data))
     (f/apply-filters pipeline data)
     []))

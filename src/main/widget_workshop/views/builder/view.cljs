@@ -6,8 +6,8 @@
             [widget-workshop.views.widget :as w]
             [widget-workshop.handlers.compose-widgets]
             [widget-workshop.util.uuid :refer [aUUID]]
-            [widget-workshop.handlers.default-data :refer [gen-widget]]))
-
+            [widget-workshop.handlers.default-data :refer [gen-widget]]
+            [widget-workshop.views.builder.data-table :as t]))
 
 
 
@@ -33,19 +33,34 @@
     (assoc db :builder/vega-type val)))
 
 
-(defn- sources-tool [widget]
-  [:> Droppable {:droppable-id   "builder/source-tool"
-                 :isDropDisabled false
-                 :min-height     "50px"
-                 :type           "source"}
+(defn- sources-drop-area [source widget]
+  (prn "sources-drop-area" widget source (:sample source) (:columns source) (:row-key-fn source))
+  [:div.flow-h
+   [:> Droppable {:droppable-id   "builder/source-tool"
+                  :isDropDisabled false
+                  :min-height     "50px"
+                  :type           "source"}
 
-   (fn [provided snapshot]
-     ;(prn "sources-tool" widget @(rf/subscribe [:drag-items (:source widget)]))
-     (r/as-element
-       [d/draggable-item-vlist provided snapshot
-        (map (fn [w]
-               @(rf/subscribe [:drag-item w]))
-          [(:source widget)]) "cadetblue"]))])
+    (fn [provided snapshot]
+      (r/as-element
+        [d/draggable-item-vlist
+         provided snapshot
+         [source]
+         (:id widget)]))]
+
+   (if (not (empty? source))
+     [t/data-table (atom (:sample source)) (:columns source) (:row-key-fn source)]
+     [:div])])
+
+
+
+(defn- sources-tool [widget]
+  (prn "sources-tool" widget)
+  [:div
+   (map (fn [w]
+          ^{:key w} [sources-drop-area @(rf/subscribe [:drag-item w]) widget])
+     [(:source widget)])])
+
 
 
 
@@ -58,10 +73,10 @@
     (fn [provided snapshot]
       ;(prn "steps-tool" (:steps widget))
       (r/as-element
-        [d/draggable-item-vlist provided snapshot
+        [d/draggable-item-hlist provided snapshot
          (map (fn [w]
                 @(rf/subscribe [:drag-item w]))
-           (:steps widget)) "cadetblue"]))]])
+           (:steps widget)) (:id widget)]))]])
 
 
 
@@ -155,7 +170,7 @@
         {:type      :text
          :value     value
          :on-change #(do
-                       (prn "change vega-type")
+                       ;(prn "change vega-type")
                        (rf/dispatch-sync
                          [:update-vega-type (-> % .-target .-value)]))}]])))
 
@@ -198,11 +213,8 @@
 
      [:div.column {:style {:background-color "lightgray"
                            :border-radius    "5px"}}
-      [:div.columns
-       [:div.column.is-one-fifth
-        [builder-panel]]
-       [:div.column
-        [building-widget-panel]]]]]]])
+      [builder-panel]
+      [building-widget-panel]]]]])
 
 
 

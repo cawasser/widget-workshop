@@ -21,6 +21,29 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
+; re-frame event handlers
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(rf/reg-event-db
+  :remove-source
+  (fn [db [_ widget-id source-id]]
+    ;(prn ":remove-source" widget-id source-id)
+    (assoc-in db [:widgets widget-id :source] "")))
+
+
+(rf/reg-event-db
+  :remove-step
+  (fn [db [_ widget-id step-id]]
+    ;(prn ":remove-step" widget-id step-id)
+    (assoc-in db [:widgets widget-id :steps]
+      (into []
+        (remove #(= step-id %) (get-in db [:widgets widget-id :steps]))))))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
 ; dnd handlers
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -48,8 +71,8 @@
                          (:droppableId source) (:index source)
                          (:droppableId destination) (:index destination)])
       (do
-        (prn "do nothing"
-          ())))))
+        ;(prn "do nothing"
+        ()))))
 
 
 
@@ -101,11 +124,11 @@
    content])
 
 
-(defn source-drag-item [{:keys [id name type] :as item} index]
-  (let [[bg-color txt-color] (get-colors type)
-        isActive? (r/atom false)]
-   ; (prn "source-drag-item" id name type bg-color txt-color)
+(defn source-drag-item [{:keys [id name type] :as item} index widget-id]
+  (let [[bg-color txt-color] (get-colors type)]
+    (prn "source-drag-item" id name type bg-color txt-color)
 
+    ^{key id}
     [:> Draggable {:key id :draggable-id id :index index}
      (fn [provided snapshot]
        (r/as-element
@@ -130,16 +153,17 @@
            [:span name]
            [:span {:style    {:color       txt-color
                               :margin-left "10px"
-                              :cursor      "e-resize"}
-                   :on-click #(prn "show the meta-data")} ">"]]]))]))
+                              :cursor      "not-allowed"}
+                   :on-click #(rf/dispatch-sync [:remove-source widget-id id])} "X"]]]))]))
 
 
 
-(defn step-drag-item [{:keys [id name type step static] :as item} index]
+(defn step-drag-item [{:keys [id name type step static] :as item} index widget-id]
   (let [[bg-color txt-color] (get-colors type)
         isOpen? (r/atom false)]
     ;(prn "step-drag-item" item id name type step)
 
+    ^{:key id}
     [:> Draggable {:key id :draggable-id id :index index}
      (fn [provided snapshot]
        (r/as-element
@@ -158,25 +182,24 @@
                                 :max-width        "220px"
                                 :color            txt-color
                                 :background-color bg-color}}
-                        ;:on-click #(do
-                        ;             (prn "close! :div.flow-h")
-                        ;             (reset! isOpen? false))}
+           ;:on-click #(do
+           ;             (prn "close! :div.flow-h")
+           ;             (reset! isOpen? false))}
            [:p {:on-click #(do
                              ;(prn "close! :p")
                              (reset! isOpen? false))} name]
            (if (not static)
-             [:div#edit {:style           {:color       "lightgray"
-                                           :margin-left "10px"
-                                           :cursor      :default}}
+             [:div#edit {:style {:color       "lightgray"
+                                 :margin-left "10px"
+                                 :cursor      :default}}
               [e/edit-panel item isOpen?]])
            (if (not static)
              [:div#popover {:style    {:color       txt-color
                                        :margin-left "10px"
-                                       :cursor      "e-resize"}
+                                       :cursor      "not-allowed"}
                             :on-click #(do
-                                         ;(prn "close! arrow")
-                                        ;(prn "popover!")
-                                         (reset! isOpen? false))} ">"])]]))]))
+                                         (reset! isOpen? false)
+                                         (rf/dispatch-sync [:remove-step widget-id id]))} "X"])]]))]))
 
 
 
@@ -186,16 +209,16 @@
 
   see https://stackoverflow.com/questions/33299746/why-are-multi-methods-not-working-as-functions-for-reagent-re-frame"
 
-  [{:keys [id name type] :as item} index]
+  [{:keys [id name type] :as item} index widget-id]
 
   (condp = type
-    :source (source-drag-item item index)
-    :step (step-drag-item item index)
+    :source (source-drag-item item index widget-id)
+    :step (step-drag-item item index widget-id)
     [:div]))
 
 
 
-(defn draggable-item-vlist [provided snapshot data]
+(defn draggable-item-vlist [provided snapshot data widget-id]
   (let [isDraggingOver (.-isDraggingOver snapshot)]
     [:div (merge {:ref   (.-innerRef provided)
                   :style {:background-color (if isDraggingOver "lightgreen" "inherit")
@@ -205,14 +228,14 @@
                           :min-height       "30px"
                           :margin           "auto"}}
             (js->clj (.-droppableProps provided)))
-     ;(prn "draggable-item-vlist " data)
+     (prn "draggable-item-vlist " data)
      (for [[index item] (map-indexed vector data)]
-       ^{:key index} (drag-item item index))
+       ^{:key index} (drag-item item index widget-id))
      (.-placeholder provided)]))
 
 
 
-(defn draggable-item-hlist [provided snapshot data]
+(defn draggable-item-hlist [provided snapshot data widget-id]
   (let [isDraggingOver (.-isDraggingOver snapshot)]
     [:div (merge {:ref   (.-innerRef provided)
                   :style {:background-color (if isDraggingOver "lightgreen" "inherit")
@@ -228,7 +251,7 @@
             (js->clj (.-droppableProps provided)))
      ;(prn "draggable-item-hlist " data)
      (for [[index item] (map-indexed vector data)]
-       ^{:key index} (drag-item item index))
+       ^{:key index} (drag-item item index widget-id))
      (.-placeholder provided)]))
 
 
@@ -239,4 +262,28 @@
 
 
   (empty? [nil])
+  ())
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; remove source(s) and step(s)
+(comment
+  (def db @re-frame.db/app-db)
+  (def widget-id (:id @(rf/subscribe [:current-widget])))
+  (def step-id "0281c978-363e-47be-bfcc-fcad797e82d2")
+
+  ; sources
+  (get-in db [:widgets])
+  (get-in db [:widgets widget-id])
+  (get-in db [:widgets widget-id :source])
+
+  (assoc-in db [:widgets widget-id :source] "")
+
+
+  ; steps
+  (get-in db [:widgets widget-id :steps])
+
+  (assoc-in db [:widgets widget-id :steps]
+    (into []
+      (remove #(= step-id %) (get-in db [:widgets widget-id :steps]))))
   ())

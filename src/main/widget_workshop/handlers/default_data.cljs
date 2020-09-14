@@ -1,6 +1,20 @@
 (ns widget-workshop.handlers.default-data
   (:require [widget-workshop.server.source.generic-data]
-            [widget-workshop.server.source.config-data]))
+            [widget-workshop.server.source.config-data]
+            [goog.i18n.NumberFormat.Format])
+  (:import
+    (goog.i18n NumberFormat)
+    (goog.i18n.NumberFormat Format)))
+
+(def nff (NumberFormat. Format/DECIMAL))
+
+(defn format-number
+  [num]
+  (.format nff (str num)))
+
+(defn format-date
+  [val]
+  (str val))
 
 
 (def sample-generic-data
@@ -13,6 +27,17 @@
    {:id 7 :x 700 :y 12.5 :datetime #inst"2020-08-11T16:00:00.000Z"}
    {:id 8 :x 800 :y 25 :datetime #inst"2020-08-11T17:00:00.000Z"}
    {:id 9 :x 900 :y 11.7 :datetime #inst"2020-08-11T18:00:00.000Z"}])
+
+(def columns-generic-data
+  [{:path [:id] :header "ID" :key :id}  ; convention - use field name for reagent key
+   {:path [:x] :header "X" :key :x}
+   {:path [:y] :header "Y" :key :y}
+   {:path [:datetime]
+    :header "Date/Time"
+    :format #(format-date %)
+    :attrs (fn [data] {:style {:text-align "right"
+                               :display "block"}})
+    :key :datetime}])
 
 (def sample-config-data
   [{:datetime #inst"2020-08-11T10:00:00.000Z" :id 1 :kind "alpha" :param-1 "off" :param-2 "off"}
@@ -39,6 +64,22 @@
    {:datetime #inst"2020-08-11T15:00:00.000Z" :id 5 :kind "beta" :x 120 :y 100}
    {:datetime #inst"2020-08-11T17:00:00.000Z" :id 5 :kind "beta" :x 140 :y 100}])
 
+(def columns-config-data
+  [{:path [:datetime]
+    :header "Date/Time"
+    :format #(format-date %)
+    :attrs (fn [data] {:style {:text-align "right"
+                               :display "block"}})
+    :key :datetime}
+   {:path [:id] :header "ID" :key :id}  ; convention - use field name for reagent key
+   {:path [:kind] :header "Kind" :key :kind}
+   {:path [:param-1] :header "Param-1" :key :param-1}
+   {:path [:param-2] :header "Param-2" :key :param-2}
+   {:path [:param-3] :header "Param-3" :key :param-3}
+   {:path [:x] :header "X" :key :x}
+   {:path [:y] :header "Y" :key :y}])
+
+
 (def init-db
   {
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -57,8 +98,10 @@
 
    ; a map to a set with a single data-source for this widget, this is where the data
    ; will come from (singleton per widget)
-   :builder/sources        {"generic-source" {:name "generic-source" :sample sample-generic-data}
-                            "config-source"  {:name "config-source" :sample sample-config-data}}
+   :builder/sources        {"generic-source" {:name "generic-source" :sample sample-generic-data
+                                              :columns columns-generic-data :row-key-fn [:datetime :id]}
+                            "config-source"  {:name "config-source" :sample sample-config-data
+                                              :columns columns-config-data :row-key-fn [:datetime :id]}}
 
    ;; a map of :steps to the dsl used to actually perform the operation
    ;; on a data set
@@ -95,10 +138,13 @@
    ;     [:ds/nth n]
 
    :builder/drag-items     {
+                            ; TODO: pull theses :builder/drag-items keys from :builder/sources
                             "generic-source"  {:id "generic-source" :type :source
-                                               :name "generic-source" :sample sample-generic-data}
+                                               :name "generic-source" :sample sample-generic-data
+                                               :columns columns-generic-data :row-key-fn [:id]}
                             "config-source"  {:id "config-source" :type :source
-                                              :name "config-source" :sample sample-config-data}
+                                              :name "config-source" :sample sample-config-data
+                                              :columns columns-config-data :row-key-fn [:id]}
                             "group-by"       {:id     "group-by" :type :step :name "group-by"
                                               :static true
                                               :step   [:ds/group-by {:param {:vector :keyword} :value []}]}
@@ -111,7 +157,7 @@
                                               :step   [:ds/take {:param {:scalar :number} :value 5}]}
                             "drop"           {:id     "drop" :type :step :name "drop"
                                               :static true
-                                              :step   [:ds/take {:param {:scalar :number} :value 5}]}
+                                              :step   [:ds/drop {:param {:scalar :number} :value 5}]}
                             "extract"        {:id     "extract" :type :step :name "extract"
                                               :static true
                                               :step   [:ds/extract {:param {:vector :keyword} :value []}]}}
@@ -207,5 +253,10 @@
 
 
   (gen-widget "skadsljfkdajf")
+
+
+  (instance? js/Date #inst"2020-08-11T10:00:00.000Z")
+  (js/Date. #inst"2020-08-11T10:00:00.000Z")
+
 
   ())
