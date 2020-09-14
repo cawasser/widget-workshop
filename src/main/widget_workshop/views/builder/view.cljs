@@ -59,7 +59,7 @@
   [:div
    (map (fn [w]
           ^{:key w} [sources-drop-area @(rf/subscribe [:drag-item w]) widget])
-     [(:source widget)])])
+     (:source widget))])
 
 
 

@@ -223,13 +223,13 @@
    ; to hold a map of the widget uuid's to the context and content
    ;
    :widgets                {"alpha" {:id     "alpha" :name "Alpha"
-                                     :source ""
+                                     :source []
                                      :steps  []}
                             "beta"  {:id     "beta" :name "Beta"
-                                     :source ""
+                                     :source []
                                      :steps  []}
                             "delta" {:id     "delta" :name "Delta"
-                                     :source ""
+                                     :source []
                                      :steps  []}}})
 
 

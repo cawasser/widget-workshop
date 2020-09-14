@@ -121,13 +121,13 @@
 
 
 
-(defn- replace-source
+(defn- add-source
   "replace the current source for the current widget under construction
 
   NOTE: this current LEAKS drag-items (we never delete to old one)"
   [db widget new-uuid]
-  (-> (get-in db [:widgets (:id widget)])
-    (assoc :source new-uuid)))
+  (let [x (get-in db [:widgets (:id widget)])]
+    (assoc x :source (conj (:source x) new-uuid))))
 
 
 
@@ -147,7 +147,7 @@
       db
       (-> db
         (assoc-in [:widgets current-widget]
-          (replace-source db widget new-uuid))
+          (add-source db widget new-uuid))
         (assoc-in [:builder/drag-items new-uuid]
           (assoc item :id new-uuid))))))
 
@@ -351,7 +351,7 @@
     db
     (-> db
       (assoc-in [:widgets current-widget]
-        (replace-source widget new-uuid))
+        (add-source widget new-uuid))
       (assoc-in [:builder/drag-items new-uuid]
         (assoc item :id new-uuid))))
 
