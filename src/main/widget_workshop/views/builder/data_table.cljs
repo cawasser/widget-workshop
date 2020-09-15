@@ -10,15 +10,64 @@
 
 
 
+(defn- get-column-id-from-name [db source-id link-name]
+  (let [source (get-in db [:builder/drag-items source-id])
+        columns (:columns source)]
+    (->> columns
+      (filter (fn [{:keys [header]}]
+                  (= header link-name)))
+      first
+      :key)))
+
+
+
 (rf/reg-event-db
   :toggle-link
-  (fn [db [_ widget-id link-id]]
-    (let [orig (get-in db [:widgets widget-id :links])]
+  (fn [db [_ widget-id source-id link-name]]
+    (let [orig (get-in db [:widgets widget-id :links])
+          column-id (get-column-id-from-name db source-id link-name)]
       (assoc-in db [:widgets widget-id :links]
-        (if (contains? orig link-id)
-          (disj orig link-id)
-          (conj orig link-id))))))
+        (if (contains? orig column-id)
+          (disj orig column-id)
+          (conj orig column-id))))))
 
+
+(comment
+  (def db @re-frame.db/app-db)
+  (def widget-id (:builder/current-widget db))
+  (def source-id (first (get-in db [:widgets widget-id :source])))
+  (def link-name "Date/Time")
+
+  (def source (get-in db [:builder/drag-items source-id]))
+  (def columns (:columns source))
+
+  (->> columns
+    (filter (fn [{:keys [header]}]
+              (= header link-name)))
+    first
+    :key)
+
+  (get-column-id-from-name db source-id link-name)
+
+
+  (def orig (get-in db [:widgets widget-id :links]))
+  (def column-id (get-column-id-from-name db source-id link-name))
+
+  (let [orig (get-in db [:widgets widget-id :links])
+        column-id (get-column-id-from-name db source-id link-name)]
+    (assoc-in db [:widgets widget-id :links]
+      (if (contains? orig column-id)
+        (disj orig column-id)
+        (conj orig column-id))))
+
+  (rf/dispatch-sync [:toggle-link widget-id source-id link-name])
+  (rf/dispatch-sync [:toggle-link widget-id source-id "ID"])
+  (rf/dispatch-sync [:toggle-link widget-id source-id "X"])
+  (rf/dispatch-sync [:toggle-link widget-id source-id "Y"])
+
+  (get-in @re-frame.db/app-db [:widgets "alpha" :links])
+
+  ())
 
 (rf/reg-sub
   :links
@@ -134,7 +183,7 @@
 (def table-state (atom {:draggable true}))
 
 
-(defn data-table [table-data columns row-key]
+(defn data-table [widget-id source-id table-data columns row-key]
   (let [table-state (atom {:draggable true})]
     [:div.container {:style {:font-size 16 :margin-top 10} :height "100%"}
      ;[:div.panel.panel-default
@@ -142,7 +191,10 @@
      [rt/reagent-table table-data {:table {:class "table table-hover table-striped table-bordered table-transition"
                                            :style {:border-spacing 0
                                                    :border-collapse "separate"}
-                                           :on-double-click #(prn "DOUBLE CLICK!" (-> % .-target .-textContent))}
+                                           :on-double-click #(do
+                                                               (prn "toggling" (-> % .-target .-textContent))
+                                                               (rf/dispatch-sync
+                                                                 [:toggle-link widget-id source-id (-> % .-target .-textContent)]))}
                                    :table-container {:style {:border "1px solid green"}}
                                    :th {:style {:border "1px solid white" :background-color "mediumblue" :color "white"}}
                                    :table-state  table-state

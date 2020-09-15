@@ -49,7 +49,7 @@
          (:id widget)]))]
 
    (if (not (empty? source))
-     [t/data-table (atom (:sample source)) (:columns source) (:row-key-fn source)]
+     [t/data-table (:id widget) (:id source) (atom (:sample source)) (:columns source) (:row-key-fn source)]
      [:div])])
 
 
