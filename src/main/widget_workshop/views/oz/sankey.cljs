@@ -2,19 +2,45 @@
   (:require [oz.core :as oz]
             [reagent.core :as r]))
 
+(def energy-data
+  [["Oil" "Transportation" 94]
+   ["Natural Gas" "Transportation" 3]
+   ["Coal" "Transportation" 0]
+   ["Renewable" "Transportation" 0]
+   ["Nuclear" "Transportation" 3]
+   ["Oil" "Industrial" 41]
+   ["Natural Gas" "Industrial" 40]
+   ["Coal" "Industrial" 7]
+   ["Renewable" "Industrial" 11]
+   ["Nuclear" "Industrial" 0]
+   ["Oil" "Residential & Commercial" 17]
+   ["Natural Gas" "Residential & Commercial" 76]
+   ["Coal" "Residential & Commercial" 1]
+   ["Renewable" "Residential & Commercial" 7]
+   ["Nuclear" "Residential & Commercial" 0]
+   ["Oil" "Electric Power" 1]
+   ["Natural Gas" "Electric Power" 18]
+   ["Coal" "Electric Power" 48]
+   ["Renewable" "Electric Power" 11]
+   ["Nuclear" "Electric Power" 22]])
 
-(def sankey-data
-    {:height 500
-     :width 900
+
+(defn make-buckets [data]
+  {:buckets
+    (mapv (fn [vec]
+            (let [[stk1 stk2 weight] vec]
+                {:key {:stk1 stk1 :stk2 stk2} :weight weight})) data)})
+
+
+(defn sankey-data [data height width]
+    {:height height
+     :width width
      :data [{:name "rawData",
-             :values {:aggregations {:table {:buckets [{:key {:stk1 "aa", :stk2 "11"}, :doc_count 7}
-                                                       {:key {:stk1 "aa", :stk2 "111"}, :doc_count 4}
-                                                       {:key {:stk1 "bb", :stk2 "1111"}, :doc_count 8}
-                                                       {:key {:stk1 "cc", :stk2 "11"}, :doc_count 3}]}}},
+             :values {:aggregations {:table (make-buckets data)}},
              :format {:property "aggregations.table.buckets"},
              :transform [{:type "formula", :expr "datum.key.stk1", :as "stk1"}
                          {:type "formula", :expr "datum.key.stk2", :as "stk2"}
-                         {:type "formula", :expr "datum.doc_count", :as "size"}]}
+                         {:type "formula", :expr "datum.weight", :as "size"}]}
             {:name "nodes",
              :source "rawData",
              :transform [{:type "filter",
@@ -130,4 +156,4 @@
 
 
 (defn draw-sankey []
-  (oz/vega sankey-data))
+  (oz/vega (sankey-data energy-data 500 900)))
