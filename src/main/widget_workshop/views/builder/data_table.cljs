@@ -1,11 +1,29 @@
 (ns widget-workshop.views.builder.data-table
   (:require [reagent.core :as r :refer [atom]]
             [reagent-table.core :as rt]
-            [goog.events :as events]
+            [re-frame.core :as rf]
             [goog.i18n.NumberFormat.Format])
+
   (:import
     (goog.i18n NumberFormat)
     (goog.i18n.NumberFormat Format)))
+
+
+
+(rf/reg-event-db
+  :toggle-link
+  (fn [db [_ widget-id link-id]]
+    (let [orig (get-in db [:widgets widget-id :links])]
+      (assoc-in db [:widgets widget-id :links]
+        (if (contains? orig link-id)
+          (disj orig link-id)
+          (conj orig link-id))))))
+
+
+(rf/reg-sub
+  :links
+  (fn [db [_ widget-id]]
+    (get-in db [:widgets widget-id :links])))
 
 
 (enable-console-print!)
@@ -27,6 +45,8 @@
       (and expr
        (expr row)))))
 
+
+
 (defn- cell-fn
   "Return the cell hiccup form for rendering.
    - render-info the specific column from :column-model
@@ -42,15 +62,21 @@
         attrs   (attrs data)]
     [:span attrs content]))
 
+
+
 (defn date?
   "Returns true if the argument is a date, false otherwise."
   [d]
   (instance? js/Date d))
 
+
+
 (defn date-as-sortable
   "Returns something that can be used to order dates."
   [d]
   (.getTime d))
+
+
 
 (defn compare-vals
   "A comparator that works for the various types found in table structures.
@@ -115,14 +141,15 @@
      ;[:div.panel-body
      [rt/reagent-table table-data {:table {:class "table table-hover table-striped table-bordered table-transition"
                                            :style {:border-spacing 0
-                                                   :border-collapse "separate"}}
+                                                   :border-collapse "separate"}
+                                           :on-double-click #(prn "DOUBLE CLICK!" (-> % .-target .-textContent))}
                                    :table-container {:style {:border "1px solid green"}}
                                    :th {:style {:border "1px solid white" :background-color "mediumblue" :color "white"}}
                                    :table-state  table-state
                                    :scroll-height "20vh"
                                    :column-model columns
                                    :row-key      #(fn [row _] (do
-                                                                (prn "row-key" (get-in row row-key))
+                                                                ;(prn "row-key" (get-in row row-key))
                                                                 (get-in row row-key)))
                                    :render-cell  cell-fn
                                    :sort         sort-fn}]]))

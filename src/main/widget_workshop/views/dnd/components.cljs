@@ -126,7 +126,7 @@
 
 (defn source-drag-item [{:keys [id name type] :as item} index widget-id]
   (let [[bg-color txt-color] (get-colors type)]
-    (prn "source-drag-item" id name type bg-color txt-color)
+    ;(prn "source-drag-item" id name type bg-color txt-color)
 
     ^{key id}
     [:> Draggable {:key id :draggable-id id :index index}
@@ -228,7 +228,7 @@
                           :min-height       "30px"
                           :margin           "auto"}}
             (js->clj (.-droppableProps provided)))
-     (prn "draggable-item-vlist " data)
+     ;(prn "draggable-item-vlist " data)
      (for [[index item] (map-indexed vector data)]
        ^{:key index} (drag-item item index widget-id))
      (.-placeholder provided)]))

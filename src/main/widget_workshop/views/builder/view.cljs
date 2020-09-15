@@ -34,9 +34,9 @@
 
 
 (defn- sources-drop-area [source widget]
-  (prn "sources-drop-area" widget source (:sample source) (:columns source) (:row-key-fn source))
+  ;(prn "sources-drop-area" widget source (:sample source) (:columns source) (:row-key-fn source))
   [:div.flow-h
-   [:> Droppable {:droppable-id   "builder/source-tool"
+   [:> Droppable {:droppable-id   (str "builder/source-tool-" (:name source))
                   :isDropDisabled false
                   :min-height     "50px"
                   :type           "source"}
@@ -55,11 +55,13 @@
 
 
 (defn- sources-tool [widget]
-  (prn "sources-tool" widget)
+  ;(prn "sources-tool" widget)
   [:div
    (map (fn [w]
           ^{:key w} [sources-drop-area @(rf/subscribe [:drag-item w]) widget])
-     (:source widget))])
+     (:source widget))
+   ^{:key "default"} [sources-drop-area "" widget]])
+
 
 
 

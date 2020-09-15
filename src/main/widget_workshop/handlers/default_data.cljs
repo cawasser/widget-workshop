@@ -29,15 +29,15 @@
    {:id 9 :x 900 :y 11.7 :datetime #inst"2020-08-11T18:00:00.000Z"}])
 
 (def columns-generic-data
-  [{:path [:id] :header "ID" :key :id}  ; convention - use field name for reagent key
+  [{:path [:id] :header "ID" :key :id}                      ; convention - use field name for reagent key
    {:path [:x] :header "X" :key :x}
    {:path [:y] :header "Y" :key :y}
-   {:path [:datetime]
+   {:path   [:datetime]
     :header "Date/Time"
     :format #(format-date %)
-    :attrs (fn [data] {:style {:text-align "right"
-                               :display "block"}})
-    :key :datetime}])
+    :attrs  (fn [data] {:style {:text-align "right"
+                                :display    "block"}})
+    :key    :datetime}])
 
 (def sample-config-data
   [{:datetime #inst"2020-08-11T10:00:00.000Z" :id 1 :kind "alpha" :param-1 "off" :param-2 "off"}
@@ -65,13 +65,14 @@
    {:datetime #inst"2020-08-11T17:00:00.000Z" :id 5 :kind "beta" :x 140 :y 100}])
 
 (def columns-config-data
-  [{:path [:datetime]
+  [{:path   [:datetime]
     :header "Date/Time"
     :format #(format-date %)
-    :attrs (fn [data] {:style {:text-align "right"
-                               :display "block"}})
-    :key :datetime}
-   {:path [:id] :header "ID" :key :id}  ; convention - use field name for reagent key
+    :attrs  (fn [data] {:style {:text-align "right"
+                                :display    "block"}})
+    :thead {:style {:border "1px solid white" :background-color "mediumgreen" :color "white"}}
+    :key    :datetime}
+   {:path [:id] :header "ID" :key :id}                      ; convention - use field name for reagent key
    {:path [:kind] :header "Kind" :key :kind}
    {:path [:param-1] :header "Param-1" :key :param-1}
    {:path [:param-2] :header "Param-2" :key :param-2}
@@ -98,9 +99,9 @@
 
    ; a map to a set with a single data-source for this widget, this is where the data
    ; will come from (singleton per widget)
-   :builder/sources        {"generic-source" {:name "generic-source" :sample sample-generic-data
+   :builder/sources        {"generic-source" {:name    "generic-source" :sample sample-generic-data
                                               :columns columns-generic-data :row-key-fn [:datetime :id]}
-                            "config-source"  {:name "config-source" :sample sample-config-data
+                            "config-source"  {:name    "config-source" :sample sample-config-data
                                               :columns columns-config-data :row-key-fn [:datetime :id]}}
 
    ;; a map of :steps to the dsl used to actually perform the operation
@@ -126,7 +127,7 @@
    :builder/widget-list    ["alpha" "beta" "delta"]
 
    ;
-   :builder/vega-type "line"
+   :builder/vega-type      "line"
 
    ; map of uuids to {:id <uuid> :name <name>} for each draggble, so they are uniquely identified
    ; throughout the entire app
@@ -139,11 +140,11 @@
 
    :builder/drag-items     {
                             ; TODO: pull theses :builder/drag-items keys from :builder/sources
-                            "generic-source"  {:id "generic-source" :type :source
-                                               :name "generic-source" :sample sample-generic-data
-                                               :columns columns-generic-data :row-key-fn [:id]}
-                            "config-source"  {:id "config-source" :type :source
-                                              :name "config-source" :sample sample-config-data
+                            "generic-source" {:id      "generic-source" :type :source
+                                              :name    "generic-source" :sample sample-generic-data
+                                              :columns columns-generic-data :row-key-fn [:id]}
+                            "config-source"  {:id      "config-source" :type :source
+                                              :name    "config-source" :sample sample-config-data
                                               :columns columns-config-data :row-key-fn [:id]}
                             "group-by"       {:id     "group-by" :type :step :name "group-by"
                                               :static true
@@ -224,13 +225,16 @@
    ;
    :widgets                {"alpha" {:id     "alpha" :name "Alpha"
                                      :source []
-                                     :steps  []}
+                                     :steps  []
+                                     :links  #{}}
                             "beta"  {:id     "beta" :name "Beta"
                                      :source []
-                                     :steps  []}
+                                     :steps  []
+                                     :links  #{}}
                             "delta" {:id     "delta" :name "Delta"
                                      :source []
-                                     :steps  []}}})
+                                     :steps  []
+                                     :links  #{}}}})
 
 
 
