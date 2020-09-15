@@ -4,6 +4,7 @@
             [widget-workshop.views.dnd.components :as d]
             ["react-beautiful-dnd" :refer [DragDropContext Draggable Droppable]]
             [widget-workshop.views.widget :as w]
+            [widget-workshop.views.oz.sankey :as sankey]
             [widget-workshop.handlers.compose-widgets]))
 
 
@@ -59,8 +60,8 @@
 (defn widget-panel []
   [:div
    [:h2 "Widgets"]
-   [w/resizable-widget "alpha"]
-   [:div.widget-panel]])
+   [:div.widget-panel
+    [sankey/draw-sankey]]])
     ;(for [[idx id] (map-indexed vector @(rf/subscribe [:widgets]))]
     ;  ^{:key idx} [w/widget id true]))
 
