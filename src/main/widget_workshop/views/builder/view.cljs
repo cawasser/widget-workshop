@@ -7,9 +7,16 @@
             [widget-workshop.handlers.compose-widgets]
             [widget-workshop.util.uuid :refer [aUUID]]
             [widget-workshop.handlers.default-data :refer [gen-widget]]
-            [widget-workshop.views.builder.data-table :as t]))
+            [widget-workshop.views.builder.data-table :as t]
+            [widget-workshop.views.builder.vega-types :as v]))
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; RE-FRAME EVENT HANDLERS
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (rf/reg-event-db
   :new-widget
@@ -24,13 +31,21 @@
 (rf/reg-sub
   :vega-type
   (fn [db _]
-    (:builder/vega-type db)))
+    (get-in db [:widgets (:builder/current-widget db) :vega-type])))
 
 
 (rf/reg-event-db
   :update-vega-type
   (fn [db [_ val]]
-    (assoc db :builder/vega-type val)))
+    (assoc-in db [:widgets (:builder/current-widget db) :vega-type] val)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; UI COMPONENTS
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defn- sources-drop-area [source widget]
@@ -61,8 +76,6 @@
           ^{:key w} [sources-drop-area @(rf/subscribe [:drag-item w]) widget])
      (:source widget))
    ^{:key "default"} [sources-drop-area "" widget]])
-
-
 
 
 
@@ -162,26 +175,27 @@
    [steps-panel @(rf/subscribe [:drag-items :builder/steps-list])]])
 
 
-
-(defn vega-input-field []
+(defn vega-input-field [name]
   (fn []
     (let [value @(rf/subscribe [:vega-type])]
-      ;(prn "vector-field" item (:id item) value)
-      [:div.field
-       [:input.input
-        {:type      :text
-         :value     value
-         :on-change #(do
-                       ;(prn "change vega-type")
-                       (rf/dispatch-sync
-                         [:update-vega-type (-> % .-target .-value)]))}]])))
+      ;(prn "vega-input-field-field" name value)
+      [:div.button {:class (if (= name value) "are-small is-success" "are-small is-info")
+                    :cursor :arrow
+                    :style {:margin "1px"}
+                    :on-click #(do
+                                 (rf/dispatch-sync
+                                   [:update-vega-type name]))}
+       name])))
+
 
 
 (defn building-widget-panel []
   [:div {:style {:height "auto"}}
+   (for [[index name] (map-indexed vector v/vega-types)]
+     ^{:key index} [vega-input-field name])
    [w/fullsize-widget @(rf/subscribe [:current-widget])]
-   [:p @(rf/subscribe [:vega-type])]
-   [vega-input-field]])
+   [:p @(rf/subscribe [:vega-type])]])
+
 
 
 

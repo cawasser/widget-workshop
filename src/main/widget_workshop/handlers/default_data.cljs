@@ -70,7 +70,7 @@
     :format #(format-date %)
     :attrs  (fn [data] {:style {:text-align "right"
                                 :display    "block"}})
-    :thead {:style {:border "1px solid white" :background-color "mediumgreen" :color "white"}}
+    :thead  {:style {:border "1px solid white" :background-color "mediumgreen" :color "white"}}
     :key    :datetime}
    {:path [:id] :header "ID" :key :id}                      ; convention - use field name for reagent key
    {:path [:kind] :header "Kind" :key :kind}
@@ -223,18 +223,27 @@
    ; since widgets show up in multiple places, we use this unqualified key
    ; to hold a map of the widget uuid's to the context and content
    ;
-   :widgets                {"alpha" {:id     "alpha" :name "Alpha"
-                                     :source []
-                                     :steps  []
-                                     :links  #{}}
-                            "beta"  {:id     "beta" :name "Beta"
-                                     :source []
-                                     :steps  []
-                                     :links  #{}}
-                            "delta" {:id     "delta" :name "Delta"
-                                     :source []
-                                     :steps  []
-                                     :links  #{}}}})
+   :widgets                {"alpha" {:id        "alpha" :name "Alpha"
+                                     :title-color "maroon"
+                                     :text-color  "white"
+                                     :source    []
+                                     :steps     []
+                                     :links     #{}
+                                     :vega-type "line"}
+                            "beta"  {:id        "beta" :name "Beta"
+                                     :title-color "purple"
+                                     :text-color  "white"
+                                     :source    []
+                                     :steps     []
+                                     :links     #{}
+                                     :vega-type "line"}
+                            "delta" {:id        "delta" :name "Delta"
+                                     :title-color "tomato"
+                                     :text-color  "white"
+                                     :source    []
+                                     :steps     []
+                                     :links     #{}
+                                     :vega-type "line"}}})
 
 
 
@@ -244,7 +253,8 @@
    :text-color  "white"
    :source      #{}
    :steps       []
-   :content     {}})
+   :content     {}
+   :vega-type "line"})
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

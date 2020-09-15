@@ -29,7 +29,27 @@
   :remove-source
   (fn [db [_ widget-id source-id]]
     ;(prn ":remove-source" widget-id source-id)
-    (assoc-in db [:widgets widget-id :source] "")))
+    (assoc-in db [:widgets widget-id :source]
+      (into []
+        (remove #(= source-id %) (get-in db [:widgets widget-id :source]))))))
+
+
+
+(comment
+  (def db @re-frame.db/app-db)
+  (def widget-id "alpha")
+  (def source-id (first (get-in db [:widgets widget-id :source])))
+
+  (into []
+    (remove #(= source-id %) (get-in db [:widgets widget-id :source])))
+
+
+  (rf/dispatch-sync [:remove-source "alpha" source-id])
+
+  (get-in @re-frame.db/app-db [:widgets "alpha" :source])
+  ())
+
+
 
 
 (rf/reg-event-db
@@ -79,7 +99,7 @@
 (defn- get-colors [type]
   (if type
     (condp = type
-      :source ["cornflowerblue" "black"]
+      :source ["cornflowerblue" "white"]
       :step ["cadetblue" "white"]
       ["black" "white"])
     ["black" "white"]))

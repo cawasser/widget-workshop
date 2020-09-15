@@ -53,7 +53,7 @@
 (rf/reg-sub
   :widget-source-sample
   (fn [[_ id]]
-   ;(prn "pre :widget-source-sample" id)
+    ;(prn "pre :widget-source-sample" id)
     (if (not (empty? id))
       [(rf/subscribe [:widget-source id]) (rf/subscribe [:build/sources])]
       []))
@@ -74,14 +74,14 @@
   ;(prn "title-bar" widget delete?)
   [:div#title-bar.container.level {:style {:width            "auto"
                                            :height           "auto"
-                                           :background-color (:title-color widget)
-                                           :color            (:text-color widget)}}
+                                           :background-color (:title-color widget)}}
    [:div.level-left.has-text-left
     {:style {:width  "auto"
              :height "auto"}}
-    [:h3 {:style {:margin   5
-                  :position :relative
-                  :top      "50%"}}
+    [:h3 {:style {:margin     5
+                  :position   :relative
+                  :top        "50%"
+                  :color (:text-color widget)}}
      (:name widget)]
     (if delete?
       [:div.level-right.has-text-centered
@@ -125,8 +125,8 @@
 
 (defn- handle-sample-data [widget]
   ;(prn "handle-sample-data" widget (:id widget))
-  (let [id (:id widget)
-        source (rf/subscribe [:widget-source-sample id])
+  (let [id       (:id widget)
+        source   (rf/subscribe [:widget-source-sample id])
         pipeline (rf/subscribe [:widget-pipeline id])]
 
     (fn []
@@ -213,7 +213,7 @@
            @(rf/subscribe [:widget-source-sample id])
            @(rf/subscribe [:widget-pipeline id])))
 
-  (let [source (rf/subscribe [:widget-source-sample id])
+  (let [source   (rf/subscribe [:widget-source-sample id])
         pipeline (rf/subscribe [:widget-pipeline id])]
     (p/run-pipeline @pipeline @source))
 
