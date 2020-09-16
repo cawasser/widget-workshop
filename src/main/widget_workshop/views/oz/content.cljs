@@ -1,6 +1,7 @@
 (ns widget-workshop.views.oz.content
   (:require [oz.core :as oz]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [re-frame.core :as rf]))
 
 
 (defn play-data [& names]
@@ -10,9 +11,9 @@
 
 (def plot
   (r/atom {:data     {:values '()}
-           :encoding {:x     {:field "datetime" :type "quantitative"}
-                      :y     {:field "x" :type "quantitative"}
-                      :color {:field "y" :type "nominal"}}
+           :encoding {:x     {:field :datetime :type "quantitative"}
+                      :y     {:field :x :type "quantitative"}
+                      :color {:field :y :type "nominal"}}
            :autosize {:type     "fit"
                       :contains "padding"}}))
 ;:autosize {:type     "fit"
@@ -20,6 +21,14 @@
 ;           :resize   true}}))
 
 
+
+(defn compose-vega-input [widget after]
+  (prn "compose-vega-plot" widget after)
+  (let [ret (-> @plot
+              (assoc-in [:data :values] after)
+              (assoc :mark @(rf/subscribe [:widget-content-type (:id widget)])))]
+    (prn "compose-vega-plot ret" ret)
+    ret))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

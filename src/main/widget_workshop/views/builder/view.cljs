@@ -192,8 +192,11 @@
 (defn- build-content [widget]
   (let [type  @(rf/subscribe [:widget-content-type widget])
         ui-base (get v/vega-types-config type)
-        as-content (merge ui-base (:content widget))]
-    (assoc-in as-content [:base :mark] type)))
+        as-content (merge ui-base (:content widget))
+        ret (assoc-in as-content [:base :mark] (-> as-content :mark))]
+    (prn "build-content" widget "///" (-> as-content :mark) "///" ret)
+    ret))
+
 
 
 
@@ -203,13 +206,14 @@
                  :width  "30%" :margin "0px auto 0px auto"}}
    (let [content (build-content widget)
          fields-avail @(rf/subscribe [:avail-fields (:id widget)])]
-     (prn "widget-ui content" (-> content :ui :encoding))
+     ;(prn "widget-ui content" (-> content :ui :encoding))
      (for [[idx [name field]] (map-indexed vector (get-in content [:ui :encoding]))]
        (do
-         (prn "widget-ui field" name field)
+         ;(prn "widget-ui field" name field)
          ^{:key idx} [:div.flow-h
                       [:p {:style {:width "20%"}} (:title field)]
                       [:select {:name name :id name}
+                       [:option {:value "blank"} ""]
                        (for [column fields-avail]
                          ^{:key (str column)}
                          [:option {:value column} (str column)])]])))])

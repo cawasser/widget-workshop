@@ -36,6 +36,8 @@
       ;(prn ":widget-source" id ret)
       ret)))
 
+
+
 (rf/reg-sub
   :build/sources
   (fn [db _]
@@ -55,15 +57,18 @@
   (fn [[_ id]]
     ;(prn "pre :widget-source-sample" id)
     (if (not (empty? id))
-      [(rf/subscribe [:widget-source id]) (rf/subscribe [:build/sources])]
+      ; TODO: [:widget-source id] returns MULTIPLE sources!!!
+      [(rf/subscribe [:widget-source id])
+       (rf/subscribe [:build/sources])]
       []))
 
   (fn [[source-id sources]]
-    ;(prn ":widget-source-sample" source-id sources)
     (if (and
           (not (empty? sources))
-          (not= "" source-id))
-      (get-in sources [source-id :sample])
+          (not (empty? source-id)))
+      (do
+        (prn ":widget-source-sample" source-id sources)
+        (mapv #(get-in sources [% :sample]) source-id))
       [])))
 
 
@@ -78,10 +83,10 @@
    [:div.level-left.has-text-left
     {:style {:width  "auto"
              :height "auto"}}
-    [:h3 {:style {:margin     5
-                  :position   :relative
-                  :top        "50%"
-                  :color (:text-color widget)}}
+    [:h3 {:style {:margin   5
+                  :position :relative
+                  :top      "50%"
+                  :color    (:text-color widget)}}
      (:name widget)]
     (if delete?
       [:div.level-right.has-text-centered
@@ -123,18 +128,21 @@
 
 
 
+
+
 (defn- handle-sample-data [widget]
-  ;(prn "handle-sample-data" widget (:id widget))
-  (let [id       (:id widget)
-        source   (rf/subscribe [:widget-source-sample id])
-        pipeline (rf/subscribe [:widget-pipeline id])]
+  (prn "handle-sample-data" widget (:id widget))
+  (let [id          (:id widget)
+        source      @(rf/subscribe [:widget-source id])
+        source-data (rf/subscribe [:widget-source-sample id])
+        pipeline    (rf/subscribe [:widget-pipeline id])]
+
+    (prn "handle-sample-data pre" (:id widget) source source-data pipeline)
 
     (fn []
-      (let [after (p/run-pipeline @pipeline @source)]
+      (let [after (p/run-pipeline @pipeline @source-data)]
         ;(prn "handle-sample-data ===>" after)
-        [oz.core/vega-lite (-> @oz/plot
-                             (assoc-in [:data :values] after)
-                             (assoc :mark @(rf/subscribe [:widget-content-type])))]))))
+        [oz.core/vega-lite (oz/compose-vega-input widget after)]))))
 
 
 
@@ -163,7 +171,7 @@
 (comment
   (def db @re-frame.db/app-db)
   (def widget @(rf/subscribe [:current-widget]))
-  (def id (:id @(rf/subscribe [:current-widget])))
+  (def id (:id widget))
 
   (get-in db [:widgets id :source])
   @(rf/subscribe [:widget-source id])
@@ -175,17 +183,25 @@
     ret
     [])
 
-  (let [[id sources] [@(rf/subscribe [:widget-source id])
-                      @(rf/subscribe [:build/sources])]]
+  (def source-id @(rf/subscribe [:widget-source id]))
+  (def sources @(rf/subscribe [:build/sources]))
+
+  (get sources (first source-id))
+
+  (let [[source-id sources] [@(rf/subscribe [:widget-source id])
+                             @(rf/subscribe [:build/sources])]]
     (if (and
           (not (empty? sources))
-          (not= "" id))
-      (get-in sources [id :sample])
+          (not (empty? source-id)))
+      (do
+        (prn ":widget-source-sample" source-id sources)
+        (mapv #(get-in sources [% :sample]) source-id))
       []))
 
 
-  @(rf/subscribe [:widget-source-sample (:source widget)])
+  @(rf/subscribe [:widget-source-sample (:id widget)])
 
+  @(rf/subscribe [:widget-pipeline (:id widget)])
 
 
   (-> db

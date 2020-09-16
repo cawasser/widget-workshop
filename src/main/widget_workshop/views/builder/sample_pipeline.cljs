@@ -12,6 +12,8 @@
       (get-in db [:widgets id :steps])
       [])))
 
+
+
 (rf/reg-sub
   :widget-pipeline
   (fn [[_ id]]
@@ -20,7 +22,7 @@
      (rf/subscribe [:widget-step-ids id])])
 
   (fn [[data steps]]
-    ;(prn ":widget-pipeline (steps)" steps  " (data) " data)
+    (prn ":widget-pipeline (steps)" steps  " (data) " data)
     (into []
       (map #(get-in data [% :step]) steps))))
 
@@ -30,7 +32,8 @@
 (defn run-pipeline [pipeline data]
   ;(prn "run-pipeline" data pipeline)
   (if (not (empty? data))
-    (f/apply-filters pipeline data)
+    ; TODO: (run-pipeline) -> data is a vector!!!
+    (f/apply-filters pipeline (first data))
     []))
 
 
