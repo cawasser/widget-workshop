@@ -134,7 +134,7 @@
         ;(prn "handle-sample-data ===>" after)
         [oz.core/vega-lite (-> @oz/plot
                              (assoc-in [:data :values] after)
-                             (assoc :mark @(rf/subscribe [:vega-type])))]))))
+                             (assoc :mark @(rf/subscribe [:widget-content-type])))]))))
 
 
 

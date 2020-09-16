@@ -223,38 +223,44 @@
    ; since widgets show up in multiple places, we use this unqualified key
    ; to hold a map of the widget uuid's to the context and content
    ;
-   :widgets                {"alpha" {:id        "alpha" :name "Alpha"
-                                     :title-color "maroon"
-                                     :text-color  "white"
-                                     :source    []
-                                     :steps     []
-                                     :links     #{}
-                                     :vega-type "line"}
-                            "beta"  {:id        "beta" :name "Beta"
-                                     :title-color "purple"
-                                     :text-color  "white"
-                                     :source    []
-                                     :steps     []
-                                     :links     #{}
-                                     :vega-type "line"}
-                            "delta" {:id        "delta" :name "Delta"
-                                     :title-color "tomato"
-                                     :text-color  "white"
-                                     :source    []
-                                     :steps     []
-                                     :links     #{}
-                                     :vega-type "line"}}})
+   :widgets                {"alpha" {:id                  "alpha" :name "Alpha"
+                                     :title-color         "maroon"
+                                     :text-color          "white"
+                                     :source              []
+                                     :steps               []
+                                     :links               #{}
+                                     ;:widget-content-type "line"
+                                     :content             {:provider :vega-lite
+                                                           :type "line"}}
+                            "beta"  {:id                  "beta" :name "Beta"
+                                     :title-color         "purple"
+                                     :text-color          "white"
+                                     :source              []
+                                     :steps               []
+                                     :links               #{}
+                                     ;:widget-content-type "line"
+                                     :content             {:provider :vega-lite
+                                                           :type "line"}}
+                            "delta" {:id                  "delta" :name "Delta"
+                                     :title-color         "tomato"
+                                     :text-color          "white"
+                                     :source              []
+                                     :steps               []
+                                     :links               #{}
+                                     ;:widget-content-type "line"
+                                     :content             {:provider :vega-lite
+                                                           :type "line"}}}})
 
 
 
 (defn gen-widget [id]
-  {:id          id :name "Widget"
-   :title-color "darkgray"
-   :text-color  "white"
-   :source      #{}
-   :steps       []
-   :content     {}
-   :vega-type "line"})
+  {:id                  id :name "Widget"
+   :title-color         "darkgray"
+   :text-color          "white"
+   :source              #{}
+   :steps               []
+   :content             {}
+   :widget-content-type "line"})
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
